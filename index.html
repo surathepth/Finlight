@@ -186,9 +186,9 @@
             <!-- ============================================== -->
             <section id="dashboardSection" class="hidden animate-fade-in space-y-6">
                 <div class="flex justify-between items-end border-b border-gray-700 pb-4">
-                    <div>
-                        <h1 class="text-3xl font-bold text-white mb-2">แผงควบคุม (Dashboard)</h1>
-                        <p class="text-gray-400">พื้นที่สำหรับสร้างรายงานใหม่ (รอการพัฒนาในอนาคต)</p>
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl md:text-3xl font-bold text-white mb-2 whitespace-nowrap">แผงควบคุม (Dashboard)</h1>
+                        <p class="text-gray-400 whitespace-nowrap">พื้นที่สำหรับสร้างรายงานใหม่ (รอการพัฒนาในอนาคต)</p>
                     </div>
                 </div>
             </section>
@@ -424,7 +424,7 @@
             <div class="flex-1 flex flex-col items-center md:items-end">
                 <h3 class="text-lg font-bold text-slate-200 mb-3">ติดตามเรา (Follow Us)</h3>
                 <div class="flex flex-wrap justify-center md:justify-end gap-3">
-                    <a href="https://iceprosound.com/" target="_blank" class="px-4 py-2 bg-slate-800 hover:bg-blue-600 text-slate-200 hover:text-white rounded-lg border border-slate-600 hover:border-blue-500 transition shadow-sm text-sm flex items-center gap-2">
+                    <a href="#" target="_blank" class="px-4 py-2 bg-slate-800 hover:bg-blue-600 text-slate-200 hover:text-white rounded-lg border border-slate-600 hover:border-blue-500 transition shadow-sm text-sm flex items-center gap-2">
                         🌐 Website
                     </a>
                     <a href="https://web.facebook.com/profile.php?id=100072422406999" target="_blank" class="px-4 py-2 bg-slate-800 hover:bg-[#1877F2] text-slate-200 hover:text-white rounded-lg border border-slate-600 hover:border-[#1877F2] transition shadow-sm text-sm flex items-center gap-2">
@@ -442,7 +442,7 @@
         
         <!-- Copyright -->
         <div class="mt-8 pt-4 border-t border-slate-700/50 text-center text-xs text-slate-500">
-            &copy; 2026 Finlight System (ICE LIGHT). Developed with love by Lilin & Boss Thep-Apai.
+            &copy; 2026 ICE FINLIGHT System. Developed with love by Lilin & Boss Thep-Apai.
         </div>
     </footer>
 
@@ -662,12 +662,12 @@
     <!-- SECTION: ระบบคลังสินค้า (INVENTORY) - ซ่อนเป็นค่าเริ่มต้น -->
     <!-- ============================================== -->
     <section id="inventorySection" class="hidden animate-fade-in space-y-6 px-4 md:px-0 pb-32">
-        <div class="flex flex-col md:flex-row md:justify-between items-start md:items-end border-b border-gray-700 pb-4 gap-4 no-print">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2">📦 ฐานข้อมูลคลังสินค้า</h1>
-                <p class="text-sm md:text-base text-gray-400">จัดการข้อมูลสินค้า SKU จำนวนคงเหลือ และราคาขาย</p>
+        <div class="flex flex-col lg:flex-row lg:justify-between items-start lg:items-end border-b border-gray-700 pb-4 gap-4 no-print">
+            <div class="flex-shrink-0">
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 whitespace-nowrap">📦 ฐานข้อมูลคลังสินค้า (Inventory Database)</h1>
+                <p class="text-sm md:text-base text-gray-400 whitespace-nowrap">จัดการข้อมูลสินค้า SKU จำนวนคงเหลือ และราคาขาย</p>
             </div>
-            <div class="flex flex-wrap gap-2 w-full md:w-auto">
+            <div class="flex flex-wrap gap-2 w-full lg:w-auto">
                 <button onclick="exportInventoryToExcel()" class="flex-1 md:flex-none bg-green-600 hover:bg-green-500 px-3 py-2 text-sm md:text-base md:px-4 rounded text-white transition flex items-center justify-center gap-1 md:gap-2">
                     📊 <span class="hidden sm:inline">ส่งออก</span> Excel
                 </button>
@@ -878,9 +878,9 @@
     <!-- ============================================== -->
     <section id="staffSection" class="hidden animate-fade-in space-y-6 px-4 md:px-0 pb-32">
         <div class="flex justify-between items-end border-b border-gray-700 pb-4 no-print">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">👥 ระบบจัดการพนักงาน</h1>
-                <p class="text-sm md:text-base text-gray-400">เพิ่ม/ลบ ข้อมูลช่างและพนักงาน (อัพเดทไปยัง Firebase แบบ Real-time)</p>
+            <div class="flex-shrink-0">
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-2 whitespace-nowrap">👥 ระบบจัดการพนักงาน - ช่าง (Staff Management)</h1>
+                <p class="text-sm md:text-base text-gray-400 whitespace-nowrap">เพิ่ม/ลบ ข้อมูลช่างและพนักงาน (อัพเดทไปยัง Firebase แบบ Real-time)</p>
             </div>
         </div>
 
@@ -954,7 +954,7 @@
                     <!-- ส่วนหัวสำหรับพิมพ์เท่านั้น (มาตรฐาน A4) -->
                     <div class="hidden print:block text-center mb-8 pt-4">
                         <h2 class="text-3xl font-bold mt-4 mb-2">ฐานข้อมูลพนักงาน</h2>
-                        <p class="text-gray-800 text-xl font-bold mb-4">บริษัท ไอซ์โปรซาวด์ จำกัด</p>
+                        <p class="text-gray-800 text-xl font-bold mb-4">บริษัท ไอซ์ ฟินไลท์ จำกัด</p>
                     </div>
 
                     <!-- ช่องค้นหาพนักงาน -->
@@ -1017,6 +1017,353 @@
         </div>
     </div>
 
+    <!-- ======================================================== -->
+    <!-- 🌟 MODAL: DOCUMENT WORKFLOW HUB (ศูนย์รวมเอกสารทางเดินงาน 8 ชนิด) -->
+    <!-- ======================================================== -->
+<!-- ======================================================== -->
+<!-- MODAL: DOCUMENT WORKFLOW HUB (ศูนย์รวมเอกสารทางเดินงาน 8 ชนิด) -->
+<!-- ======================================================== -->
+<div id="documentHubModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in duration-200">
+        <!-- Modal Header -->
+        <div class="px-5 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-slate-700/80 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg border border-indigo-400/40">
+                    📄
+                </div>
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                        ศูนย์รวมเอกสารทางเดินงาน (8 ชนิด)
+                        <span id="hubDocNoBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/40">REQ-...</span>
+                    </h3>
+                    <p class="text-xs text-slate-400">ระบบเชื่อมโยงและตรวจสอบย้อนกลับทางเดินเอกสาร ICE FINLIGHT</p>
+                </div>
+            </div>
+            <button onclick="closeDocumentHubModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-600/60 text-lg">
+                ✕
+            </button>
+        </div>
+
+        <!-- Document Quick Info Banner -->
+        <div id="hubDocInfoBanner" class="px-5 py-3 bg-slate-800/60 border-b border-slate-700/60 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+                <span class="text-slate-400 block">ผู้เบิก/ช่าง:</span>
+                <span id="hubTechName" class="font-bold text-white text-sm">-</span>
+            </div>
+            <div>
+                <span class="text-slate-400 block">ไซต์งาน:</span>
+                <span id="hubJobSite" class="font-bold text-emerald-400 text-sm">-</span>
+            </div>
+            <div>
+                <span class="text-slate-400 block">วันที่ทำรายการ:</span>
+                <span id="hubDate" class="font-bold text-slate-200">-</span>
+            </div>
+            <div>
+                <span class="text-slate-400 block">จำนวนอุปกรณ์:</span>
+                <span id="hubTotalItems" class="font-bold text-amber-300 text-sm">-</span>
+            </div>
+        </div>
+
+        <!-- Modal Body: 8 Document Cards Grid -->
+        <div class="p-5 overflow-y-auto custom-scrollbar space-y-4 flex-1">
+            <!-- กลุ่มที่ 1: ขั้นตอนจัดส่งออกหน้างาน -->
+            <div>
+                <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-blue-400"></span> หมวดที่ 1: ขั้นตอนส่งมอบออกสู่หน้างาน
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- 1. ใบเบิกสินค้าอุปกรณ์ -->
+                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-blue-500/50 transition flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-blue-600/30 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/30">1</span>
+                                <div>
+                                    <div class="font-bold text-white text-sm">ใบเบิกสินค้าอุปกรณ์</div>
+                                    <div class="text-[11px] text-slate-400">Equipment Requisition Form</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">ต้นทาง</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-3">เอกสารหลักฐานขอเบิกอุปกรณ์ต้นฉบับ สำหรับตรวจสอบย้อนหลังและกระทบยอดตลอดไป</p>
+                        <div class="flex items-center gap-2 mt-auto">
+                            <button id="hubBtnPrintReq" class="flex-1 py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
+                                🖨️ พิมพ์ A4/PDF
+                            </button>
+                            <button id="hubBtnExcelReq" class="py-1.5 px-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold shadow transition flex items-center justify-center gap-1" title="ส่งออก Excel">
+                                📊 Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. ใบจัดสินค้าอุปกรณ์ -->
+                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-amber-500/50 transition flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-amber-600/30 text-amber-400 flex items-center justify-center text-xs font-bold border border-amber-500/30">2</span>
+                                <div>
+                                    <div class="font-bold text-white text-sm">ใบจัดสินค้าอุปกรณ์</div>
+                                    <div class="text-[11px] text-slate-400">Preparation & Picking Order</div>
+                                </div>
+                            </div>
+                            <span id="hubBadgePickStatus" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">สโตร์/จัดของ</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-3">เอกสารให้สโตร์เดินหยิบของ ตรวจนับจ่ายจริง/ของขาด และมีกล่องเซ็น 3 ฝ่าย</p>
+                        <div class="flex items-center gap-2 mt-auto">
+                            <button id="hubBtnPrintPick" class="flex-1 py-1.5 px-3 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
+                                📦 พิมพ์ A4/PDF
+                            </button>
+                            <button id="hubBtnExcelPick" class="py-1.5 px-3 bg-green-700 hover:bg-green-600 text-white rounded-lg text-xs font-semibold shadow transition flex items-center justify-center gap-1" title="ส่งออก Excel">
+                                📊 Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. ใบขนส่งสินค้าอุปกรณ์ -->
+                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-cyan-500/50 transition flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-cyan-600/30 text-cyan-400 flex items-center justify-center text-xs font-bold border border-cyan-500/30">3</span>
+                                <div>
+                                    <div class="font-bold text-white text-sm">ใบขนส่งสินค้าอุปกรณ์</div>
+                                    <div class="text-[11px] text-slate-400">Transport & Delivery Slip</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">ทีมขนส่ง</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-3">เอกสารกำกับการเดินทางของพนักงานขับรถ ระบุทะเบียนรถ แผนที่ และจำนวนกล่องบรรทุก</p>
+                        <div class="flex items-center gap-2 mt-auto">
+                            <button id="hubBtnPrintTrans" class="w-full py-1.5 px-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
+                                🚚 พิมพ์ใบขนส่ง A4/PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4. ใบรับสินค้าอุปกรณ์ (หน้างาน) -->
+                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-emerald-500/50 transition flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-emerald-600/30 text-emerald-400 flex items-center justify-center text-xs font-bold border border-emerald-500/30">4</span>
+                                <div>
+                                    <div class="font-bold text-white text-sm">ใบรับสินค้าอุปกรณ์ (หน้างาน)</div>
+                                    <div class="text-[11px] text-slate-400">On-site Receiving Slip</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">หน้างาน</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-3">หลักฐานตรวจรับมอบอุปกรณ์เมื่อรถขนส่งไปถึงไซต์งานจริง ยืนยันสภาพสมบูรณ์</p>
+                        <div class="flex items-center gap-2 mt-auto">
+                            <button id="hubBtnPrintRecv" class="w-full py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
+                                📋 พิมพ์ใบรับของหน้างาน A4
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- กลุ่มที่ 2: ขั้นตอนจบงานและการโอนย้าย -->
+            <div>
+                <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> หมวดที่ 2: ขั้นตอนคืนคลังสินค้า / โอนย้ายไซต์งาน
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- 5. ใบรับคืนสินค้าอุปกรณ์ -->
+                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-green-500/50 transition flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-green-600/30 text-green-400 flex items-center justify-center text-xs font-bold border border-green-500/30">5</span>
+                                <div>
+                                    <div class="font-bold text-white text-sm">ใบรับคืนสินค้าอุปกรณ์</div>
+                                    <div class="text-[11px] text-slate-400">Equipment Return Slip</div>
+                                </div>
+                            </div>
+                            <span id="hubBadgeReturnStatus" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-500/20 text-green-300 border border-green-500/30">คืนคลัง</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-3">เอกสารทางการเมื่อรับของกลับเข้าคลัง แยกอิสระจากใบเบิก คืนครบ/คืนบางส่วน</p>
+                        <div class="flex items-center gap-2 mt-auto">
+                            <button id="hubBtnPrintRet" class="w-full py-1.5 px-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
+                                🔄 พิมพ์ใบรับคืนเข้าคลัง A4
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 6. ใบโอนย้ายสินค้าข้ามไซต์งาน -->
+                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-indigo-500/50 transition flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center text-xs font-bold border border-indigo-500/30">6</span>
+                                <div>
+                                    <div class="font-bold text-white text-sm">ใบโอนย้ายสินค้าข้ามไซต์งาน</div>
+                                    <div class="text-[11px] text-slate-400">Site-to-Site Transfer Slip</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">ไม่เข้าคลัง</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-3">กรณีโอนย้ายตรงจากไซต์ A ➔ ไซต์ B ทันทีโดยไม่ต้องขนกลับคลังก่อน</p>
+                        <div class="flex items-center gap-2 mt-auto">
+                            <button id="hubBtnPrintXfer" class="w-full py-1.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
+                                🚚 พิมพ์ใบโอนย้ายข้ามไซต์ A4
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- กลุ่มที่ 3: ขั้นตอนชำรุดและสูญหาย -->
+            <div>
+                <div class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-rose-400"></span> หมวดที่ 3: ขั้นตอนชำรุด / ซ่อมบำรุง / สูญหายตัดซาก
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- 7. ใบเบิกซ่อมบำรุง -->
+                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-rose-500/50 transition flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-rose-600/30 text-rose-400 flex items-center justify-center text-xs font-bold border border-rose-500/30">7</span>
+                                <div>
+                                    <div class="font-bold text-white text-sm">ใบเบิกซ่อมบำรุง</div>
+                                    <div class="text-[11px] text-slate-400">Maintenance & Repair Order</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">ช่างซ่อม</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-3">ใบแจ้งซ่อมอุปกรณ์ชำรุดเสียหาย พร้อมบันทึกอาการเสียและย้ายไปคลังซ่อม</p>
+                        <div class="flex items-center gap-2 mt-auto">
+                            <button id="hubBtnPrintMaint" class="w-full py-1.5 px-3 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
+                                🛠️ พิมพ์ใบเบิกซ่อมบำรุง A4
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 8. ใบสูญหาย / ใบตัดซาก -->
+                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-slate-500/50 transition flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-slate-700 text-slate-300 flex items-center justify-center text-xs font-bold border border-slate-600">8</span>
+                                <div>
+                                    <div class="font-bold text-white text-sm">ใบสูญหาย / ใบตัดซาก</div>
+                                    <div class="text-[11px] text-slate-400">Equipment Loss & Scrap Form</div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 border border-slate-600">ตัดจำหน่าย</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-3">เอกสารตัดจำหน่ายออกจากบัญชีสต็อกถาวร สำหรับของหายหรือพังจนซ่อมไม่ได้</p>
+                        <div class="flex items-center gap-2 mt-auto">
+                            <button id="hubBtnPrintScrap" class="w-full py-1.5 px-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
+                                ⚠️ พิมพ์ใบตัดซาก/สูญหาย A4
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-5 py-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <div class="flex items-center gap-1.5">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+                รองรับการพิมพ์ A4 และบันทึก PDF ครบทั้ง 8 ประเภท
+            </div>
+            <button onclick="closeDocumentHubModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg transition font-medium border border-slate-700">
+                ปิดหน้าต่าง
+            </button>
+        </div>
+    </div>
+</div>
+
+    <!-- ======================================================== -->
+    <!-- 📷 MODAL: ATTACH PICKING PROOF & RECORD ISSUED QTY       -->
+    <!-- ======================================================== -->
+    <div id="attachPickingProofModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-4xl rounded-2xl border border-gray-600 p-6 space-y-5 max-h-[92vh] overflow-y-auto custom-scrollbar">
+            <!-- Header -->
+            <div class="flex justify-between items-center border-b border-gray-700 pb-3">
+                <div>
+                    <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+                        <span>📷</span> แนบรูปหลักฐานใบจัดสินค้า & บันทึกยอดจัดจ่ายจริง
+                    </h2>
+                    <p class="text-xs text-gray-400">แนบภาพถ่ายใบจัดสินค้าอุปกรณ์ที่ช่างกรอกด้วยมือ พร้อมดึงข้อมูลลงระบบแบบ Auto</p>
+                </div>
+                <button onclick="closeAttachPickingProofModal()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+
+            <!-- Requisition Summary Card -->
+            <div id="attachReqInfoCard" class="bg-amber-950/30 border border-amber-500/40 rounded-xl p-4 text-xs text-amber-200 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div><strong>เลขที่:</strong> <span id="attachCardDocNo" class="font-mono font-bold text-white">-</span></div>
+                <div><strong>ผู้เบิก/ช่าง:</strong> <span id="attachCardTech" class="text-white">-</span></div>
+                <div><strong>ไซต์งาน:</strong> <span id="attachCardSite" class="text-white">-</span></div>
+                <div><strong>วันที่:</strong> <span id="attachCardDate">-</span></div>
+            </div>
+
+            <!-- Step 1: Upload / Camera Capture -->
+            <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700 space-y-3">
+                <label class="block text-xs text-gray-200 font-bold flex items-center gap-1.5">
+                    <span>📸</span> 1. ถ่ายรูป หรือ เลือกไฟล์ภาพใบจัดสินค้าที่ช่างกรอกด้วยมือ:
+                </label>
+                <div class="flex flex-wrap items-center gap-3">
+                    <label class="cursor-pointer bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md transition flex items-center gap-2">
+                        <span>📷 ถ่ายรูป / อัปโหลดไฟล์ภาพ</span>
+                        <input type="file" id="pickingProofFileInput" accept="image/*" class="hidden" onchange="handlePickingProofFileSelect(event)">
+                    </label>
+                    <button type="button" onclick="clearPickingProofImage()" id="btnClearProofImg" class="hidden text-xs bg-red-600/30 hover:bg-red-600 text-red-300 hover:text-white px-3 py-2 rounded-lg border border-red-500/40 transition">
+                        ลบรูปนี้
+                    </button>
+                    <span id="proofFileName" class="text-xs text-gray-400 italic">ยังไม่ได้เลือกรูปภาพ</span>
+                </div>
+                <!-- Image Preview Area -->
+                <div id="proofImagePreviewContainer" class="hidden mt-2 p-2 bg-slate-900/80 rounded-xl border border-slate-700 text-center">
+                    <img id="proofImagePreview" src="" alt="Proof Preview" class="max-h-72 mx-auto rounded-lg shadow-md object-contain cursor-pointer" onclick="viewImageEnlarged(this.src)" title="คลิกเพื่อดูขนาดใหญ่">
+                    <p class="text-[11px] text-gray-400 mt-1">คลิกที่รูปเพื่อดูขนาดใหญ่</p>
+                </div>
+            </div>
+
+            <!-- Step 2: Auto-populated Items Table with Editable Issued Qty -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <label class="text-xs font-bold text-gray-200 flex items-center gap-1.5">
+                        <span>📋</span> 2. รายการอุปกรณ์ (ดึง Auto จากใบเบิก — ปรับยอดจัดจ่ายจริงตามลายมือในรูปได้ทันที):
+                    </label>
+                    <span class="text-[11px] text-amber-400">* ระบบเติมยอดจ่ายจริงเท่ากับยอดเบิกให้อัตโนมัติ</span>
+                </div>
+                <div class="overflow-x-auto rounded-lg border border-gray-700 custom-scrollbar">
+                    <table class="w-full text-left text-xs text-gray-300">
+                        <thead class="bg-slate-800 text-gray-200 uppercase border-b border-gray-700">
+                            <tr>
+                                <th class="px-3 py-2 w-12 text-center">ลำดับ</th>
+                                <th class="px-3 py-2">รายการอุปกรณ์</th>
+                                <th class="px-3 py-2 text-center w-24">จำนวนเบิก</th>
+                                <th class="px-3 py-2 text-center w-28">จำนวนจ่ายจริง</th>
+                                <th class="px-3 py-2 text-center w-24">จำนวนขาด</th>
+                                <th class="px-3 py-2">หมายเหตุ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attachItemsTableBody" class="divide-y divide-gray-700/50">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-700">
+                <button type="button" onclick="closeAttachPickingProofModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg text-xs font-medium transition">
+                    ยกเลิก
+                </button>
+                <button type="button" onclick="savePickingProofData()" id="btnSaveProofData" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-xs font-bold shadow-lg ice-glow transition flex items-center gap-1.5">
+                    <span id="saveProofSpinner" class="hidden animate-spin">🔄</span>
+                    <span id="saveProofBtnText">💾 บันทึกรูปหลักฐาน & อัปเดตยอดจัดจ่ายจริง</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🌟 MODAL: VIEW ENLARGED IMAGE (ดูภาพหลักฐานขนาดใหญ่) -->
+    <div id="viewImageModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4" onclick="closeViewImageModal()">
+        <div class="relative max-w-5xl max-h-[95vh] flex flex-col items-center" onclick="event.stopPropagation()">
+            <button onclick="closeViewImageModal()" class="absolute -top-10 right-0 text-white text-3xl font-bold hover:text-red-400 transition">&times;</button>
+            <img id="enlargedImagePreview" src="" alt="Enlarged Image" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl object-contain border border-slate-700">
+        </div>
+    </div>
+
+
     <!-- 🧠 JAVASCRIPT (สมองประมวลผลป๊อปอัป) 🧠 -->
     <script>
         // 1. ฐานข้อมูลจำลอง (ดึงจากภาพ 3 ใบของบอสเทพอภัย)
@@ -1028,7 +1375,7 @@
             'สายไฟ': { icon: '⚡', items: ['สายไฟเมน 16A/32A (10ม., 20ม., 25ม.), พาวเวอร์คอน 5ม., สาย LED PAR กันน้ำ 3ม.'] },
             'หมวก+แขนโคมไฟ': { icon: '🏗️', items: ['หมวก (สวม/กลาง/ใหญ่, หมวก Moving Bar, แขนสวม)'] },
             'ลำโพง': { icon: '🔊', items: ['ลำโพง NEXO: M46, B112, S118/SUB, GEO M1220, GEO M1210, RS18, PS15 UR, STM M28, STM 118', 'ลำโพง RCF & Admark: RCF ART 310A, Admark AD-L5A, AD-728C/SUB, AD-321A/SUB', 'ลำโพง ICE: ICE SUB 218, ICE SUB 18 นิ้ว (RS18, RS28, LS18), ICE LINE ARRAY 212, ICE PA 10 นิ้ว/V8', 'ลำโพง Active: Active 12 นิ้ว/FPJ 12AD, Active 15 นิ้ว/FPJ 15AD'] },
-            'เพาเวอร์แอมป์': { icon: '🔋', items: ['เพาเวอร์ NEXO', 'เพาเวอร์ ICE PROSOUND/PA', 'เพาเวอร์ ICE PROSOUND/SUB'] },
+            'เพาเวอร์แอมป์': { icon: '🔋', items: ['เพาเวอร์ NEXO', 'เพาเวอร์ ICE FINLIGHT/PA', 'เพาเวอร์ ICE FINLIGHT/SUB'] },
             'มิกซ์+คอนโทรล': { icon: '🎚️', items: ['Mixers: DIGICO X-SD08, Midas M32 Live, YAMAHA DM7, YAMAHA MG12XU, YAMAHA DM3', 'Stage Boxes: DIGICO, Midas DL32, YAMAHA Rio3224-D2', 'Controllers: ชุดคอนโทรล Admark DX428, คอนโทรล LAKE LMX88, คอนโทรล Marani MIR-260E', 'ชุดกล่องรับ MRT MADI แร็ค, กล่อง DI BOX'] },
             'สายไฟ+สายสัญญาณ+ตู้ไฟ': { icon: '🔌', items: ['สายไฟ+สายสัญญาณ+พ่วง (ลำโพง 4/8 คอร์, สายสัญญาณ XLR 4/8/12 คอร์, ตู้ไฟ, โหลด, นั่งร้าน, รอกกว้าน)'] },
             'แร็คอุปกรณ์': { icon: '🗄️', items: ['อุปกรณ์เสริม (อุปกรณ์แขวนลำโพงทอง/แดง/ดำ/เงิน, Fly Bar แขวนลำโพง NEXO/Admark/J8/V8/LS18)'] },
@@ -1068,7 +1415,11 @@
 
             try {
                 // [LILIN'S SURGICAL INSERT] : วิ่งไปดึงข้อมูลคลังสินค้า ที่หมวดหมู่ตรงกับที่บอสกคลิก
-                const snapshot = await db.collection('inventory').where('category', '==', categoryName).get();
+                const cleanCategoryName = (categoryName || '').trim();
+                let snapshot = await db.collection('inventory').where('category', '==', cleanCategoryName).get();
+                if (snapshot.empty && cleanCategoryName !== categoryName) {
+                    snapshot = await db.collection('inventory').where('category', '==', categoryName).get();
+                }
                 
                 if(snapshot.empty) {
                     itemList.innerHTML = '<div class="text-center text-red-400 p-4">⚠️ ยังไม่มีสินค้าในหมวดหมู่นี้ในคลัง (กรุณาไปเพิ่มที่ฐานข้อมูลคลังสินค้า)</div>';
@@ -1517,6 +1868,245 @@
 
         // ==========================================
         
+        // ========================================================
+        // 📷 ATTACH PICKING PROOF & RECORD ISSUED QTY CONTROLLER
+        // ========================================================
+        let currentAttachDocId = null;
+        let currentAttachProofBase64 = null;
+
+        // ========================================================
+        // 📷 ATTACH PICKING PROOF MODAL CONTROLLER
+        // ========================================================
+        async function openAttachPickingProofModal(docId) {
+            currentAttachDocId = docId;
+            currentAttachProofBase64 = null;
+
+            const modal = document.getElementById('attachPickingProofModal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+
+            const fileInput = document.getElementById('pickingProofFileInput');
+            if (fileInput) fileInput.value = '';
+            const fileNameLabel = document.getElementById('proofFileName');
+            if (fileNameLabel) fileNameLabel.textContent = 'ยังไม่ได้เลือกรูปภาพ';
+            const previewContainer = document.getElementById('proofImagePreviewContainer');
+            const previewImg = document.getElementById('proofImagePreview');
+            const clearBtn = document.getElementById('btnClearProofImg');
+
+            if (previewContainer) previewContainer.classList.add('hidden');
+            if (previewImg) previewImg.src = '';
+            if (clearBtn) clearBtn.classList.add('hidden');
+
+            try {
+                const doc = await db.collection('requisitions').doc(docId).get();
+                if (!doc.exists) { alert('❌ ไม่พบข้อมูลใบเบิกนี้'); return; }
+                const data = doc.data();
+
+                document.getElementById('attachCardDocNo').textContent = data.docNo || docId;
+                document.getElementById('attachCardTech').textContent = data.techName || data.technician || data.techFullName || '-';
+                document.getElementById('attachCardSite').textContent = data.jobSite || data.siteName || data.site || '-';
+                let dStr = '-';
+                if (data.createdAt && data.createdAt.toDate) {
+                    dStr = data.createdAt.toDate().toLocaleString('th-TH');
+                }
+                document.getElementById('attachCardDate').textContent = dStr;
+
+                // If already has proof image, show it
+                if (data.pickingProofImage) {
+                    currentAttachProofBase64 = data.pickingProofImage;
+                    if (previewImg) previewImg.src = data.pickingProofImage;
+                    if (previewContainer) previewContainer.classList.remove('hidden');
+                    if (clearBtn) clearBtn.classList.remove('hidden');
+                    if (fileNameLabel) fileNameLabel.textContent = 'มีรูปภาพแนบอยู่แล้ว';
+                }
+
+                // Render items table
+                const tbody = document.getElementById('attachItemsTableBody');
+                const items = data.items || [];
+                let html = '';
+                items.forEach((item, idx) => {
+                    const reqQty = parseInt(item.qty) || 0;
+                    const issuedQty = (item.issuedQty !== undefined && item.issuedQty !== null && item.issuedQty !== '') ? parseInt(item.issuedQty) : reqQty;
+                    const missingQty = (item.missingQty !== undefined && item.missingQty !== null && item.missingQty !== '') ? parseInt(item.missingQty) : Math.max(0, reqQty - issuedQty);
+                    const note = item.note || '';
+
+                    html += `
+                        <tr class="border-b border-gray-700/40 hover:bg-slate-800/40">
+                            <td class="px-3 py-2 text-center font-bold text-gray-400">${idx + 1}</td>
+                            <td class="px-3 py-2">
+                                <div class="font-medium text-white">${item.name}</div>
+                                <div class="text-[11px] text-blue-400 font-mono">${item.sku || '-'}</div>
+                            </td>
+                            <td class="px-3 py-2 text-center font-bold text-slate-300">
+                                ${reqQty} ${item.unit || 'ชิ้น'}
+                            </td>
+                            <td class="px-3 py-2 text-center">
+                                <input type="number" id="proofIssuedQty_${idx}" value="${issuedQty}" min="0" oninput="calculateMissingQty(${idx}, ${reqQty})" class="w-20 bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-center font-bold outline-none focus:border-amber-400">
+                            </td>
+                            <td class="px-3 py-2 text-center">
+                                <input type="number" id="proofMissingQty_${idx}" value="${missingQty}" min="0" class="w-20 bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-center outline-none focus:border-amber-400 text-rose-400 font-bold">
+                            </td>
+                            <td class="px-3 py-2">
+                                <input type="text" id="proofNote_${idx}" value="${note}" placeholder="หมายเหตุการจัด..." class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs outline-none focus:border-amber-400">
+                            </td>
+                        </tr>
+                    `;
+                });
+                if (tbody) tbody.innerHTML = html;
+            } catch (err) {
+                alert("❌ เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message);
+            }
+        }
+
+        function calculateMissingQty(idx, reqQty) {
+            const issuedInput = document.getElementById(`proofIssuedQty_${idx}`);
+            const missingInput = document.getElementById(`proofMissingQty_${idx}`);
+            if (issuedInput && missingInput) {
+                const issued = parseInt(issuedInput.value) || 0;
+                missingInput.value = Math.max(0, reqQty - issued);
+            }
+        }
+
+        function closeAttachPickingProofModal() {
+            const modal = document.getElementById('attachPickingProofModal');
+            if (modal) modal.classList.add('hidden');
+            currentAttachDocId = null;
+            currentAttachProofBase64 = null;
+        }
+
+        function handlePickingProofFileSelect(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const fileNameLabel = document.getElementById('proofFileName');
+            if (fileNameLabel) fileNameLabel.textContent = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Compress image using canvas
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 1280;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    currentAttachProofBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                    const previewContainer = document.getElementById('proofImagePreviewContainer');
+                    const previewImg = document.getElementById('proofImagePreview');
+                    const clearBtn = document.getElementById('btnClearProofImg');
+                    if (previewImg) previewImg.src = currentAttachProofBase64;
+                    if (previewContainer) previewContainer.classList.remove('hidden');
+                    if (clearBtn) clearBtn.classList.remove('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearPickingProofImage() {
+            currentAttachProofBase64 = null;
+            const fileInput = document.getElementById('pickingProofFileInput');
+            if (fileInput) fileInput.value = '';
+            const fileNameLabel = document.getElementById('proofFileName');
+            if (fileNameLabel) fileNameLabel.textContent = 'ยังไม่ได้เลือกรูปภาพ';
+            const previewContainer = document.getElementById('proofImagePreviewContainer');
+            const previewImg = document.getElementById('proofImagePreview');
+            const clearBtn = document.getElementById('btnClearProofImg');
+
+            if (previewImg) previewImg.src = '';
+            if (previewContainer) previewContainer.classList.add('hidden');
+            if (clearBtn) clearBtn.classList.add('hidden');
+        }
+
+        async function savePickingProofData() {
+            if (!currentAttachDocId) return;
+
+            const spinner = document.getElementById('saveProofSpinner');
+            const btnText = document.getElementById('saveProofBtnText');
+            if (spinner) spinner.classList.remove('hidden');
+            if (btnText) btnText.textContent = 'กำลังบันทึกข้อมูล...';
+
+            try {
+                const doc = await db.collection('requisitions').doc(currentAttachDocId).get();
+                if (!doc.exists) { alert('❌ ไม่พบข้อมูลใบเบิก'); return; }
+                const data = doc.data();
+                const items = data.items || [];
+
+                // Update each item with issuedQty, missingQty, note
+                for (let idx = 0; idx < items.length; idx++) {
+                    const issuedInput = document.getElementById(`proofIssuedQty_${idx}`);
+                    const missingInput = document.getElementById(`proofMissingQty_${idx}`);
+                    const noteInput = document.getElementById(`proofNote_${idx}`);
+
+                    if (issuedInput) items[idx].issuedQty = parseInt(issuedInput.value) || 0;
+                    if (missingInput) items[idx].missingQty = parseInt(missingInput.value) || 0;
+                    if (noteInput) items[idx].note = noteInput.value.trim();
+                }
+
+                const updatePayload = {
+                    items: items,
+                    isPrintedForPicking: true,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                if (currentAttachProofBase64 !== null) {
+                    updatePayload.pickingProofImage = currentAttachProofBase64;
+                    updatePayload.hasPickingProof = !!currentAttachProofBase64;
+                }
+
+                await db.collection('requisitions').doc(currentAttachDocId).update(updatePayload);
+
+                alert("✅ บันทึกรูปหลักฐานใบจัดสินค้าและอัปเดตยอดจัดจ่ายจริงเรียบร้อยแล้ว!");
+                closeAttachPickingProofModal();
+                loadReportData();
+            } catch (err) {
+                alert("❌ เกิดข้อผิดพลาดในการบันทึก: " + err.message);
+            } finally {
+                if (spinner) spinner.classList.add('hidden');
+                if (btnText) btnText.textContent = '💾 บันทึกรูปหลักฐาน & อัปเดตยอดจัดจ่ายจริง';
+            }
+        }
+
+        function viewPickingProofImage(docId) {
+            const item = cachedRequisitionsList.find(r => r.id === docId);
+            if (item && item.pickingProofImage) {
+                viewImageEnlarged(item.pickingProofImage);
+            } else {
+                alert("ℹ️ ไม่พบรูปภาพหลักฐานในเอกสารนี้");
+            }
+        }
+
+        function viewImageEnlarged(src) {
+            const modal = document.getElementById('viewImageModal');
+            const img = document.getElementById('enlargedImagePreview');
+            if (modal && img) {
+                img.src = src;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeViewImageModal() {
+            const modal = document.getElementById('viewImageModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
         // 9.5 ฟังก์ชันพิมพ์ใบเบิก/ยืม A4 (สากล)
                 function printRequisitionA4(data, items, existingWindow = null) {
             const printWindow = existingWindow || window.open('', '_blank', 'width=950,height=1200');
@@ -1526,9 +2116,10 @@
                 return;
             }
 
+            const isReturned = Boolean(data && (data.isReturned === true || data.status === 'คืนแล้ว' || data.status === 'คืนสินค้าแล้ว' || data.returnStatus === 'คืนแล้ว'));
             const dateStr = new Date().toLocaleString('th-TH');
-            const docTitle = 'ใบเบิก / ใบยืมอุปกรณ์';
-            const docSubtitle = 'EQUIPMENT REQUISITION FORM';
+            const docTitle = isReturned ? 'ใบรับคืนอุปกรณ์' : 'ใบเบิก / ใบยืมอุปกรณ์';
+            const docSubtitle = isReturned ? 'EQUIPMENT RETURN RECEIPT' : 'EQUIPMENT REQUISITION FORM';
             
             // วนลูปสร้างแถวตารางรายการอุปกรณ์จริง
             let tableRows = '';
@@ -1760,7 +2351,7 @@
                     <div class="container">
                         <div class="header-wrapper">
                             <div class="company-block">
-                                <h1 class="company-name">ICE PRO SOUND & LIGHTING</h1>
+                                <h1 class="company-name">ICE FINLIGHT</h1>
                                 <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                             </div>
                             <div class="doc-block">
@@ -1883,255 +2474,6 @@
                         })()}
                     </div>
                 
-<!-- ======================================================== -->
-<!-- MODAL: DOCUMENT WORKFLOW HUB (ศูนย์รวมเอกสารทางเดินงาน 8 ชนิด) -->
-<!-- ======================================================== -->
-<div id="documentHubModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-slate-700 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in duration-200">
-        <!-- Modal Header -->
-        <div class="px-5 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-slate-700/80 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl shadow-lg border border-indigo-400/40">
-                    📄
-                </div>
-                <div>
-                    <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                        ศูนย์รวมเอกสารทางเดินงาน (8 ชนิด)
-                        <span id="hubDocNoBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/40">REQ-...</span>
-                    </h3>
-                    <p class="text-xs text-slate-400">ระบบเชื่อมโยงและตรวจสอบย้อนกลับทางเดินเอกสาร ICE PRO SOUND & LIGHTING</p>
-                </div>
-            </div>
-            <button onclick="closeDocumentHubModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-600/60 text-lg">
-                ✕
-            </button>
-        </div>
-
-        <!-- Document Quick Info Banner -->
-        <div id="hubDocInfoBanner" class="px-5 py-3 bg-slate-800/60 border-b border-slate-700/60 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div>
-                <span class="text-slate-400 block">ผู้เบิก/ช่าง:</span>
-                <span id="hubTechName" class="font-bold text-white text-sm">-</span>
-            </div>
-            <div>
-                <span class="text-slate-400 block">ไซต์งาน:</span>
-                <span id="hubJobSite" class="font-bold text-emerald-400 text-sm">-</span>
-            </div>
-            <div>
-                <span class="text-slate-400 block">วันที่ทำรายการ:</span>
-                <span id="hubDate" class="font-bold text-slate-200">-</span>
-            </div>
-            <div>
-                <span class="text-slate-400 block">จำนวนอุปกรณ์:</span>
-                <span id="hubTotalItems" class="font-bold text-amber-300 text-sm">-</span>
-            </div>
-        </div>
-
-        <!-- Modal Body: 8 Document Cards Grid -->
-        <div class="p-5 overflow-y-auto custom-scrollbar space-y-4 flex-1">
-            <!-- กลุ่มที่ 1: ขั้นตอนจัดส่งออกหน้างาน -->
-            <div>
-                <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-blue-400"></span> หมวดที่ 1: ขั้นตอนส่งมอบออกสู่หน้างาน
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- 1. ใบเบิกสินค้าอุปกรณ์ -->
-                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-blue-500/50 transition flex flex-col justify-between">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-blue-600/30 text-blue-400 flex items-center justify-center text-xs font-bold border border-blue-500/30">1</span>
-                                <div>
-                                    <div class="font-bold text-white text-sm">ใบเบิกสินค้าอุปกรณ์</div>
-                                    <div class="text-[11px] text-slate-400">Equipment Requisition Form</div>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">ต้นทาง</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mb-3">เอกสารหลักฐานขอเบิกอุปกรณ์ต้นฉบับ สำหรับตรวจสอบย้อนหลังและกระทบยอดตลอดไป</p>
-                        <div class="flex items-center gap-2 mt-auto">
-                            <button id="hubBtnPrintReq" class="flex-1 py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
-                                🖨️ พิมพ์ A4/PDF
-                            </button>
-                            <button id="hubBtnExcelReq" class="py-1.5 px-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold shadow transition flex items-center justify-center gap-1" title="ส่งออก Excel">
-                                📊 Excel
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 2. ใบจัดสินค้าอุปกรณ์ -->
-                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-amber-500/50 transition flex flex-col justify-between">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-amber-600/30 text-amber-400 flex items-center justify-center text-xs font-bold border border-amber-500/30">2</span>
-                                <div>
-                                    <div class="font-bold text-white text-sm">ใบจัดสินค้าอุปกรณ์</div>
-                                    <div class="text-[11px] text-slate-400">Preparation & Picking Order</div>
-                                </div>
-                            </div>
-                            <span id="hubBadgePickStatus" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">สโตร์/จัดของ</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mb-3">เอกสารให้สโตร์เดินหยิบของ ตรวจนับจ่ายจริง/ของขาด และมีกล่องเซ็น 3 ฝ่าย</p>
-                        <div class="flex items-center gap-2 mt-auto">
-                            <button id="hubBtnPrintPick" class="flex-1 py-1.5 px-3 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
-                                📦 พิมพ์ A4/PDF
-                            </button>
-                            <button id="hubBtnExcelPick" class="py-1.5 px-3 bg-green-700 hover:bg-green-600 text-white rounded-lg text-xs font-semibold shadow transition flex items-center justify-center gap-1" title="ส่งออก Excel">
-                                📊 Excel
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 3. ใบขนส่งสินค้าอุปกรณ์ -->
-                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-cyan-500/50 transition flex flex-col justify-between">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-cyan-600/30 text-cyan-400 flex items-center justify-center text-xs font-bold border border-cyan-500/30">3</span>
-                                <div>
-                                    <div class="font-bold text-white text-sm">ใบขนส่งสินค้าอุปกรณ์</div>
-                                    <div class="text-[11px] text-slate-400">Transport & Delivery Slip</div>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">ทีมขนส่ง</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mb-3">เอกสารกำกับการเดินทางของพนักงานขับรถ ระบุทะเบียนรถ แผนที่ และจำนวนกล่องบรรทุก</p>
-                        <div class="flex items-center gap-2 mt-auto">
-                            <button id="hubBtnPrintTrans" class="w-full py-1.5 px-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
-                                🚚 พิมพ์ใบขนส่ง A4/PDF
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 4. ใบรับสินค้าอุปกรณ์ (หน้างาน) -->
-                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-emerald-500/50 transition flex flex-col justify-between">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-emerald-600/30 text-emerald-400 flex items-center justify-center text-xs font-bold border border-emerald-500/30">4</span>
-                                <div>
-                                    <div class="font-bold text-white text-sm">ใบรับสินค้าอุปกรณ์ (หน้างาน)</div>
-                                    <div class="text-[11px] text-slate-400">On-site Receiving Slip</div>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">หน้างาน</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mb-3">หลักฐานตรวจรับมอบอุปกรณ์เมื่อรถขนส่งไปถึงไซต์งานจริง ยืนยันสภาพสมบูรณ์</p>
-                        <div class="flex items-center gap-2 mt-auto">
-                            <button id="hubBtnPrintRecv" class="w-full py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
-                                📋 พิมพ์ใบรับของหน้างาน A4
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- กลุ่มที่ 2: ขั้นตอนจบงานและการโอนย้าย -->
-            <div>
-                <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> หมวดที่ 2: ขั้นตอนคืนคลังสินค้า / โอนย้ายไซต์งาน
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- 5. ใบรับคืนสินค้าอุปกรณ์ -->
-                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-green-500/50 transition flex flex-col justify-between">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-green-600/30 text-green-400 flex items-center justify-center text-xs font-bold border border-green-500/30">5</span>
-                                <div>
-                                    <div class="font-bold text-white text-sm">ใบรับคืนสินค้าอุปกรณ์</div>
-                                    <div class="text-[11px] text-slate-400">Equipment Return Slip</div>
-                                </div>
-                            </div>
-                            <span id="hubBadgeReturnStatus" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-500/20 text-green-300 border border-green-500/30">คืนคลัง</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mb-3">เอกสารทางการเมื่อรับของกลับเข้าคลัง แยกอิสระจากใบเบิก คืนครบ/คืนบางส่วน</p>
-                        <div class="flex items-center gap-2 mt-auto">
-                            <button id="hubBtnPrintRet" class="w-full py-1.5 px-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
-                                🔄 พิมพ์ใบรับคืนเข้าคลัง A4
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 6. ใบโอนย้ายสินค้าข้ามไซต์งาน -->
-                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-indigo-500/50 transition flex flex-col justify-between">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center text-xs font-bold border border-indigo-500/30">6</span>
-                                <div>
-                                    <div class="font-bold text-white text-sm">ใบโอนย้ายสินค้าข้ามไซต์งาน</div>
-                                    <div class="text-[11px] text-slate-400">Site-to-Site Transfer Slip</div>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">ไม่เข้าคลัง</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mb-3">กรณีโอนย้ายตรงจากไซต์ A ➔ ไซต์ B ทันทีโดยไม่ต้องขนกลับคลังก่อน</p>
-                        <div class="flex items-center gap-2 mt-auto">
-                            <button id="hubBtnPrintXfer" class="w-full py-1.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
-                                🚚 พิมพ์ใบโอนย้ายข้ามไซต์ A4
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- กลุ่มที่ 3: ขั้นตอนชำรุดและสูญหาย -->
-            <div>
-                <div class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-rose-400"></span> หมวดที่ 3: ขั้นตอนชำรุด / ซ่อมบำรุง / สูญหายตัดซาก
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- 7. ใบเบิกซ่อมบำรุง -->
-                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-rose-500/50 transition flex flex-col justify-between">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-rose-600/30 text-rose-400 flex items-center justify-center text-xs font-bold border border-rose-500/30">7</span>
-                                <div>
-                                    <div class="font-bold text-white text-sm">ใบเบิกซ่อมบำรุง</div>
-                                    <div class="text-[11px] text-slate-400">Maintenance & Repair Order</div>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">ช่างซ่อม</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mb-3">ใบแจ้งซ่อมอุปกรณ์ชำรุดเสียหาย พร้อมบันทึกอาการเสียและย้ายไปคลังซ่อม</p>
-                        <div class="flex items-center gap-2 mt-auto">
-                            <button id="hubBtnPrintMaint" class="w-full py-1.5 px-3 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
-                                🛠️ พิมพ์ใบเบิกซ่อมบำรุง A4
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 8. ใบสูญหาย / ใบตัดซาก -->
-                    <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3.5 hover:border-slate-500/50 transition flex flex-col justify-between">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-slate-700 text-slate-300 flex items-center justify-center text-xs font-bold border border-slate-600">8</span>
-                                <div>
-                                    <div class="font-bold text-white text-sm">ใบสูญหาย / ใบตัดซาก</div>
-                                    <div class="text-[11px] text-slate-400">Equipment Loss & Scrap Form</div>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 border border-slate-600">ตัดจำหน่าย</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 mb-3">เอกสารตัดจำหน่ายออกจากบัญชีสต็อกถาวร สำหรับของหายหรือพังจนซ่อมไม่ได้</p>
-                        <div class="flex items-center gap-2 mt-auto">
-                            <button id="hubBtnPrintScrap" class="w-full py-1.5 px-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1">
-                                ⚠️ พิมพ์ใบตัดซาก/สูญหาย A4
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Footer -->
-        <div class="px-5 py-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-            <div class="flex items-center gap-1.5">
-                <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
-                รองรับการพิมพ์ A4 และบันทึก PDF ครบทั้ง 8 ประเภท
-            </div>
-            <button onclick="closeDocumentHubModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg transition font-medium border border-slate-700">
-                ปิดหน้าต่าง
-            </button>
-        </div>
-    </div>
-</div>
 
 </body>
                 </html>
@@ -2249,7 +2591,7 @@
                     <div class="container">
                         <div class="header-wrapper">
                             <div class="company-block">
-                                <h1 class="company-name">ICE PRO SOUND & LIGHTING</h1>
+                                <h1 class="company-name">ICE FINLIGHT</h1>
                                 <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                             </div>
                             <div class="doc-block">
@@ -2425,7 +2767,7 @@
                     <div class="container">
                         <div class="header-wrapper">
                             <div class="company-block">
-                                <h1 class="company-name">ICE PRO SOUND & LIGHTING</h1>
+                                <h1 class="company-name">ICE FINLIGHT</h1>
                                 <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                             </div>
                             <div class="doc-block">
@@ -2586,7 +2928,7 @@
                     <div class="container">
                         <div class="header-wrapper">
                             <div class="company-block">
-                                <h1 class="company-name">ICE PRO SOUND & LIGHTING</h1>
+                                <h1 class="company-name">ICE FINLIGHT</h1>
                                 <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                             </div>
                             <div class="doc-block">
@@ -2940,7 +3282,7 @@ function printTransportSlipA4(data, items, existingWindow = null) {
         <body>
             <div class="header-wrapper">
                 <div>
-                    <h1 class="company-name">ICE PRO SOUND & LIGHTING</h1>
+                    <h1 class="company-name">ICE FINLIGHT</h1>
                     <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                 </div>
                 <div class="doc-block">
@@ -2955,7 +3297,7 @@ function printTransportSlipA4(data, items, existingWindow = null) {
                         <div class="info-row"><span class="info-label">เลขที่เอกสารอ้างอิง :</span><span class="info-val" style="font-weight: 700; color: #0284c7;">${docNo}</span></div>
                         <div class="info-row"><span class="info-label">ผู้รับงาน / ผู้เบิก :</span><span class="info-val">${data.techName || data.technician || data.techFullName || '-'}</span></div>
                         <div class="info-row"><span class="info-label">ผู้ขนส่งสินค้า :</span><span class="info-val">${data.transportName || data.techName || '-'}</span></div>
-                        <div class="info-row"><span class="info-label">ทะเบียนรถ / รอบส่ง :</span><span class="info-val">${data.vehiclePlate || 'รถตู้ขนส่งอุปกรณ์ Finlight (ICE LIGHT)'}</span></div>
+                        <div class="info-row"><span class="info-label">ทะเบียนรถ / รอบส่ง :</span><span class="info-val">${data.vehiclePlate || 'รถตู้ขนส่งอุปกรณ์ ICE FINLIGHT'}</span></div>
                     </div>
                     <div class="info-col-right">
                         <div class="info-row"><span class="info-label">วันที่ขนส่ง :</span><span class="info-val">${dateStr}</span></div>
@@ -3124,7 +3466,7 @@ function printOnSiteReceivingA4(data, items, existingWindow = null) {
         <body>
             <div class="header-wrapper">
                 <div>
-                    <h1 class="company-name">ICE PRO SOUND & LIGHTING</h1>
+                    <h1 class="company-name">ICE FINLIGHT</h1>
                     <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                 </div>
                 <div class="doc-block">
@@ -3306,7 +3648,7 @@ function printReturnReceiptA4(data, items, existingWindow = null) {
         <body>
             <div class="header-wrapper">
                 <div>
-                    <h1 class="company-name">ICE PRO SOUND & LIGHTING</h1>
+                    <h1 class="company-name">ICE FINLIGHT</h1>
                     <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                 </div>
                 <div class="doc-block">
@@ -3493,7 +3835,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         <body>
             <div class="header-wrapper">
                 <div>
-                    <h1 class="company-name">ICE PRO SOUND & LIGHTING</h1>
+                    <h1 class="company-name">ICE FINLIGHT</h1>
                     <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                 </div>
                 <div class="doc-block">
@@ -3871,8 +4213,8 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     <div class="container">
                         <div class="header-wrapper">
                             <div class="company-block">
-                                <h1 class="company-name">ICE LIGHT</h1>
-                                <div class="company-subtitle">ให้เช่าไฟแอลอีดี เครื่องเสียง / งานอีเว้นท์ทุกประเภท (FINLIGHT)</div>
+                                <h1 class="company-name">ICE FINLIGHT</h1>
+                                <div class="company-subtitle">ให้เช่าไฟแอลอีดี เครื่องเสียง / งานอีเว้นท์ทุกประเภท (ICE FINLIGHT)</div>
                             </div>
                             <div class="doc-block">
                                 <div class="doc-badge">${docTitle}</div>
@@ -4396,7 +4738,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 <html lang="th">
                 <head>
                     <meta charset="UTF-8">
-                    <title>รายงานสรุปใบเบิกและอุปกรณ์ - FINLIGHT (ICE LIGHT)</title>
+                    <title>รายงานสรุปใบเบิกและอุปกรณ์ - ICE FINLIGHT</title>
                     <style>
                         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
                         @page { size: A4 landscape; margin: 8mm; }
@@ -4421,7 +4763,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </head>
                 <body>
                     <div class="header">
-                        <div class="company-name">💡 บริษัท ฟินไลท์ จำกัด (FINLIGHT CO., LTD.) - ICE LIGHT</div>
+                        <div class="company-name">💡 บริษัท ไอซ์ ฟินไลท์ จำกัด (ICE FINLIGHT CO., LTD.)</div>
                         <div class="doc-title">รายงานสรุปภาพรวมใบเบิกและอุปกรณ์ (Requisition Summary Report)</div>
                         <div class="meta">
                             <span><strong>ข้อมูล:</strong> รายการล่าสุดจากระบบ Real-time</span>
@@ -4521,7 +4863,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 }
 
                 let csvContent = "\uFEFF";
-                csvContent += `"บริษัท ฟินไลท์ จำกัด (FINLIGHT CO., LTD.) - ICE LIGHT"\n`;
+                csvContent += `"บริษัท ไอซ์ ฟินไลท์ จำกัด (ICE FINLIGHT CO., LTD.)"\n`;
                 csvContent += `"ใบจัดสินค้าอุปกรณ์ (EQUIPMENT PICKING ORDER)"\n`;
                 csvContent += `"เลขที่เอกสาร: ${docNo}"\n`;
                 csvContent += `"วันที่ทำรายการ: ${dateStr}"\n`;
@@ -4845,6 +5187,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                         <td class="px-6 py-4 text-center">${statusBadge}</td>
                         <td class="px-6 py-4 text-center space-x-1.5 whitespace-nowrap">
                             <button onclick="openDocumentHubModal('${data.id}')" class="text-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-2 py-1.5 rounded-lg shadow transition inline-flex items-center gap-1" title="เปิดศูนย์รวมเอกสารทางเดินงานทั้ง 8 ชนิด">📄 เอกสาร 8 ชนิด</button>
+                            <button onclick="openAttachPickingProofModal('${data.id}')" class="text-xs bg-purple-600 hover:bg-purple-500 px-2 py-1.5 rounded-lg text-white font-semibold shadow transition inline-flex items-center gap-1" title="แนบรูปถ่ายใบจัดสินค้าและกรอกยอดจ่ายจริง">📷 กรอกยอดจัด/แนบรูป</button>
                             <button onclick="printPickingForm('${data.id}')" class="text-xs bg-amber-600 hover:bg-amber-500 px-2.5 py-1.5 rounded-lg text-white font-semibold shadow transition inline-flex items-center gap-1" title="พิมพ์ใบจัดสินค้าอุปกรณ์สำหรับช่าง">📦 ใบจัดสินค้า</button>
                             <button onclick="exportPickingFormExcel('${data.id}')" class="text-xs bg-green-700 hover:bg-green-600 text-white font-semibold px-2 py-1.5 rounded-lg shadow transition inline-flex items-center gap-1" title="ส่งออก Excel ใบจัดสินค้า">📊 Excel</button>
                             <button onclick="resetPickingStatus('${data.id}')" class="text-[11px] bg-slate-700 hover:bg-slate-600 text-slate-200 hover:text-white px-2 py-1.5 rounded border border-slate-600 transition" title="รีเซ็ตสถานะใบจัดสินค้าเป็นรอพิมพ์">🔄 รีเซ็ต</button>
@@ -5114,12 +5457,12 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </head>
                 <body>
                     <h1>รายงานฐานข้อมูลพนักงาน</h1>
-                    <div class="subtitle">บริษัท ฟินไลท์ จำกัด (FINLIGHT CO., LTD.) - ICE LIGHT - ข้อมูล ณ วันที่ ${date}</div>
+                    <div class="subtitle">บริษัท ไอซ์ ฟินไลท์ จำกัด (ICE FINLIGHT CO., LTD.) - ข้อมูล ณ วันที่ ${date}</div>
 
                     ${tableHTML}
                     
                     <div class="footer">
-                        ออกรายงานโดยระบบ Finlight (ICE LIGHT)
+                        ออกรายงานโดยระบบ ICE FINLIGHT
                     </div>
                 </body>
                 </html>
@@ -5483,7 +5826,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </head>
                 <body>
                     <h1>รายงานฐานข้อมูลคลังสินค้า (Inventory Report)</h1>
-                    <div class="subtitle">ระบบ Finlight (ICE LIGHT) - ข้อมูล ณ วันที่ ${date}</div>
+                    <div class="subtitle">ระบบ ICE FINLIGHT - ข้อมูล ณ วันที่ ${date}</div>
                     
                     <div class="summary">
                         <span>📦 ยอดรวมสินค้าคงเหลือ: ${totalItems} ชิ้น</span>
@@ -5493,7 +5836,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     ${tableHTML}
                     
                     <div class="footer">
-                        ออกรายงานโดยระบบ Finlight (ICE LIGHT)
+                        ออกรายงานโดยระบบ ICE FINLIGHT
                     </div>
                 </body>
                 </html>
@@ -6287,7 +6630,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </div>
             </div>
 
-            <!-- 🏷️ Brand Title: ICE LIGHT -->
+            <!-- 🏷️ Brand Title: ICE FINLIGHT -->
             <div class="flex items-center justify-center gap-2.5 mb-2">
                 <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden shrink-0 border border-blue-400/40 bg-black flex items-center justify-center shadow">
                     <img src="assets/ice-logo-new.jpg" alt="ICE" class="w-full h-full object-cover">

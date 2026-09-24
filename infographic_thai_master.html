@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผังขั้นตอนการทำงานระบบเบิกยืมอุปกรณ์ - ICE PROSOUND (ภาษาไทย A4 เต็มหน้า)</title>
+    <!-- Google Fonts: Orbitron, Prompt, Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Prompt:wght@400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Prompt', 'Sarabun', sans-serif;
+            background-color: #04070d;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        /* 
+           Exact A4 Portrait Dimension Ratio (1 : 1.4142)
+           Base size: 800px x 1131px (Full A4)
+        */
+        .a4-canvas {
+            width: 800px;
+            height: 1131px;
+            position: relative;
+            background: #070b14;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 22px 24px;
+        }
+
+        /* Background Layers */
+        .bg-watermark {
+            position: absolute;
+            inset: 0;
+            background-image: url('assets/futuristic_speaker.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.18;
+            filter: brightness(0.85) contrast(1.2);
+            mix-blend-mode: screen;
+            z-index: 0;
+        }
+
+        .bg-gradient-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(13, 22, 38, 0.4) 0%, rgba(5, 8, 15, 0.95) 80%);
+            z-index: 1;
+        }
+
+        /* Central Timeline Spine */
+        .timeline-spine {
+            position: absolute;
+            top: 130px;
+            bottom: 135px;
+            left: 50%;
+            width: 3px;
+            transform: translateX(-50%);
+            background: linear-gradient(180deg, 
+                #00e5ff 0%, 
+                #3b82f6 25%, 
+                #f59e0b 50%, 
+                #00e5ff 75%, 
+                #10b981 100%);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
+            z-index: 2;
+        }
+
+        /* Central Numbered Circle Nodes */
+        .node-circle {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            z-index: 5;
+            background: #070d18;
+            border: 2px solid;
+        }
+
+        .node-cyan {
+            border-color: #00e5ff;
+            color: #00e5ff;
+            box-shadow: 0 0 16px rgba(0, 229, 255, 0.5), inset 0 0 8px rgba(0, 229, 255, 0.3);
+        }
+
+        .node-amber {
+            border-color: #f59e0b;
+            color: #f59e0b;
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.5), inset 0 0 8px rgba(245, 158, 11, 0.3);
+        }
+
+        .node-emerald {
+            border-color: #10b981;
+            color: #10b981;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.5), inset 0 0 8px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Stage Cards */
+        .stage-card {
+            width: 345px;
+            background: rgba(10, 16, 28, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 9px 12px;
+            box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.8), 0 0 14px rgba(0, 229, 255, 0.12);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 4;
+        }
+
+        .card-left {
+            border: 1px solid rgba(0, 229, 255, 0.4);
+            border-right: 3px solid #00e5ff;
+        }
+
+        .card-right {
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            border-left: 3px solid #f59e0b;
+        }
+
+        .card-emerald {
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            border-left: 3px solid #10b981;
+        }
+
+        /* Connecting Branch Arms from Spine to Card */
+        .branch-left {
+            position: absolute;
+            right: -28px;
+            top: 50%;
+            width: 28px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.2), #00e5ff);
+        }
+
+        .branch-right {
+            position: absolute;
+            left: -28px;
+            top: 50%;
+            width: 28px;
+            height: 2px;
+            background: linear-gradient(90deg, #f59e0b, rgba(245, 158, 11, 0.2));
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .thai-heading {
+            font-family: 'Prompt', sans-serif;
+            font-weight: 700;
+        }
+
+        .thai-body {
+            font-family: 'Sarabun', sans-serif;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="a4Infographic" class="a4-canvas">
+        <!-- Background Assets -->
+        <div class="bg-watermark"></div>
+        <div class="bg-gradient-overlay"></div>
+
+        <!-- Central Glowing Timeline Spine -->
+        <div class="timeline-spine"></div>
+
+        <!-- ======================================================= -->
+        <!-- 1. HEADER (TOP A4) -->
+        <!-- ======================================================= -->
+        <header class="relative z-10 bg-slate-950/85 border border-cyan-500/40 rounded-xl px-5 py-3 text-center shadow-xl backdrop-blur-md">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono text-[9px] font-bold border border-cyan-400/40 tracking-wider">
+                        STANDARD OPERATING PROCEDURE
+                    </span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-bolt text-cyan-400 text-xs"></i>
+                    <h1 class="font-orbitron text-xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-200 to-amber-300">
+                        ICE PROSOUND
+                    </h1>
+                </div>
+                <div>
+                    <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-[9px] font-bold border border-amber-400/40">
+                        4K A4 FULL POSTER
+                    </span>
+                </div>
+            </div>
+            <h2 class="thai-heading text-sm font-bold text-white mt-1">
+                ผังขั้นตอนการทำงาน "ระบบเบิกยืม-คืน อุปกรณ์เครื่องเสียงและระบบไฟ"
+            </h2>
+            <p class="thai-body text-[10.5px] text-slate-300">
+                กระบวนการบริหารจัดการอุปกรณ์แบบบูรณาการ หน้าร้าน ช่างหน้างาน และหลังร้าน เชื่อมโยง Real-time Cloud ERP
+            </p>
+        </header>
+
+        <!-- ======================================================= -->
+        <!-- 2. TIMELINE WORKFLOW (7 STAGES) -->
+        <!-- ======================================================= -->
+        <main class="relative z-10 flex flex-col justify-between flex-1 my-3">
+
+            <!-- STAGE 01 (Left) -->
+            <div class="relative flex items-center justify-between w-full h-[110px]">
+                <!-- Card Left -->
+                <div class="stage-card card-left">
+                    <div class="branch-left"></div>
+                    <div class="flex items-start space-x-2.5">
+                        <img src="assets/chips/chip_01_intake.png" alt="Intake" class="w-14 h-12 rounded-lg object-cover border border-cyan-400/40 shadow-sm flex-shrink-0 mt-0.5">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <h3 class="thai-heading text-[12px] font-bold text-white">01 | เจ้าหน้าที่รับงาน & ไซต์งาน</h3>
+                                <span class="text-[8.5px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-mono">หลังร้าน Admin</span>
+                            </div>
+                            <p class="thai-body text-[10px] text-slate-300 leading-tight">
+                                รับออเดอร์งาน (เช่า/ขาย/ซ่อม/ติดตั้ง) บันทึกข้อมูลลูกค้า กำหนดวัน-เวลา และสถานที่จัดงาน (ไซต์งาน) เข้าระบบทันที
+                            </p>
+                            <span class="inline-block text-[8.5px] text-cyan-300 font-mono mt-1">Staff Order Intake & Site Registration</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Center Node 01 -->
+                <div class="node-circle node-cyan" style="top: 50%;">01</div>
+                <!-- Empty Right placeholder for balance -->
+                <div class="w-[345px]"></div>
+            </div>
+
+            <!-- STAGE 02 (Right) -->
+            <div class="relative flex items-center justify-between w-full h-[110px]">
+                <!-- Empty Left placeholder -->
+                <div class="w-[345px]"></div>
+                <!-- Center Node 02 -->
+                <div class="node-circle node-amber" style="top: 50%;">02</div>
+                <!-- Card Right -->
+                <div class="stage-card card-right">
+                    <div class="branch-right"></div>
+                    <div class="flex items-start space-x-2.5">
+                        <div class="flex-1 text-right">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <span class="text-[8.5px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">หัวหน้างาน</span>
+                                <h3 class="thai-heading text-[12px] font-bold text-white">02 | วางแผนอุปกรณ์ & มอบหมายช่าง</h3>
+                            </div>
+                            <p class="thai-body text-[10px] text-slate-300 leading-tight">
+                                ออกแบบจัดสเปกระบบเสียง (ตู้ลำโพง, แอมป์, มิกเซอร์, ไฟพาร์, Truss) วางผังระบบเสียง และระบุหัวหน้าทีมช่างคุมงาน
+                            </p>
+                            <span class="inline-block text-[8.5px] text-amber-300 font-mono mt-1">Equipment Planning & Tech Allocation</span>
+                        </div>
+                        <img src="assets/chips/chip_02_planning.png" alt="Planning" class="w-14 h-12 rounded-lg object-cover border border-amber-400/40 shadow-sm flex-shrink-0 mt-0.5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 03 (Left) -->
+            <div class="relative flex items-center justify-between w-full h-[110px]">
+                <!-- Card Left -->
+                <div class="stage-card card-left">
+                    <div class="branch-left"></div>
+                    <div class="flex items-start space-x-2.5">
+                        <img src="assets/chips/chip_03_mobile.png" alt="Mobile" class="w-14 h-12 rounded-lg object-cover border border-cyan-400/40 shadow-sm flex-shrink-0 mt-0.5">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <h3 class="thai-heading text-[12px] font-bold text-white">03 | ช่างเบิกของผ่านมือถือ (หน้าร้าน)</h3>
+                                <span class="text-[8.5px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-mono">หน้าร้าน Store</span>
+                            </div>
+                            <p class="thai-body text-[10px] text-slate-300 leading-tight">
+                                ช่างเปิดหน้าเว็บ <span class="text-cyan-300 font-semibold font-mono">index.html</span> เลือกหมวดหมู่ หยิบอุปกรณ์ลงตะกร้า ระบุจำนวน และไซต์งานในไม่กี่วินาที
+                            </p>
+                            <span class="inline-block text-[8.5px] text-cyan-300 font-mono mt-1">Mobile & Tablet Requisition App</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Center Node 03 -->
+                <div class="node-circle node-cyan" style="top: 50%;">03</div>
+                <!-- Empty Right placeholder -->
+                <div class="w-[345px]"></div>
+            </div>
+
+            <!-- STAGE 04 (Right) -->
+            <div class="relative flex items-center justify-between w-full h-[110px]">
+                <!-- Empty Left placeholder -->
+                <div class="w-[345px]"></div>
+                <!-- Center Node 04 -->
+                <div class="node-circle node-emerald" style="top: 50%;">04</div>
+                <!-- Card Right -->
+                <div class="stage-card card-emerald">
+                    <div class="branch-right"></div>
+                    <div class="flex items-start space-x-2.5">
+                        <div class="flex-1 text-right">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <span class="text-[8.5px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold font-mono">✨ Phase 4</span>
+                                <h3 class="thai-heading text-[12px] font-bold text-white">04 | อนุมัติ & ตัดสต๊อก Real-time</h3>
+                            </div>
+                            <p class="thai-body text-[10px] text-slate-300 leading-tight">
+                                ผู้จัดการตรวจใบเบิกและกดยืนยัน ระบบตัดสต๊อกทันที พร้อมบันทึกประวัติลง <strong class="text-emerald-400">Stock Card</strong> อัตโนมัติ ป้องกันของสูญหาย
+                            </p>
+                            <span class="inline-block text-[8.5px] text-emerald-300 font-mono mt-1">Automated Stock-Cut & Stock Card Log</span>
+                        </div>
+                        <img src="assets/chips/chip_04_approval.png" alt="Approval" class="w-14 h-12 rounded-lg object-cover border border-emerald-400/40 shadow-sm flex-shrink-0 mt-0.5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 05 (Left) -->
+            <div class="relative flex items-center justify-between w-full h-[110px]">
+                <!-- Card Left -->
+                <div class="stage-card card-left">
+                    <div class="branch-left"></div>
+                    <div class="flex items-start space-x-2.5">
+                        <img src="assets/chips/chip_05_dispatch.png" alt="Dispatch" class="w-14 h-12 rounded-lg object-cover border border-cyan-400/40 shadow-sm flex-shrink-0 mt-0.5">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <h3 class="thai-heading text-[12px] font-bold text-white">05 | พิมพ์ใบเบิก A4 & จ่ายของขึ้นรถ</h3>
+                                <span class="text-[8.5px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-mono">คลังสินค้า</span>
+                            </div>
+                            <p class="thai-body text-[10px] text-slate-300 leading-tight">
+                                พิมพ์ใบเบิก A4 มีลายเซ็นกำกับ คลังตรวจนับอุปกรณ์จริง สแกนเช็กของ และโหลดใส่ Flight Case ขึ้นรถขนส่งไปไซต์งาน
+                            </p>
+                            <span class="inline-block text-[8.5px] text-cyan-300 font-mono mt-1">A4 Dispatch Print & Warehouse Loading</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Center Node 05 -->
+                <div class="node-circle node-cyan" style="top: 50%;">05</div>
+                <!-- Empty Right placeholder -->
+                <div class="w-[345px]"></div>
+            </div>
+
+            <!-- STAGE 06 (Right) -->
+            <div class="relative flex items-center justify-between w-full h-[110px]">
+                <!-- Empty Left placeholder -->
+                <div class="w-[345px]"></div>
+                <!-- Center Node 06 -->
+                <div class="node-circle node-amber" style="top: 50%;">06</div>
+                <!-- Card Right -->
+                <div class="stage-card card-right">
+                    <div class="branch-right"></div>
+                    <div class="flex items-start space-x-2.5">
+                        <div class="flex-1 text-right">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <span class="text-[8.5px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">หน้างานจริง</span>
+                                <h3 class="thai-heading text-[12px] font-bold text-white">06 | ปฏิบัติงานคอนเสิร์ตหน้างาน</h3>
+                            </div>
+                            <p class="thai-body text-[10px] text-slate-300 leading-tight">
+                                ทีมช่างติดตั้งระบบเสียง แขวนลำโพง Line-Array เดินสายสัญญาณ และควบคุมคอนโซลมิกเซอร์ มอนิเตอร์ผ่านระบบ Cloud 24 ชม.
+                            </p>
+                            <span class="inline-block text-[8.5px] text-amber-300 font-mono mt-1">Live Concert Audio Setup & Execution</span>
+                        </div>
+                        <img src="assets/chips/chip_06_concert.png" alt="Concert" class="w-14 h-12 rounded-lg object-cover border border-amber-400/40 shadow-sm flex-shrink-0 mt-0.5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 07 (Left) -->
+            <div class="relative flex items-center justify-between w-full h-[110px]">
+                <!-- Card Left -->
+                <div class="stage-card card-left">
+                    <div class="branch-left"></div>
+                    <div class="flex items-start space-x-2.5">
+                        <img src="assets/chips/chip_07_return.png" alt="Return" class="w-14 h-12 rounded-lg object-cover border border-cyan-400/40 shadow-sm flex-shrink-0 mt-0.5">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <h3 class="thai-heading text-[12px] font-bold text-white">07 | ตรวจเช็กสภาพ & คืนเข้าคลัง</h3>
+                                <span class="text-[8.5px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">ปิดจ็อบ 100%</span>
+                            </div>
+                            <p class="thai-body text-[10px] text-slate-300 leading-tight">
+                                งานเสร็จ ช่างนำของกลับคลัง เจ้าหน้าที่ตรวจสภาพ ทดสอบระบบ และบันทึกรับคืนใน Admin สต๊อกปรับคืนอัตโนมัติ 100%
+                            </p>
+                            <span class="inline-block text-[8.5px] text-cyan-300 font-mono mt-1">Return Inspection & Inventory Restocking</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Center Node 07 -->
+                <div class="node-circle node-amber" style="top: 50%;">07</div>
+                <!-- Digital Mixer Console illustration on right side of stage 7 -->
+                <div class="w-[345px] flex items-center justify-center">
+                    <img src="assets/chips/chip_mixer.png" alt="Mixer Console" class="w-[280px] h-[95px] object-cover rounded-xl border border-cyan-500/40 shadow-lg shadow-cyan-500/20">
+                </div>
+            </div>
+
+        </main>
+
+        <!-- ======================================================= -->
+        <!-- 3. FOOTER SECTION & QR CODES (BOTTOM A4) -->
+        <!-- ======================================================= -->
+        <footer class="relative z-10 bg-slate-950/90 border border-slate-700/80 rounded-xl px-5 py-2.5 flex items-center justify-between shadow-2xl backdrop-blur-md">
+            <!-- Left QR: Front Store -->
+            <div class="flex items-center space-x-3">
+                <div id="qrFrontStore" class="bg-white p-1 rounded-lg shadow-md flex-shrink-0"></div>
+                <div>
+                    <div class="flex items-center space-x-1 text-[9px] font-bold text-cyan-400 font-mono uppercase tracking-wider">
+                        <span>📱 หน้าร้าน-เบิกจ่ายอุปกรณ์</span>
+                    </div>
+                    <a href="https://surathepth.github.io/Icepro-sound/" target="_blank" class="text-[10px] text-slate-200 hover:text-cyan-300 font-mono block">
+                        surathepth.github.io/Icepro-sound/
+                    </a>
+                    <p class="text-[8px] text-slate-400">สำหรับช่างและเจ้าหน้าที่เบิกจ่ายหน้างาน</p>
+                </div>
+            </div>
+
+            <!-- Center Company Branding -->
+            <div class="flex flex-col items-center text-center px-4">
+                <h2 class="font-orbitron font-black text-sm tracking-widest text-white">ICE PROSOUND</h2>
+                <p class="thai-heading text-[10px] text-cyan-300 mt-0.5">บริการเช่า จำหน่าย ติดตั้ง ระบบเครื่องเสียงคอนเสิร์ตครบวงจร</p>
+                <div class="flex items-center space-x-2 mt-0.5 text-[8px] text-slate-400 font-mono">
+                    <span>PROJECT: ICEPROSOUND-11BE6</span>
+                    <span>•</span>
+                    <span class="text-emerald-400 font-bold">REAL-TIME CLOUD ERP</span>
+                </div>
+            </div>
+
+            <!-- Right QR: Admin Back-Office -->
+            <div class="flex items-center space-x-3">
+                <div class="text-right">
+                    <div class="flex items-center justify-end space-x-1 text-[9px] font-bold text-amber-400 font-mono uppercase tracking-wider">
+                        <span>⚙️ หลังร้าน-ADMIN & สต๊อกการ์ด</span>
+                    </div>
+                    <a href="https://surathepth.github.io/Icepro-sound/admin.html" target="_blank" class="text-[10px] text-slate-200 hover:text-amber-300 font-mono block">
+                        .../Icepro-sound/admin.html
+                    </a>
+                    <p class="text-[8px] text-slate-400">จัดการคลัง สต๊อกการ์ด รายงาน และสรุปยอด</p>
+                </div>
+                <div id="qrAdminOffice" class="bg-white p-1 rounded-lg shadow-md flex-shrink-0"></div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- QR Code Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            new QRCode(document.getElementById("qrFrontStore"), {
+                text: "https://surathepth.github.io/Icepro-sound/",
+                width: 48,
+                height: 48,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            new QRCode(document.getElementById("qrAdminOffice"), {
+                text: "https://surathepth.github.io/Icepro-sound/admin.html",
+                width: 48,
+                height: 48,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        });
+    </script>
+</body>
+</html>

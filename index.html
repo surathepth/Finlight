@@ -42,6 +42,36 @@
             filter: grayscale(100%); /* คงความเป็นขาวดำเพื่อความพรีเมียม */
         }
 
+        
+        /* 🎛️ [LILIN'S TOUCH-FRIENDLY BIG HORIZONTAL SCROLLBAR STANDARD] */
+        .custom-scrollbar {
+            scrollbar-color: #38bdf8 #0f172a;
+            scrollbar-width: auto;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #38bdf8, #2563eb);
+            border-radius: 8px;
+            border: 2px solid #0f172a;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            cursor: pointer;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(90deg, #60a5fa, #3b82f6);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.9);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:active {
+            background: #0284c7;
+        }
+
         .glass-panel {
             background: rgba(30, 41, 59, 0.85); /* Slate 800 ทึบขึ้นเป็น 85% ป้องกันลายน้ำกวนตัวหนังสือ */
             backdrop-filter: blur(12px);
@@ -90,16 +120,62 @@
             th { background-color: #f3f4f6 !important; font-weight: bold !important; font-size: 14px !important; }
             td { font-size: 13px !important; } /* ปรับขนาดตัวอักษรให้พอดีในแนวนอน */
             
-            /* กำหนดความกว้างคอลัมน์ให้สมส่วน */
-            th:nth-child(1), td:nth-child(1) { width: 20% !important; } /* ชื่อ-นามสกุล */
-            th:nth-child(2), td:nth-child(2) { width: 15% !important; } /* ตำแหน่ง */
-            th:nth-child(3), td:nth-child(3) { width: 25% !important; } /* เบอร์/ไลน์ */
-            th:nth-child(4), td:nth-child(4) { width: 40% !important; } /* ที่อยู่ (กว้างสุด) */
+            /* กำหนดความกว้างคอลัมน์ให้สมส่วนสำหรับตารางพนักงานเท่านั้น */
+            #staffSection table th:nth-child(1), #staffSection table td:nth-child(1) { width: 20% !important; } /* ชื่อ-นามสกุล */
+            #staffSection table th:nth-child(2), #staffSection table td:nth-child(2) { width: 15% !important; } /* ตำแหน่ง */
+            #staffSection table th:nth-child(3), #staffSection table td:nth-child(3) { width: 25% !important; } /* เบอร์/ไลน์ */
+            #staffSection table th:nth-child(4), #staffSection table td:nth-child(4) { width: 40% !important; } /* ที่อยู่ (กว้างสุด) */
 
             #staffSection { display: block !important; padding: 0 !important; } /* บังคับให้แสดงหน้าพนักงานตอนพิมพ์ */
             #dashboardSection, #storeSection { display: none !important; }
         }
-    </style>
+    
+        /* 🖨️ [LILIN'S UNIVERSAL RESILIENT PRINT STUDIO MEDIA QUERY] */
+        @media print {
+            body > *:not(#resilientPrintModal) {
+                display: none !important;
+            }
+            #resilientPrintModal {
+                position: static !important;
+                display: block !important;
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+                z-index: 999999 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            #resilientPrintModal .no-print {
+                display: none !important;
+            }
+            #resilientPrintA4Wrapper {
+                max-width: 100% !important;
+                width: 100% !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                background: #ffffff !important;
+            }
+            #resilientPrintContent {
+                width: 100% !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            /* 🛡️ ป้องกันคำสั่งภายนอกมารบกวนตารางในโมดอลพิมพ์ A4 */
+            #resilientPrintModal table, #resilientPrintContent table {
+                width: 100% !important;
+                table-layout: fixed !important;
+            }
+            #resilientPrintModal th, #resilientPrintContent th,
+            #resilientPrintModal td, #resilientPrintContent td {
+                width: auto;
+            }
+        }
+</style>
 
     <!-- Firebase SDK (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -290,17 +366,40 @@
                 </div>
 
                 <!-- ตารางแสดงข้อมูล -->
-                <div class="glass-panel rounded-lg overflow-x-auto border border-slate-600">
-                    <table class="w-full text-left text-sm text-slate-200">
-                        <thead class="bg-slate-700/90 text-slate-100 text-[15px] font-bold tracking-wide border-b-2 border-slate-500">
+                <!-- 🎛️ Dual-Layer Permanent Table Scroll Control Toolbar (ระดับสายตา) -->
+                <div class="flex flex-wrap items-center justify-between bg-slate-900/95 px-4 py-3 rounded-t-xl border-t border-x border-slate-600 text-xs gap-2 no-print shadow-lg">
+                    <div class="flex items-center gap-2 text-slate-200 font-bold text-sm">
+                        <span class="text-lg">📊</span>
+                        <span>ตารางประวัติและสถานะใบเบิกอุปกรณ์</span>
+                        <span class="text-xs text-amber-300 font-normal hidden sm:inline">(เลื่อนซ้าย-ขวาได้ทันทีจากแถบด้านบน หรือกดปุ่มลูกศร)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="scrollIndexReportTable(-280)" class="px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-95 text-white rounded-lg border border-blue-400/50 transition flex items-center gap-1.5 font-bold shadow-md cursor-pointer text-xs sm:text-sm" title="เลื่อนตารางไปทางซ้าย">
+                            ◀ เลื่อนซ้าย
+                        </button>
+                        <button type="button" onclick="scrollIndexReportTable(280)" class="px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-95 text-white rounded-lg border border-blue-400/50 transition flex items-center gap-1.5 font-bold shadow-md cursor-pointer text-xs sm:text-sm" title="เลื่อนตารางไปทางขวา">
+                            เลื่อนขวา ▶
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 🔄 แถบสกรอลล์บาร์แนวนอนคู่ขนานด้านบน (Top Synchronized Scrollbar) -->
+                <div id="indexReportTopScrollWrapper" class="w-full overflow-x-auto border-x border-slate-600 bg-slate-950/80 custom-scrollbar no-print" style="height: 16px;">
+                    <div id="indexReportTopScrollDummy" style="height: 1px; width: 1200px;"></div>
+                </div>
+
+                <!-- ตารางแสดงข้อมูล (มีแถบเลื่อนแนวนอนด้านล่างขนาดใหญ่ และจำกัดความสูงพอดี 1 หน้าจอ) -->
+                <div id="indexReportTableScrollContainer" class="glass-panel rounded-b-xl overflow-x-auto overflow-y-auto max-h-[65vh] border-b border-x border-slate-600 custom-scrollbar shadow-2xl relative">
+                    <table id="indexMainReportTable" class="w-full text-left text-sm text-slate-200 min-w-[1000px]">
+                        <thead class="sticky top-0 z-20 bg-slate-800/95 backdrop-blur text-slate-100 text-[15px] font-bold tracking-wide border-b-2 border-slate-500 shadow-md">
                             <tr class="whitespace-nowrap">
-                                <th class="px-6 py-4">วันเวลาเบิก</th>
-                                <th class="px-6 py-4">ช่าง / พนักงาน</th>
-                                <th class="px-6 py-4">ไซต์งาน</th>
-                                <th class="px-6 py-4">เซลล์ผู้ดูแล</th>
-                                <th class="px-6 py-4 text-center">จำนวนอุปกรณ์ (ชิ้น)</th>
-                                <th class="px-6 py-4 text-center">สถานะ</th>
-                                <th class="px-6 py-4 text-center">จัดการ</th>
+                                <th class="px-4 py-3.5 sticky left-0 bg-slate-900 z-30 border-r border-slate-700 shadow-md">วันเวลาเบิก</th>
+                                <th class="px-5 py-3.5">ช่าง / พนักงาน</th>
+                                <th class="px-5 py-3.5">ไซต์งาน</th>
+                                <th class="px-5 py-3.5">เซลล์ผู้ดูแล</th>
+                                <th class="px-4 py-3.5 text-center">จำนวนอุปกรณ์ (ชิ้น)</th>
+                                <th class="px-4 py-3.5 text-center">สถานะ</th>
+                                <th class="px-4 py-3.5 text-center">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="reportTableBody" class="divide-y divide-slate-600/50 bg-slate-800/30">
@@ -332,77 +431,77 @@
             <!-- Categories Grid (17 หมวดหมู่หลักจากระบบ) -->
             <div id="categoryGridContainer" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 mt-6">
                 <!-- Image 1 Categories -->
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('รายการโคมไฟ')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการโคมไฟ')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">💡</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">รายการโคมไฟ</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">รายการโคมไฟ</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('ไฟเลเซอร์ + CO2')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('ไฟเลเซอร์ + CO2')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">💨</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">ไฟเลเซอร์ + CO2</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2"><span class="inline-block whitespace-nowrap">ไฟเลเซอร์+</span> <span class="inline-block whitespace-nowrap">CO2</span></h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('บอร์ดคอนโทรลไฟ+บูทเตอร์')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('บอร์ดคอนโทรลไฟ+บูทเตอร์')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🎛️</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">บอร์ดคอนโทรลไฟ+บูทเตอร์</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2"><span class="inline-block whitespace-nowrap">บอร์ดคอนโทรลไฟ+</span> <span class="inline-block whitespace-nowrap">บูทเตอร์</span></h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('สายสัญญาณไฟ')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('สายสัญญาณไฟ')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🔌</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">สายสัญญาณไฟ</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">สายสัญญาณไฟ</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('สายไฟ')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('สายไฟ')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">⚡</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">สายไฟ</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">สายไฟ</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('หมวก+แขนโคมไฟ')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('หมวก+แขนโคมไฟ')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🏗️</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">หมวก+แขนโคมไฟ</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2"><span class="inline-block whitespace-nowrap">หมวก+</span> <span class="inline-block whitespace-nowrap">แขนโคมไฟ</span></h2>
                 </div>
 
                 <!-- Image 2 Categories -->
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('ลำโพง')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('ลำโพง')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🔊</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">ลำโพง</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">ลำโพง</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('เพาเวอร์แอมป์')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('เพาเวอร์แอมป์')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🔋</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">เพาเวอร์แอมป์</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">เพาเวอร์แอมป์</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('มิกซ์+คอนโทรล')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('มิกซ์+คอนโทรล')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🎚️</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">มิกซ์+คอนโทรล</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">มิกซ์+คอนโทรล</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('สายไฟ+สายสัญญาณ+ตู้ไฟ')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('สายไฟ+สายสัญญาณ+ตู้ไฟ')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🔌</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">สายไฟ+สายสัญญาณ+ตู้ไฟ</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2"><span class="inline-block whitespace-nowrap">สายไฟ+</span> <span class="inline-block whitespace-nowrap">สายสัญญาณ+</span> <span class="inline-block whitespace-nowrap">ตู้ไฟ</span></h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('แร็คอุปกรณ์')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('แร็คอุปกรณ์')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🗄️</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">แร็คอุปกรณ์</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">แร็คอุปกรณ์</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('ชุดไมโครโฟน+เครื่องควบคุม+ขา')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('ชุดไมโครโฟน+เครื่องควบคุม+ขาไมค์')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🎤</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">ชุดไมโครโฟน+เครื่องควบคุม+ขาไมค์</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2"><span class="inline-block whitespace-nowrap">ชุดไมโครโฟน+</span> <span class="inline-block whitespace-nowrap">เครื่องควบคุม+</span> <span class="inline-block whitespace-nowrap">ขาไมค์</span></h2>
                 </div>
 
                 <!-- Image 3 Categories -->
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('รายการ Truss')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการ Truss')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">⛩️</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">รายการ Truss</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">รายการ Truss</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('รายการรอกไฟฟ้')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการรอกไฟฟ้')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">⛓️</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">รายการรอกไฟฟ้า</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">รายการรอกไฟฟ้า</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('รายการนั่งร้านเหล็ก')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการนั่งร้านเหล็ก')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🪜</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">รายการนั่งร้านลิ่มล็อค</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2"><span class="inline-block whitespace-nowrap">รายการนั่งร้าน</span> <span class="inline-block whitespace-nowrap">ลิ่มล็อค</span></h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('รายการเวที')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการเวที')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🎭</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">รายการเวที</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">รายการเวที</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('รายการเต็นท์')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการเต็นท์')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">⛺</div>
-                    <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">รายการเมการูฟ</h2>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">รายการเมการูฟ</h2>
                 </div>
             </div>
 
@@ -601,7 +700,7 @@
                         ตรวจสอบรายการให้ครบถ้วนก่อนบันทึก
                     </div>
                     <div class="flex space-x-3 w-full sm:w-auto">
-                        <button onclick="clearCart()" class="w-full sm:w-auto px-4 py-3 sm:py-2 bg-red-600/20 hover:bg-red-600/40 border border-red-500/50 text-red-400 rounded-lg transition font-medium">ล้างตะกร้า</button>
+                        <button onclick="clearCart()" class="w-full sm:w-auto px-4 py-3 sm:py-2 bg-red-600/20 hover:bg-red-600/40 border border-red-500/50 text-red-400 rounded-lg transition font-medium inline-flex items-center justify-center gap-1.5" title="ล้างตะกร้าและเคลียร์ข้อมูลทรานเซกชั่นทั้งหมด">🗑️ ล้างตะกร้า / เคลียร์ทรานเซกชั่น</button>
                         <button onclick="saveToFirebase()" class="w-full sm:w-auto px-6 py-3 sm:py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition font-bold shadow-lg ice-glow flex items-center justify-center gap-2">
                             <span id="saveBtnText">บันทึกใบเบิกและยืม 📝</span>
                             <span id="saveSpinner" class="hidden animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
@@ -1039,6 +1138,42 @@
     <!-- 🌟 MODAL: DOCUMENT WORKFLOW HUB (ศูนย์รวมเอกสารทางเดินงาน 8 ชนิด) -->
     <!-- ======================================================== -->
 <!-- ======================================================== -->
+
+    <!-- ======================================================== -->
+    <!-- MODAL: UNIVERSAL RESILIENT PRINT STUDIO (ระบบพรีวิวและพิมพ์เอกสารทนทาน 100%) -->
+    <!-- ======================================================== -->
+    <div id="resilientPrintModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[100000] hidden flex-col items-center justify-start p-2 sm:p-4 overflow-y-auto">
+        <!-- Floating Toolbar (Always Visible, No-Print) -->
+        <div class="sticky top-2 z-50 flex flex-wrap items-center justify-between w-full max-w-4xl bg-slate-900/95 border border-slate-700/80 rounded-2xl px-4 py-2.5 shadow-2xl mb-4 gap-2 no-print backdrop-blur">
+            <div class="flex items-center gap-2.5">
+                <span class="text-2xl">🖨️</span>
+                <div>
+                    <h4 id="resilientPrintDocTitle" class="text-sm sm:text-base font-bold text-white leading-tight">พรีวิวเอกสารก่อนพิมพ์ (A4 Preview)</h4>
+                    <p class="text-[11px] text-slate-400">ระบบแสดงตัวอย่างเอกสาร A4 ป้องกันหน้าขาว รองรับเครื่องพิมพ์ทุกรุ่น 100%</p>
+                    <p class="text-[10.5px] text-amber-300/90 font-medium mt-0.5">💡 เคล็ดลับ: หากหน้าต่างพิมพ์หมุนค้างที่ Loading preview... ให้ตั้งเครื่องพิมพ์เริ่มต้นใน Windows เป็น "Microsoft Print to PDF" เพื่อตัดการค้างจากเครื่องพิมพ์ที่ออฟไลน์ค่ะ</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="executeResilientDirectPrint()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-lg flex items-center gap-1.5 transition active:scale-95 cursor-pointer">
+                    <span>🖨️</span> สั่งพิมพ์ออกเครื่องพิมพ์
+                </button>
+                <button type="button" onclick="executeResilientDirectPrint()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow flex items-center gap-1.5 transition active:scale-95 cursor-pointer">
+                    <span>📄</span> บันทึก PDF
+                </button>
+                <button type="button" onclick="closeResilientPrintModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition border border-slate-700 cursor-pointer">
+                    ✕ ปิด
+                </button>
+            </div>
+        </div>
+
+        <!-- Printable Sheet Container (A4 Scaled & Centered) -->
+        <div id="resilientPrintA4Wrapper" class="w-full max-w-4xl bg-white text-slate-900 rounded-lg shadow-2xl p-4 sm:p-8 mb-8 overflow-x-auto">
+            <div id="resilientPrintContent">
+                <!-- Dynamic Document Content Injected Here -->
+            </div>
+        </div>
+    </div>
+
 <!-- MODAL: DOCUMENT WORKFLOW HUB (ศูนย์รวมเอกสารทางเดินงาน 8 ชนิด) -->
 <!-- ======================================================== -->
 <div id="documentHubModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
@@ -1381,9 +1516,121 @@
         </div>
     </div>
 
+    <!-- ⚠️ MODAL: CONFIRM EXIT / CLOSE (ระบบทวงถามยืนยันก่อนปิดหน้าต่างหรือออกจากระบบ) -->
+    <div id="exitConfirmModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[99999] hidden flex items-center justify-center p-4 select-none" onclick="event.stopPropagation()">
+        <div class="bg-white dark:bg-slate-850 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-sm w-full p-6 text-center transform transition-all scale-100 animate-in fade-in zoom-in duration-150">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-500 flex items-center justify-center text-3xl font-bold border border-amber-300 dark:border-amber-600/50 shadow-inner">
+                ⚠️
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">แจ้งเตือนยืนยัน</h3>
+            <p id="exitConfirmMessage" class="text-slate-600 dark:text-slate-200 text-sm font-medium mb-6 leading-relaxed">
+                ท่านแน่ใจหรือไม่ที่จะปิดหรือออกจากระบบนี้
+            </p>
+            <div class="grid grid-cols-2 gap-3">
+                <button id="exitConfirmBtnYes" type="button" onclick="handleExitConfirmYes()" class="w-full py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-sm shadow-lg shadow-red-500/25 transition cursor-pointer">
+                    ใช่
+                </button>
+                <button id="exitConfirmBtnNo" type="button" onclick="handleExitConfirmNo()" class="w-full py-2.5 px-4 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 active:scale-95 text-slate-700 dark:text-slate-200 font-bold text-sm transition cursor-pointer">
+                    ไม่ใช่
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- 🧠 JAVASCRIPT (สมองประมวลผลป๊อปอัป) 🧠 -->
     <script>
+        // 🛡️ Universal HTML Escape Utility (Lilin Finlight Protection)
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+        window.escapeHtml = escapeHtml;
+
+        // 🛡️ Universal Category Word-Cohesion Formatter (Lilin Protection against Thai word-splitting like "ขาไมค์")
+        function formatCategoryDisplayName(name) {
+            if (!name) return '';
+            let clean = String(name).trim();
+            
+            // 1. แยกกลุ่มคำที่เชื่อมด้วยเครื่องหมาย + เป็นก้อนคำอิสระป้องกันการแตกคำภายใน
+            if (clean.includes('+')) {
+                return clean.split('+').map((part, idx, arr) => {
+                    const hasNext = idx < arr.length - 1;
+                    const suffix = hasNext ? '+' : '';
+                    return `<span class="inline-block whitespace-nowrap">${escapeHtml(part.trim())}${suffix}</span>`;
+                }).join(' ');
+            }
+            
+            // 2. ป้องกันคำนำหน้าที่มีขีด เช่น 001-Test-
+            if (clean.startsWith('001-Test-')) {
+                return `<span class="inline-block whitespace-nowrap">001-Test-</span> <span class="inline-block whitespace-nowrap">${escapeHtml(clean.replace('001-Test-', ''))}</span>`;
+            }
+            
+            // 3. ป้องกันกลุ่มคำผสมเฉพาะ เช่น 'ลิ่มล็อค'
+            if (clean.includes('ลิ่มล็อค')) {
+                const parts = clean.split('ลิ่มล็อค');
+                return `<span class="inline-block whitespace-nowrap">${escapeHtml(parts[0])}</span> <span class="inline-block whitespace-nowrap">ลิ่มล็อค</span>`;
+            }
+            
+            return `<span class="inline-block whitespace-nowrap">${escapeHtml(clean)}</span>`;
+        }
+        window.formatCategoryDisplayName = formatCategoryDisplayName;
+
+        // 🎛️ Universal Table Scroll Navigation & Synchronized Scrollbar (Lilin Standard)
+        function scrollIndexReportTable(offset) {
+            const container = document.getElementById('indexReportTableScrollContainer');
+            if (container) {
+                container.scrollBy({ left: offset, behavior: 'smooth' });
+            }
+        }
+
+        function initIndexTableScrollSync() {
+            const topScroll = document.getElementById('indexReportTopScrollWrapper');
+            const tableContainer = document.getElementById('indexReportTableScrollContainer');
+            const table = document.getElementById('indexMainReportTable');
+            const dummy = document.getElementById('indexReportTopScrollDummy');
+
+            if (!topScroll || !tableContainer) return;
+
+            const updateWidth = () => {
+                if (table && dummy) {
+                    dummy.style.width = Math.max(table.scrollWidth, 1100) + 'px';
+                }
+            };
+            updateWidth();
+            window.addEventListener('resize', updateWidth);
+
+            let isSyncingTop = false;
+            let isSyncingBottom = false;
+
+            topScroll.addEventListener('scroll', () => {
+                if (!isSyncingTop) {
+                    isSyncingBottom = true;
+                    tableContainer.scrollLeft = topScroll.scrollLeft;
+                }
+                isSyncingTop = false;
+            });
+
+            tableContainer.addEventListener('scroll', () => {
+                if (!isSyncingBottom) {
+                    isSyncingTop = true;
+                    topScroll.scrollLeft = tableContainer.scrollLeft;
+                }
+                isSyncingBottom = false;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initIndexTableScrollSync, 300);
+        });
+
+
+
         // 1. ฐานข้อมูลจำลอง (ดึงจากภาพ 3 ใบของบอสเทพอภัย)
         const categoryData = {
             'รายการโคมไฟ': { icon: '💡', items: ['Moving Beam F-580', 'Moving Beam T-580 TUNA', 'Moving Beam ip650F', 'BSW Moving Beam K600', 'BSWF Moving Beam XT800', 'Beam 80W / ไฟพาร์', 'Tilt Strobe 1200W', 'Strobe LED 1000W', 'Strobe LED 200W', 'Strobe MB-H001', 'Bar Dot / AM-F55510', 'Bar Pixell / AM-CP3216', 'Moving Zoom 3715', 'Tilt Bar', 'BEE EYE 1940 / K10', 'BEE EYE 1940 กันน้ำ', 'ไฟสปอร์ตไลท์ 2 หน้า (4 หัว)', 'ไฟสปอร์ตไลท์ 1 หน้า (2 หัว)', 'ไฟสปอร์ตไลท์ COB', 'LED PAR กันน้ำ', 'Super PAR', 'LED PAR 3Wx54 / 3IN1', 'LED PAR 3Wx54 / 4IN1', 'LED PAR 10Wx18 / 4IN1', 'LED PAR 12Wx18 / 6IN1', 'LED PAR 64/1000W'] },
@@ -1432,15 +1679,51 @@
             }, 10);
 
             try {
-                // [LILIN'S SURGICAL INSERT] : วิ่งไปดึงข้อมูลคลังสินค้า ที่หมวดหมู่ตรงกับที่บอสกคลิก
+                // [LILIN'S SMART CATEGORY MATCHING] : จับคู่หมวดหมู่พ้องความหมาย / นามแฝง / เศษอักขระ
                 const cleanCategoryName = (categoryName || '').trim();
-                let snapshot = await db.collection('inventory').where('category', '==', cleanCategoryName).get();
+                
+                // ระบบจับคู่หมวดหมู่พ้องความหมาย / นามแฝง (Smart Category Aliases & Synonyms)
+                const categoryAliases = {
+                    'รายการบอร์ดไฟ': ['รายการบอร์ดไฟ', 'บอร์ดคอนโทรลไฟ+บูทเตอร์', 'บอร์ดคอนทรลไฟ+บูทเตอร์'],
+                    'บอร์ดคอนโทรลไฟ+บูทเตอร์': ['บอร์ดคอนโทรลไฟ+บูทเตอร์', 'รายการบอร์ดไฟ', 'บอร์ดคอนทรลไฟ+บูทเตอร์'],
+                    '001-Test-ทดสอบ-0001-1': ['001-Test-ทดสอบ-0001-1', '001-Test-ทดสอบ-0001'],
+                    '001-Test-ทดสอบ-0001': ['001-Test-ทดสอบ-0001', '001-Test-ทดสอบ-0001-1'],
+                    'รายการเต็นท์': ['รายการเต็นท์', 'รายการเมการูฟ'],
+                    'รายการเมการูฟ': ['รายการเมการูฟ', 'รายการเต็นท์'],
+                    'รายการนั่งร้านลิ่มล็อค': ['รายการนั่งร้านลิ่มล็อค', 'รายการนั่งร้านเหล็ก'],
+                    'รายการนั่งร้านเหล็ก': ['รายการนั่งร้านเหล็ก', 'รายการนั่งร้านลิ่มล็อค'],
+                    'รายการรอกไฟฟ้า': ['รายการรอกไฟฟ้า', 'รายการรอกไฟฟ้'],
+                    'รายการรอกไฟฟ้': ['รายการรอกไฟฟ้', 'รายการรอกไฟฟ้า'],
+                    'ลำโพง': ['ลำโพง', 'ลำพง'],
+                    'ชุดไมโครโฟน+เครื่องควบคุม+ขาไมค์': ['ชุดไมโครโฟน+เครื่องควบคุม+ขาไมค์', 'ชุดไมโครโฟน+เครื่องควบคุม+ขา']
+                };
+
+                let candidates = [cleanCategoryName];
+                if (categoryAliases[cleanCategoryName]) {
+                    categoryAliases[cleanCategoryName].forEach(alias => {
+                        if (!candidates.includes(alias)) candidates.push(alias);
+                    });
+                }
+                const strippedNumber = cleanCategoryName.replace(/-\d+$/, '').trim();
+                if (strippedNumber && !candidates.includes(strippedNumber)) {
+                    candidates.push(strippedNumber);
+                }
+
+                // ค้นหาใน Firestore ด้วย in query (รองรับได้สูงสุด 10 ค่าพร้อมกัน)
+                let snapshot = await db.collection('inventory').where('category', 'in', candidates.slice(0, 10)).get();
+
                 if (snapshot.empty && cleanCategoryName !== categoryName) {
                     snapshot = await db.collection('inventory').where('category', '==', categoryName).get();
                 }
                 
                 if(snapshot.empty) {
-                    itemList.innerHTML = '<div class="text-center text-red-400 p-4">⚠️ ยังไม่มีสินค้าในหมวดหมู่นี้ในคลัง (กรุณาไปเพิ่มที่ฐานข้อมูลคลังสินค้า)</div>';
+                    itemList.innerHTML = `
+                        <div class="text-center p-6 bg-slate-800/40 rounded-lg border border-slate-700/60 my-4">
+                            <div class="text-4xl mb-2">📦</div>
+                            <div class="text-amber-300 font-semibold text-base mb-1">ยังไม่มีสินค้าในหมวดหมู่นี้ในคลัง</div>
+                            <p class="text-xs text-slate-400">ท่านสามารถเพิ่มสินค้าอุปกรณ์ลงในหมวดหมู่นี้ได้ที่หน้าระบบคลังสินค้า (Admin) ค่ะ</p>
+                        </div>
+                    `;
                     return;
                 }
                 
@@ -1451,14 +1734,14 @@
                         <div class="flex items-center justify-between p-3 bg-gray-800/40 rounded border border-gray-700/50 hover:bg-blue-900/30 hover:border-blue-500/50 transition cursor-pointer group">
                             <div>
                                 <span class="text-gray-200 group-hover:text-blue-300 font-medium">${product.name}</span>
-                                <div class="text-xs text-slate-400 mt-1">คงเหลือ: <span class="text-yellow-400">${product.stock || 0} ${product.unit || 'ชิ้น'}</span></div>
+                                <div class="text-xs text-slate-400 mt-1">คงเหลือ: <span class="text-yellow-400">${product.stock || 0} ${product.unit || 'ชิ้น'}</span>${product.location || product.binLocation ? ` | <span class="text-emerald-400 font-semibold">📍 ล็อก: ${escapeHtml(product.location || product.binLocation)}</span>` : ''}</div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <div class="flex items-center space-x-2 bg-slate-900 rounded border border-slate-700 overflow-hidden shadow-sm">
                                     <!-- ปุ่มลด -->
                                     <button type="button" onclick="const inp=this.nextElementSibling; if(!inp.value) inp.value=0; inp.stepDown();" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold border-r border-slate-700">-</button>
                                     <!-- ช่องใส่ตัวเลข (เลข 0 หายทันทีเมื่อคลิก/จิ้ม พร้อมคีย์ตัวเลขใหม่ได้ทันที) -->
-                                    <input type="number" data-product-name="${product.name}" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='' || isNaN(this.value)) this.value='0';" class="w-16 bg-transparent text-white text-center font-bold focus:outline-none focus:bg-slate-800 modal-qty-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value="0" min="0">
+                                    <input type="number" data-product-name="${product.name}" data-product-location="${escapeHtml(product.location || product.binLocation || '')}" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='' || isNaN(this.value)) this.value='0';" class="w-16 bg-transparent text-white text-center font-bold focus:outline-none focus:bg-slate-800 modal-qty-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value="0" min="0">
                                     <!-- ปุ่มเพิ่ม -->
                                     <button type="button" onclick="const inp=this.previousElementSibling; if(!inp.value) inp.value=0; inp.stepUp();" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold border-l border-slate-700">+</button>
                                 </div>
@@ -1474,18 +1757,64 @@
             }
         }
 
+        // ========================================================
+        // ⚠️ UNIVERSAL EXIT & CLOSE CONFIRMATION SYSTEM
+        // ========================================================
+        let pendingExitConfirmCallback = null;
+
+        function requestExitConfirmation(onConfirm, customMsg = null) {
+            pendingExitConfirmCallback = onConfirm;
+            const modal = document.getElementById('exitConfirmModal');
+            const msgEl = document.getElementById('exitConfirmMessage');
+            if (msgEl) {
+                msgEl.textContent = customMsg || 'ท่านแน่ใจหรือไม่ที่จะปิดหรือออกจากระบบนี้';
+            }
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function handleExitConfirmYes() {
+            const modal = document.getElementById('exitConfirmModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            if (typeof pendingExitConfirmCallback === 'function') {
+                const cb = pendingExitConfirmCallback;
+                pendingExitConfirmCallback = null;
+                cb();
+            }
+        }
+
+        function handleExitConfirmNo() {
+            const modal = document.getElementById('exitConfirmModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            pendingExitConfirmCallback = null;
+        }
+
         // 3. ฟังก์ชันปิดป๊อปอัป
-        function closeModal() {
+        function closeModal(force = false) {
+            if (!force && typeof requestExitConfirmation === 'function') {
+                requestExitConfirmation(() => closeModal(true), 'คุณต้องการออกจากหน้าต่างหรือไม่');
+                return;
+            }
             const modal = document.getElementById('itemModal');
             const modalContent = document.getElementById('modalContent');
             
             // Effect เฟดเอาท์
-            modal.classList.add('opacity-0');
-            modalContent.classList.remove('scale-100');
-            modalContent.classList.add('scale-95');
+            if (modal) modal.classList.add('opacity-0');
+            if (modalContent) {
+                modalContent.classList.remove('scale-100');
+                modalContent.classList.add('scale-95');
+            }
             
             setTimeout(() => {
-                modal.classList.add('hidden');
+                if (modal) modal.classList.add('hidden');
             }, 300); // รอ effect จบ 300ms
         }
 
@@ -1531,11 +1860,13 @@
                 const qty = parseInt(input.value || 0);
                 if (qty > 0) {
                     const itemName = input.getAttribute('data-product-name');
+                    const itemLocation = input.getAttribute('data-product-location') || '';
                     const existingItem = cart.find(item => item.name === itemName);
                     if (existingItem) {
                         existingItem.qty += qty;
+                        if (!existingItem.location && itemLocation) existingItem.location = itemLocation;
                     } else {
-                        cart.push({ name: itemName, qty: qty });
+                        cart.push({ name: itemName, qty: qty, location: itemLocation });
                     }
                     itemsAdded++;
                 }
@@ -1549,7 +1880,7 @@
                 setTimeout(() => cartBtn.classList.remove('scale-110', 'text-blue-400'), 300);
             }
             
-            closeModal(); // กวาดเสร็จแล้วปิดหน้าต่างอัตโนมัติ
+            closeModal(true); // กวาดเสร็จแล้วปิดหน้าต่างอัตโนมัติ
         }
 
         function addToCartBulk(itemName) {
@@ -1617,6 +1948,7 @@
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-800/80 rounded-lg border border-gray-700 hover:border-blue-500/50 transition gap-3">
                         <div class="flex-grow">
                             <h4 class="text-gray-200 font-medium">${item.name}</h4>
+                            ${item.location ? `<div class="text-[11px] text-emerald-400 font-medium mt-0.5">📍 ล็อก: ${escapeHtml(item.location)}</div>` : ''}
                         </div>
                         <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
                             <div class="flex items-center space-x-2 bg-gray-900 rounded-lg p-1 border border-gray-700">
@@ -1666,12 +1998,50 @@
             updateCartUI();
         }
 
-        // 6. ล้างตะกร้าทั้งหมด
-        function clearCart() {
-            if(confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างตะกร้าทั้งหมด?')) {
+        let isTransactionCleared = false;
+
+        // 6. ล้างตะกร้าและเคลียร์ข้อมูลทรานเซกชั่นทั้งหมด (Thep-Apai Reset Protocol)
+        function clearCart(skipConfirm = false) {
+            if (skipConfirm || confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างตะกร้าและเคลียร์ข้อมูลทรานเซกชั่นทั้งหมด?')) {
                 cart = [];
                 updateCartUI();
-                closeCartModal();
+                isTransactionCleared = true;
+
+                // 1. เคลียร์ข้อมูลผู้เบิก รหัสผ่านยืนยัน ไซต์งาน และบุคคลทั้งหมด
+                const techName = document.getElementById('techName');
+                const techPin = document.getElementById('techPin');
+                const jobSite = document.getElementById('jobSite');
+                const approverName = document.getElementById('approverName');
+                const issuerName = document.getElementById('issuerName');
+                const transporterName = document.getElementById('transporterName');
+                const receiverName = document.getElementById('receiverName');
+
+                if (techName) techName.value = '';
+                if (techPin) techPin.value = '';
+                if (jobSite) jobSite.value = '';
+                if (approverName) approverName.value = '';
+                if (issuerName) issuerName.value = '';
+                if (transporterName) transporterName.value = '';
+                if (receiverName) receiverName.value = '';
+
+                // 2. เคลียร์สถานะการแก้ไขเอกสารเดิม
+                currentEditingDocId = null;
+                currentEditingDocNo = null;
+                if (typeof populatedData !== 'undefined') populatedData = {};
+
+                // 3. ซ่อน Info Card และเคลียร์ข้อความแสดงผล
+                const infoCard = document.getElementById('autoPopulateInfo');
+                if (infoCard) infoCard.classList.add('hidden');
+                ['infoTechFullName', 'infoTechRole', 'infoJobAddress', 'infoJobContact', 'infoJobSale', 'infoJobGps'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = '-';
+                });
+
+                // 4. คืนค่าปุ่มบันทึก
+                const saveBtnText = document.getElementById('saveBtnText');
+                if (saveBtnText) saveBtnText.innerText = 'บันทึกใบเบิกและยืม 📝';
+
+                closeCartModal(true);
             }
         }
 
@@ -1745,7 +2115,7 @@
         }
 
         // 8. ปิดป๊อปอัปตะกร้า
-        function closeCartModal() {
+        function closeCartModal(force = false) {
             const modal = document.getElementById('cartModal');
             const modalContent = document.getElementById('cartModalContent');
             
@@ -1893,6 +2263,46 @@
         let currentAttachProofBase64 = null;
 
         // ========================================================
+        // 🔢 UNIVERSAL AUTO-CLEAR NUMBER INPUT HELPER (TOUCH & CLICK SAFE)
+        // ========================================================
+        function handleNumberInputPointerDown(input, e) {
+            const isSpinner = e && (e.offsetX > (input.offsetWidth - 24));
+            input.dataset.isSpinner = isSpinner ? 'true' : 'false';
+            if (!isSpinner) {
+                if (input.value !== '') {
+                    input.dataset.prevVal = input.value;
+                }
+                if (typeof document !== 'undefined' && document.activeElement === input) {
+                    input.value = '';
+                }
+            }
+        }
+
+        function handleNumberInputFocus(input) {
+            if (input.dataset.isSpinner === 'true') return;
+            if (input.value !== '') {
+                input.dataset.prevVal = input.value;
+            }
+            input.value = '';
+        }
+
+        function handleNumberInputBlur(input, callback) {
+            if (input.value === '') {
+                input.value = input.dataset.prevVal !== undefined ? input.dataset.prevVal : (input.min || '0');
+                if (typeof callback === 'function') {
+                    callback(input.value);
+                }
+            }
+            input.dataset.isSpinner = 'false';
+        }
+
+        function handleNumberInputKeyDown(input, e) {
+            if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && input.value === '') {
+                input.value = input.dataset.prevVal !== undefined ? input.dataset.prevVal : (input.min || '0');
+            }
+        }
+
+        // ========================================================
         // 📷 ATTACH PICKING PROOF MODAL CONTROLLER
         // ========================================================
         async function openAttachPickingProofModal(docId) {
@@ -1959,10 +2369,10 @@
                                 ${reqQty} ${item.unit || 'ชิ้น'}
                             </td>
                             <td class="px-3 py-2 text-center">
-                                <input type="number" id="proofIssuedQty_${idx}" value="${issuedQty}" min="0" oninput="calculateMissingQty(${idx}, ${reqQty})" class="w-20 bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-center font-bold outline-none focus:border-amber-400">
+                                <input type="number" id="proofIssuedQty_${idx}" value="${issuedQty}" min="0" onpointerdown="handleNumberInputPointerDown(this, event)" onfocus="handleNumberInputFocus(this)" onblur="handleNumberInputBlur(this, () => calculateMissingQty(${idx}, ${reqQty}))" onkeydown="handleNumberInputKeyDown(this, event)" oninput="calculateMissingQty(${idx}, ${reqQty})" class="w-20 bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-center font-bold outline-none focus:border-amber-400">
                             </td>
                             <td class="px-3 py-2 text-center">
-                                <input type="number" id="proofMissingQty_${idx}" value="${missingQty}" min="0" class="w-20 bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-center outline-none focus:border-amber-400 text-rose-400 font-bold">
+                                <input type="number" id="proofMissingQty_${idx}" value="${missingQty}" min="0" onpointerdown="handleNumberInputPointerDown(this, event)" onfocus="handleNumberInputFocus(this)" onblur="handleNumberInputBlur(this)" onkeydown="handleNumberInputKeyDown(this, event)" class="w-20 bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-center outline-none focus:border-amber-400 text-rose-400 font-bold">
                             </td>
                             <td class="px-3 py-2">
                                 <input type="text" id="proofNote_${idx}" value="${note}" placeholder="หมายเหตุการจัด..." class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-xs outline-none focus:border-amber-400">
@@ -1985,7 +2395,7 @@
             }
         }
 
-        function closeAttachPickingProofModal() {
+        function closeAttachPickingProofModal(force = false) {
             const modal = document.getElementById('attachPickingProofModal');
             if (modal) modal.classList.add('hidden');
             currentAttachDocId = null;
@@ -2092,7 +2502,7 @@
                 await db.collection('requisitions').doc(currentAttachDocId).update(updatePayload);
 
                 alert("✅ บันทึกรูปหลักฐานใบจัดสินค้าและอัปเดตยอดจัดจ่ายจริงเรียบร้อยแล้ว!");
-                closeAttachPickingProofModal();
+                closeAttachPickingProofModal(true);
                 loadReportData();
             } catch (err) {
                 alert("❌ เกิดข้อผิดพลาดในการบันทึก: " + err.message);
@@ -2120,19 +2530,14 @@
             }
         }
 
-        function closeViewImageModal() {
+        function closeViewImageModal(force = false) {
             const modal = document.getElementById('viewImageModal');
             if (modal) modal.classList.add('hidden');
         }
 
         // 9.5 ฟังก์ชันพิมพ์ใบเบิก/ยืม A4 (สากล)
                 function printRequisitionA4(data, items, existingWindow = null) {
-            const printWindow = existingWindow || window.open('', '_blank', 'width=950,height=1200');
-            
-            if (!printWindow) {
-                alert('⚠️ ระบบไม่สามารถเปิดหน้าต่างพิมพ์ได้ (Pop-up ถูกบล็อก)\n\n👉 กรุณาไปที่สัญลักษณ์ แม่กุญแจ/แจ้งเตือน บนแถบ URL ของเบราว์เซอร์\n👉 และเลือก "อนุญาต Pop-ups (Allow pop-ups)" สำหรับเว็บไซต์นี้ค่ะ');
-                return;
-            }
+            const printWindow = existingWindow || null;
 
             const isReturned = Boolean(data && (data.isReturned === true || data.status === 'คืนแล้ว' || data.status === 'คืนสินค้าแล้ว' || data.returnStatus === 'คืนแล้ว'));
             const dateStr = new Date().toLocaleString('th-TH');
@@ -2145,7 +2550,9 @@
                 tableRows += `
                     <tr>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; white-space: nowrap; font-weight: 600; font-size: 12px;">${index + 1}</td>
-                        <td style="border: 1px solid #000000; padding: 7px 8px; text-align: left; line-height: 1.35; word-break: break-word;">${item.name || '-'}</td>
+                        <td style="border: 1px solid #000000; padding: 7px 8px; text-align: left; line-height: 1.35; word-break: break-word;">
+                            ${item.name || '-'}${item.location ? ` <span style="font-size: 10px; color: #047857; font-weight: bold;">(📍 ล็อก: ${item.location})</span>` : ''}
+                        </td>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; white-space: nowrap; font-weight: 600; font-size: 11.5px;">${item.qty || 0} ${item.unit || 'ชิ้น'}</td>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; color: #000000; font-size: 12px;">${item.issuedQty !== undefined && item.issuedQty !== null && item.issuedQty !== '' ? item.issuedQty : ''}</td>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; color: #000000; font-size: 12px;">${item.missingQty !== undefined && item.missingQty !== null && item.missingQty !== '' ? item.missingQty : ''}</td>
@@ -2438,13 +2845,13 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th style="width: 5%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">ลำดับ</th>
-                                    <th style="width: 50%; text-align: center; font-size: 13px; padding: 7px 6px; vertical-align: middle;">รายการอุปกรณ์</th>
-                                    <th style="width: 8%; text-align: center; font-size: 11px; padding: 7px 1px; white-space: nowrap; letter-spacing: -0.3px; vertical-align: middle;">จำนวนเบิก</th>
-                                    <th style="width: 7.5%; text-align: center; font-size: 11px; padding: 7px 1px; white-space: nowrap; letter-spacing: -0.3px; vertical-align: middle;">จำนวนจ่าย</th>
-                                    <th style="width: 7.5%; text-align: center; font-size: 11px; padding: 7px 1px; white-space: nowrap; letter-spacing: -0.3px; vertical-align: middle;">จำนวนขาด</th>
-                                    <th style="width: 7.5%; text-align: center; font-size: 11px; padding: 7px 1px; white-space: nowrap; letter-spacing: -0.3px; vertical-align: middle;">จำนวนคืน</th>
-                                    <th style="width: 14.5%; text-align: center; font-size: 12px; padding: 7px 4px; white-space: nowrap; vertical-align: middle;">หมายเหตุ</th>
+                                    <th style="width: 6%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">ลำดับ</th>
+                                    <th style="width: 38%; text-align: center; font-size: 13px; padding: 7px 6px; vertical-align: middle;">รายการอุปกรณ์</th>
+                                    <th style="width: 10%; text-align: center; font-size: 11px; padding: 7px 2px; white-space: nowrap; letter-spacing: -0.3px; vertical-align: middle;">จำนวนเบิก</th>
+                                    <th style="width: 10%; text-align: center; font-size: 11px; padding: 7px 2px; white-space: nowrap; letter-spacing: -0.3px; vertical-align: middle;">จำนวนจ่าย</th>
+                                    <th style="width: 10%; text-align: center; font-size: 11px; padding: 7px 2px; white-space: nowrap; letter-spacing: -0.3px; vertical-align: middle;">จำนวนขาด</th>
+                                    <th style="width: 10%; text-align: center; font-size: 11px; padding: 7px 2px; white-space: nowrap; letter-spacing: -0.3px; vertical-align: middle;">จำนวนคืน</th>
+                                    <th style="width: 16%; text-align: center; font-size: 12px; padding: 7px 4px; white-space: nowrap; vertical-align: middle;">หมายเหตุ</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2496,12 +2903,7 @@
 </body>
                 </html>
             `;
-            printWindow.document.write(htmlContent);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-            }, 600);
+            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
         }
 
         // ========================================================
@@ -2518,11 +2920,7 @@
         }
 
         function printPartialReturnA4(data, items) {
-            const printWindow = window.open('', '_blank', 'width=950,height=1200');
-            if (!printWindow) {
-                alert('⚠️ เบราว์เซอร์บล็อก Pop-up กรุณาอนุญาต Pop-up ค่ะ');
-                return;
-            }
+            const printWindow = null;
 
             const dateStr = new Date().toLocaleString('th-TH');
             let tableRows = '';
@@ -2693,10 +3091,7 @@
                 </body>
                 </html>
             `;
-            printWindow.document.write(htmlContent);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => { printWindow.print(); }, 600);
+            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
         }
 
         async function printDamageLossA4ById(docId) {
@@ -2710,8 +3105,7 @@
         }
 
         function printDamageLossA4(data, damageItems) {
-            const printWindow = window.open('', '_blank', 'width=950,height=1200');
-            if (!printWindow) { alert('⚠️ เบราว์เซอร์บล็อก Pop-up กรุณาอนุญาต Pop-up ค่ะ'); return; }
+            const printWindow = null;
 
             const dateStr = new Date().toLocaleString('th-TH');
             let tableRows = '';
@@ -2854,10 +3248,7 @@
                 </body>
                 </html>
             `;
-            printWindow.document.write(htmlContent);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => { printWindow.print(); }, 600);
+            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
         }
 
         async function printTransferA4ById(docId) {
@@ -2871,8 +3262,7 @@
         }
 
         function printTransferA4(data, transferItems) {
-            const printWindow = window.open('', '_blank', 'width=950,height=1200');
-            if (!printWindow) { alert('⚠️ เบราว์เซอร์บล็อก Pop-up กรุณาอนุญาต Pop-up ค่ะ'); return; }
+            const printWindow = null;
 
             const dateStr = new Date().toLocaleString('th-TH');
             let tableRows = '';
@@ -3015,10 +3405,7 @@
                 </body>
                 </html>
             `;
-            printWindow.document.write(htmlContent);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => { printWindow.print(); }, 600);
+            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
         }
 
 
@@ -3127,10 +3514,10 @@ function openDocumentHubModal(docId) {
         // Update status badges inside modal
         const pickBadge = document.getElementById('hubBadgePickStatus');
         if (pickBadge) {
-            pickBadge.textContent = docData.isPrintedForPicking ? '✓ จัดสินค้าแล้ว' : '● รอจัดสินค้า';
+            pickBadge.textContent = docData.isPrintedForPicking ? '✓ จัดสินค้าแล้ว' : '🔴 รอพิมพ์ / รอตรวจสอบ';
             pickBadge.className = docData.isPrintedForPicking 
                 ? 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                : 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                : 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-600 text-white shadow-lg shadow-rose-500/40 border border-rose-400 animate-pulse';
         }
 
         const retBadge = document.getElementById('hubBadgeReturnStatus');
@@ -3152,7 +3539,13 @@ function openDocumentHubModal(docId) {
 
         bindBtn('hubBtnPrintReq', () => printRequisition(docData.id));
         bindBtn('hubBtnExcelReq', () => typeof exportRequisitionExcel === 'function' && exportRequisitionExcel(docData.id));
-        bindBtn('hubBtnPrintPick', () => printPickingForm(docData.id));
+        bindBtn('hubBtnPrintPick', () => {
+            printPickingForm(docData.id);
+            if (pickBadge) {
+                pickBadge.textContent = '✓ จัดสินค้าแล้ว';
+                pickBadge.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+            }
+        });
         bindBtn('hubBtnExcelPick', () => typeof exportPickingFormExcel === 'function' && exportPickingFormExcel(docData.id));
         bindBtn('hubBtnPrintTrans', () => printTransportSlipA4ById(docData.id));
         bindBtn('hubBtnPrintRecv', () => printOnSiteReceivingA4ById(docData.id));
@@ -3168,8 +3561,7 @@ function openDocumentHubModal(docId) {
     if (data) {
         renderHub(data);
     } else {
-        const preWindow = window.open('', '_blank', 'width=950,height=1200');
-        if (preWindow) preWindow.close(); // quick permission warm-up
+        const preWindow = null;
         db.collection('requisitions').doc(docId).get().then(doc => {
             if (!doc.exists) { alert('❌ ไม่พบข้อมูลเอกสารนี้'); return; }
             const docData = doc.data();
@@ -3181,7 +3573,7 @@ function openDocumentHubModal(docId) {
     }
 }
 
-function closeDocumentHubModal() {
+function closeDocumentHubModal(force = false) {
     const modal = document.getElementById('documentHubModal');
     if (modal) {
         modal.classList.add('hidden');
@@ -3202,28 +3594,22 @@ function printTransportSlipA4ById(docId) {
         printTransportSlipA4(data, data.items || []);
         return;
     }
-    const preWindow = window.open('', '_blank', 'width=950,height=1200');
+    const preWindow = null;
     db.collection('requisitions').doc(docId).get().then(doc => {
         if (!doc.exists) {
-            if (preWindow) preWindow.close();
             alert('❌ ไม่พบข้อมูลเอกสารนี้');
             return;
         }
         const docData = doc.data();
         docData.id = doc.id;
-        printTransportSlipA4(docData, docData.items || [], preWindow);
+        printTransportSlipA4(docData, docData.items || [], null);
     }).catch(err => {
-        if (preWindow) preWindow.close();
         alert('❌ ข้อผิดพลาด: ' + err.message);
     });
 }
 
 function printTransportSlipA4(data, items, existingWindow = null) {
-    const printWindow = existingWindow || window.open('', '_blank', 'width=950,height=1200');
-    if (!printWindow) {
-        alert('⚠️ ระบบไม่สามารถเปิดหน้าต่างพิมพ์ได้ (Pop-up ถูกบล็อก)\nกรุณาอนุญาต Pop-up สำหรับเว็บไซต์นี้ค่ะ');
-        return;
-    }
+    const printWindow = existingWindow || null;
     const dateStr = data.createdAt && typeof data.createdAt.toDate === 'function'
         ? data.createdAt.toDate().toLocaleString('th-TH')
         : new Date().toLocaleString('th-TH');
@@ -3329,12 +3715,12 @@ function printTransportSlipA4(data, items, existingWindow = null) {
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px;">ลำดับ</th>
-                        <th>รายการอุปกรณ์ที่บรรทุกขนส่ง</th>
-                        <th style="width: 95px;">จำนวนขนส่ง</th>
-                        <th style="width: 60px;">หน่วย</th>
-                        <th style="width: 110px;">บรรจุภัณฑ์</th>
-                        <th style="width: 120px;">หมายเหตุการจัดส่ง</th>
+                        <th style="width: 6%;">ลำดับ</th>
+                        <th style="width: 44%;">รายการอุปกรณ์ที่บรรทุกขนส่ง</th>
+                        <th style="width: 12%;">จำนวนขนส่ง</th>
+                        <th style="width: 8%;">หน่วย</th>
+                        <th style="width: 14%;">บรรจุภัณฑ์</th>
+                        <th style="width: 16%;">หมายเหตุการจัดส่ง</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -3371,10 +3757,7 @@ function printTransportSlipA4(data, items, existingWindow = null) {
         </body>
         </html>
     `;
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => { printWindow.print(); }, 500);
+    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
 }
 
 // -------------------------------------------------------------------------
@@ -3390,24 +3773,19 @@ function printOnSiteReceivingA4ById(docId) {
         printOnSiteReceivingA4(data, data.items || []);
         return;
     }
-    const preWindow = window.open('', '_blank', 'width=950,height=1200');
+    const preWindow = null;
     db.collection('requisitions').doc(docId).get().then(doc => {
-        if (!doc.exists) { if (preWindow) preWindow.close(); alert('❌ ไม่พบข้อมูลเอกสารนี้'); return; }
+        if (!doc.exists) { alert('❌ ไม่พบข้อมูลเอกสารนี้'); return; }
         const docData = doc.data();
         docData.id = doc.id;
-        printOnSiteReceivingA4(docData, docData.items || [], preWindow);
+        printOnSiteReceivingA4(docData, docData.items || [], null);
     }).catch(err => {
-        if (preWindow) preWindow.close();
         alert('❌ ข้อผิดพลาด: ' + err.message);
     });
 }
 
 function printOnSiteReceivingA4(data, items, existingWindow = null) {
-    const printWindow = existingWindow || window.open('', '_blank', 'width=950,height=1200');
-    if (!printWindow) {
-        alert('⚠️ ระบบไม่สามารถเปิดหน้าต่างพิมพ์ได้ (Pop-up ถูกบล็อก)');
-        return;
-    }
+    const printWindow = existingWindow || null;
     const dateStr = data.createdAt && typeof data.createdAt.toDate === 'function'
         ? data.createdAt.toDate().toLocaleString('th-TH')
         : new Date().toLocaleString('th-TH');
@@ -3513,12 +3891,12 @@ function printOnSiteReceivingA4(data, items, existingWindow = null) {
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px;">ลำดับ</th>
-                        <th>รายการอุปกรณ์ที่ส่งมอบถึงหน้างาน</th>
-                        <th style="width: 95px;">จำนวนรับจริง</th>
-                        <th style="width: 60px;">หน่วย</th>
-                        <th style="width: 140px;">สภาพอุปกรณ์</th>
-                        <th style="width: 130px;">หมายเหตุ/จุดสังเกต</th>
+                        <th style="width: 6%;">ลำดับ</th>
+                        <th style="width: 44%;">รายการอุปกรณ์ที่ส่งมอบถึงหน้างาน</th>
+                        <th style="width: 12%;">จำนวนรับจริง</th>
+                        <th style="width: 8%;">หน่วย</th>
+                        <th style="width: 14%;">สภาพอุปกรณ์</th>
+                        <th style="width: 16%;">หมายเหตุ/จุดสังเกต</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -3549,10 +3927,7 @@ function printOnSiteReceivingA4(data, items, existingWindow = null) {
         </body>
         </html>
     `;
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => { printWindow.print(); }, 500);
+    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
 }
 
 // -------------------------------------------------------------------------
@@ -3568,24 +3943,19 @@ function printReturnReceiptA4ById(docId) {
         printReturnReceiptA4(data, data.items || []);
         return;
     }
-    const preWindow = window.open('', '_blank', 'width=950,height=1200');
+    const preWindow = null;
     db.collection('requisitions').doc(docId).get().then(doc => {
-        if (!doc.exists) { if (preWindow) preWindow.close(); alert('❌ ไม่พบข้อมูลเอกสารนี้'); return; }
+        if (!doc.exists) { alert('❌ ไม่พบข้อมูลเอกสารนี้'); return; }
         const docData = doc.data();
         docData.id = doc.id;
-        printReturnReceiptA4(docData, docData.items || [], preWindow);
+        printReturnReceiptA4(docData, docData.items || [], null);
     }).catch(err => {
-        if (preWindow) preWindow.close();
         alert('❌ ข้อผิดพลาด: ' + err.message);
     });
 }
 
 function printReturnReceiptA4(data, items, existingWindow = null) {
-    const printWindow = existingWindow || window.open('', '_blank', 'width=950,height=1200');
-    if (!printWindow) {
-        alert('⚠️ ระบบไม่สามารถเปิดหน้าต่างพิมพ์ได้ (Pop-up ถูกบล็อก)');
-        return;
-    }
+    const printWindow = existingWindow || null;
     const dateStr = data.returnDate || new Date().toLocaleString('th-TH');
     const docNo = data.docNo || (data.id ? data.id.slice(0, 8) : '-');
     const isFull = (data.returnStatus === 'รับคืนแล้ว');
@@ -3695,13 +4065,13 @@ function printReturnReceiptA4(data, items, existingWindow = null) {
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px;">ลำดับ</th>
-                        <th>รายการอุปกรณ์ที่ส่งคืนคลัง</th>
-                        <th style="width: 75px;">ยอดเบิก</th>
-                        <th style="width: 80px;">รับคืนจริง</th>
-                        <th style="width: 75px;">ค้างส่ง</th>
-                        <th style="width: 55px;">หน่วย</th>
-                        <th style="width: 130px;">สภาพอุปกรณ์ / หมายเหตุ</th>
+                        <th style="width: 6%;">ลำดับ</th>
+                        <th style="width: 38%;">รายการอุปกรณ์ที่ส่งคืนคลัง</th>
+                        <th style="width: 10%;">ยอดเบิก</th>
+                        <th style="width: 10%;">รับคืนจริง</th>
+                        <th style="width: 10%;">ค้างส่ง</th>
+                        <th style="width: 8%;">หน่วย</th>
+                        <th style="width: 18%;">สภาพอุปกรณ์ / หมายเหตุ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -3738,10 +4108,7 @@ function printReturnReceiptA4(data, items, existingWindow = null) {
         </body>
         </html>
     `;
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => { printWindow.print(); }, 500);
+    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
 }
 
 // -------------------------------------------------------------------------
@@ -3757,24 +4124,19 @@ function printMaintenanceA4ById(docId) {
         printMaintenanceA4(data, data.maintenanceItems || data.damageLossItems || data.items || []);
         return;
     }
-    const preWindow = window.open('', '_blank', 'width=950,height=1200');
+    const preWindow = null;
     db.collection('requisitions').doc(docId).get().then(doc => {
-        if (!doc.exists) { if (preWindow) preWindow.close(); alert('❌ ไม่พบข้อมูลเอกสารนี้'); return; }
+        if (!doc.exists) { alert('❌ ไม่พบข้อมูลเอกสารนี้'); return; }
         const docData = doc.data();
         docData.id = doc.id;
-        printMaintenanceA4(docData, docData.maintenanceItems || docData.damageLossItems || docData.items || [], preWindow);
+        printMaintenanceA4(docData, docData.maintenanceItems || docData.damageLossItems || docData.items || [], null);
     }).catch(err => {
-        if (preWindow) preWindow.close();
         alert('❌ ข้อผิดพลาด: ' + err.message);
     });
 }
 
 function printMaintenanceA4(data, items, existingWindow = null) {
-    const printWindow = existingWindow || window.open('', '_blank', 'width=950,height=1200');
-    if (!printWindow) {
-        alert('⚠️ ระบบไม่สามารถเปิดหน้าต่างพิมพ์ได้ (Pop-up ถูกบล็อก)');
-        return;
-    }
+    const printWindow = existingWindow || null;
     const dateStr = new Date().toLocaleString('th-TH');
     const docNo = data.docNo || (data.id ? data.id.slice(0, 8) : '-');
     const maintNo = 'MNT-' + (docNo.replace(/[^0-9]/g, '').slice(-8) || Math.floor(Math.random()*900000+100000));
@@ -3882,12 +4244,12 @@ function printMaintenanceA4(data, items, existingWindow = null) {
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px;">ลำดับ</th>
-                        <th>รายการอุปกรณ์ที่ชำรุดเสียหาย</th>
-                        <th style="width: 75px;">จำนวน</th>
-                        <th style="width: 55px;">หน่วย</th>
-                        <th style="width: 170px;">อาการเสีย / สาเหตุ</th>
-                        <th style="width: 130px;">หมายเหตุการซ่อม</th>
+                        <th style="width: 6%;">ลำดับ</th>
+                        <th style="width: 38%;">รายการอุปกรณ์ที่ชำรุดเสียหาย</th>
+                        <th style="width: 10%;">จำนวน</th>
+                        <th style="width: 8%;">หน่วย</th>
+                        <th style="width: 20%;">อาการเสีย / สาเหตุ</th>
+                        <th style="width: 18%;">หมายเหตุการซ่อม</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -3924,19 +4286,13 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         </body>
         </html>
     `;
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => { printWindow.print(); }, 500);
+    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
 }
 
 
         function printRequisition(docId) {
-            // เปิดหน้าต่างเตรียมไว้ทันทีที่คลิก เพื่อไม่ให้ถูกเบราว์เซอร์บล็อก Pop-up
-            const preOpenedWindow = window.open('', '_blank', 'width=950,height=1200');
             db.collection('requisitions').doc(docId).get().then(doc => {
                 if (!doc.exists) {
-                    if (preOpenedWindow) preOpenedWindow.close();
                     alert('❌ ไม่พบข้อมูลใบเบิกนี้');
                     return;
                 }
@@ -3946,9 +4302,8 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 if (typeof markRequisitionPickingPrinted === 'function') {
                     markRequisitionPickingPrinted(docId);
                 }
-                printRequisitionA4(data, items, preOpenedWindow);
+                printRequisitionA4(data, items, null);
             }).catch(error => {
-                if (preOpenedWindow) preOpenedWindow.close();
                 console.error("Error fetching for print: ", error);
                 alert('❌ เกิดข้อผิดพลาดในการดึงข้อมูลมาพิมพ์: ' + error.message);
             });
@@ -4063,11 +4418,8 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         }
 
         function printPickingForm(docId) {
-            // เปิดหน้าต่างเตรียมไว้ทันทีที่คลิก เพื่อไม่ให้ถูกเบราว์เซอร์บล็อก Pop-up
-            const preOpenedWindow = window.open('', '_blank', 'width=950,height=1200');
             db.collection('requisitions').doc(docId).get().then(doc => {
                 if (!doc.exists) {
-                    if (preOpenedWindow) preOpenedWindow.close();
                     alert('❌ ไม่พบข้อมูลใบเบิกนี้');
                     return;
                 }
@@ -4075,22 +4427,17 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 data.id = doc.id;
                 const items = data.items || [];
                 markRequisitionPickingPrinted(docId);
-                printPickingFormA4(data, items, preOpenedWindow);
+                printPickingFormA4(data, items, null);
                 if (typeof loadReportData === 'function') {
                     loadReportData();
                 }
             }).catch(err => {
-                if (preOpenedWindow) preOpenedWindow.close();
                 alert("❌ เกิดข้อผิดพลาดในการดึงข้อมูลใบจัดสินค้า: " + err.message);
             });
         }
 
         function printPickingFormA4(data, items, existingWindow = null) {
-            const printWindow = existingWindow || window.open('', '_blank', 'width=950,height=1200');
-            if (!printWindow) {
-                alert('⚠️ ระบบไม่สามารถเปิดหน้าต่างพิมพ์ได้ (Pop-up ถูกบล็อก)\n\n👉 กรุณาไปที่สัญลักษณ์ แม่กุญแจ/แจ้งเตือน บนแถบ URL ของเบราว์เซอร์\n👉 และเลือก "อนุญาต Pop-ups (Allow pop-ups)" สำหรับเว็บไซต์นี้ค่ะ');
-                return;
-            }
+            const printWindow = existingWindow || null;
 
             const dateStr = new Date().toLocaleString('th-TH');
             const docTitle = 'ใบจัดสินค้าอุปกรณ์';
@@ -4289,13 +4636,13 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                         <table>
                             <thead>
                                 <tr>
-                                    <th style="width: 5%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">ลำดับ</th>
-                                    <th style="width: 50%; text-align: center; font-size: 12px; padding: 7px 8px; white-space: nowrap; vertical-align: middle;">รายการอุปกรณ์</th>
-                                    <th style="width: 8%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">จำนวนเบิก</th>
-                                    <th style="width: 8%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">จำนวนจ่ายจริง</th>
-                                    <th style="width: 8%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">จำนวนขาด</th>
-                                    <th style="width: 8%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">จำนวนคืน</th>
-                                    <th style="width: 13%; text-align: center; font-size: 12px; padding: 7px 4px; white-space: nowrap; vertical-align: middle;">หมายเหตุ</th>
+                                    <th style="width: 6%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">ลำดับ</th>
+                                    <th style="width: 38%; text-align: center; font-size: 12px; padding: 7px 8px; white-space: nowrap; vertical-align: middle;">รายการอุปกรณ์</th>
+                                    <th style="width: 10%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">จำนวนเบิก</th>
+                                    <th style="width: 10%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">จำนวนจ่ายจริง</th>
+                                    <th style="width: 10%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">จำนวนขาด</th>
+                                    <th style="width: 10%; text-align: center; font-size: 12px; padding: 7px 2px; white-space: nowrap; vertical-align: middle;">จำนวนคืน</th>
+                                    <th style="width: 16%; text-align: center; font-size: 12px; padding: 7px 4px; white-space: nowrap; vertical-align: middle;">หมายเหตุ</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -4329,10 +4676,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </body>
                 </html>
             `;
-            printWindow.document.write(htmlContent);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => { printWindow.print(); }, 600);
+            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
         }
 
         // ==========================================
@@ -4365,8 +4709,54 @@ function printMaintenanceA4(data, items, existingWindow = null) {
             spinner.classList.remove('hidden');
 
             try {
+                // 🔒 MANDATORY ADMIN GUARD (Boss Thep-Apai Protocol)
+                // ผู้มีสิทธิ์ทำรายการและรหัสยืนยัน ต้องเป็นระดับ Admin เท่านั้น
+                let isAdminAuthorized = false;
+                let adminAuthorizerName = '';
+
+                let currentAuth = null;
+                try {
+                    const storedAuth = localStorage.getItem('icepro_auth_user') || sessionStorage.getItem('icepro_auth_user');
+                    if (storedAuth) currentAuth = JSON.parse(storedAuth);
+                } catch(e) {}
+
+                if (currentAuth && (currentAuth.role === 'แอดมิน' || currentAuth.role === 'Admin')) {
+                    if (!techPin || techPin === currentAuth.password) {
+                        isAdminAuthorized = true;
+                        adminAuthorizerName = currentAuth.name || 'Admin';
+                    }
+                }
+
+                if (!isAdminAuthorized && techPin) {
+                    try {
+                        const staffSnap = await db.collection('staff').get();
+                        staffSnap.forEach(doc => {
+                            const s = doc.data();
+                            const sRole = (s.role || '').trim();
+                            const sPin = String(s.password || '').trim();
+                            if ((sRole === 'แอดมิน' || sRole === 'Admin') && sPin === techPin) {
+                                isAdminAuthorized = true;
+                                adminAuthorizerName = s.name || 'Admin';
+                            }
+                        });
+                    } catch (staffErr) {
+                        console.warn("Staff Admin verification error:", staffErr);
+                        if (currentAuth && (currentAuth.role === 'แอดมิน' || currentAuth.role === 'Admin')) {
+                            isAdminAuthorized = true;
+                            adminAuthorizerName = currentAuth.name || 'Admin';
+                        }
+                    }
+                }
+
+                if (!isAdminAuthorized) {
+                    alert('⛔ สิทธิ์ไม่อนุมัติ: การทำรายการและอนุมัติใบเบิก ต้องใช้รหัสผ่านหรือดำเนินการโดยผู้มีสิทธิ์ระดับ "แอดมิน (Admin)" เท่านั้นค่ะ');
+                    btnText.textContent = 'บันทึกใบเบิกและยืม 📝';
+                    spinner.classList.add('hidden');
+                    return;
+                }
                 // [LILIN'S SURGICAL INSERT - PHASE 5] : กำหนดเลขที่เอกสาร Auto-DocNo
                 const reqDocNo = (typeof currentEditingDocId !== 'undefined' && currentEditingDocId && typeof currentEditingDocNo !== 'undefined' && currentEditingDocNo) ? currentEditingDocNo : generateRequisitionDocNo();
+                const docNo = reqDocNo; // [LILIN GUARD: GUARANTEE DOCNO ALWAYS DEFINED]
 
                 // สร้างข้อมูลสำหรับบันทึก (แพ็คข้อมูล Auto-Populate พร้อมจับคู่ชื่อตัวแปรข้ามระบบแบบสมบูรณ์ 100%)
                 const requisitionData = {
@@ -4412,6 +4802,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
 
                 // บันทึกลง Collection 'requisitions'
                 if (typeof currentEditingDocId !== 'undefined' && currentEditingDocId) {
+                    requisitionData.isPrintedForPicking = false; // รีเซ็ตเพื่อแจ้งเตือนว่ามีการแก้ไขเอกสาร รอตรวจสอบ
                     await db.collection('requisitions').doc(currentEditingDocId).update(requisitionData);
                     alert(`✅ แก้ไขใบเบิกสำเร็จ!\nเลขที่: ${reqDocNo}\nผู้เบิก: ${techName}\nผู้อนุมัติ: ${approverName}\nไซต์งาน: ${requisitionData.jobSite}`);
                     currentEditingDocId = null; // รีเซ็ตสถานะ
@@ -4477,16 +4868,10 @@ function printMaintenanceA4(data, items, existingWindow = null) {
 
                 // สั่งพิมพ์บิล A4 ทันที (ส่ง snapshot ของ cart ไปก่อนล้าง)
                 const itemsToPrint = [...cart];
-                cart = [];
                 printRequisitionA4(requisitionData, itemsToPrint);
-                document.getElementById('techName').value = '';
-                document.getElementById('techPin').value = '';
-                document.getElementById('jobSite').value = '';
-                document.getElementById('approverName').value = '';
-                document.getElementById('issuerName').value = '';
-                document.getElementById('autoPopulateInfo').classList.add('hidden'); // ซ่อน Info Card
-                updateCartUI();
-                closeCartModal();
+
+                // เคลียร์ข้อมูลทรานเซกชั่นและฟอร์มทั้งหมด 100%
+                clearCart(true);
 
             } catch (error) {
                 console.error("Error adding document: ", error);
@@ -4745,11 +5130,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 `;
             });
 
-            const printWindow = window.open('', '_blank', 'width=1150,height=800');
-            if (!printWindow) {
-                alert('⚠️ ระบบไม่สามารถเปิดหน้าต่างพิมพ์ได้ (Pop-up ถูกบล็อก)\n\n👉 กรุณาอนุญาต Pop-ups สำหรับเว็บไซต์นี้ค่ะ');
-                return;
-            }
+            const printWindow = null;
 
             const printContent = `
                 <!DOCTYPE html>
@@ -4845,9 +5226,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </html>
             `;
 
-            printWindow.document.open();
-            printWindow.document.write(printContent);
-            printWindow.document.close();
+            renderResilientPrintDocument(printContent, "รายงานสรุปภาพรวมใบเบิกและอุปกรณ์", printWindow);
         }
 
         
@@ -5204,7 +5583,14 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                         <td class="px-6 py-4 text-center text-lg font-bold text-white">${totalQty}</td>
                         <td class="px-6 py-4 text-center">${statusBadge}</td>
                         <td class="px-6 py-4 text-center space-x-1.5 whitespace-nowrap">
-                            <button onclick="openDocumentHubModal('${data.id}')" class="text-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-2 py-1.5 rounded-lg shadow transition inline-flex items-center gap-1" title="เปิดศูนย์รวมเอกสารทางเดินงานทั้ง 8 ชนิด">📄 เอกสาร 8 ชนิด</button>
+                            ${(() => {
+                                const hasPendingPicking = (!data.returnStatus || data.returnStatus === 'ยังไม่คืน') && !data.isPrintedForPicking;
+                                const hubPendingCount = hasPendingPicking ? 1 : 0;
+                                const hubBadgeHtml = hubPendingCount > 0 
+                                    ? `<span class="ml-1 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold shadow animate-pulse">🔴 ${hubPendingCount}</span>` 
+                                    : '';
+                                return `<button onclick="openDocumentHubModal('${data.id}')" class="text-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-2 py-1.5 rounded-lg shadow transition inline-flex items-center gap-1" title="เปิดศูนย์รวมเอกสารทางเดินงานทั้ง 8 ชนิด">📄 เอกสาร 8 ชนิด${hubBadgeHtml}</button>`;
+                            })()}
                             <button onclick="openAttachPickingProofModal('${data.id}')" class="text-xs bg-purple-600 hover:bg-purple-500 px-2 py-1.5 rounded-lg text-white font-semibold shadow transition inline-flex items-center gap-1" title="แนบรูปถ่ายใบจัดสินค้าและกรอกยอดจ่ายจริง">📷 กรอกยอดจัด/แนบรูป</button>
                             <button onclick="printPickingForm('${data.id}')" class="text-xs bg-amber-600 hover:bg-amber-500 px-2.5 py-1.5 rounded-lg text-white font-semibold shadow transition inline-flex items-center gap-1" title="พิมพ์ใบจัดสินค้าอุปกรณ์สำหรับช่าง">📦 ใบจัดสินค้า</button>
                             <button onclick="exportPickingFormExcel('${data.id}')" class="text-xs bg-green-700 hover:bg-green-600 text-white font-semibold px-2 py-1.5 rounded-lg shadow transition inline-flex items-center gap-1" title="ส่งออก Excel ใบจัดสินค้า">📊 Excel</button>
@@ -5486,22 +5872,9 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </html>
             `;
 
-            // เปิดหน้าต่างใหม่เพื่อพิมพ์
-            const printWindow = window.open('', '_blank');
-            
-            // [LILIN'S SURGICAL INSERT] : Safety Check for Pop-up Blocker
-            if (!printWindow) {
-                alert('⚠️ ระบบไม่สามารถเปิดหน้าต่างพิมพ์ได้ (Pop-up ถูกบล็อก)\n\n👉 กรุณาไปที่สัญลักษณ์ แม่กุญแจ/แจ้งเตือน บนแถบ URL ของเบราว์เซอร์\n👉 และเลือก "อนุญาต Pop-ups (Allow pop-ups)" สำหรับเว็บไซต์นี้ค่ะ');
-                return;
-            }
+            const printWindow = null;
 
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            
-            // รอให้โหลดเสร็จแล้วสั่งพิมพ์
-            printWindow.onload = function() {
-                printWindow.print();
-            };
+            renderResilientPrintDocument(printContent, (typeof docTitle !== "undefined" ? docTitle : "รายงานข้อมูลระบบ ICE FINLIGHT"), printWindow);
         }
 
         // ฟังก์ชันส่งออก Excel (CSV format แบบรองรับภาษาไทย UTF-8)
@@ -5571,7 +5944,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
             document.getElementById('inventoryModal').classList.add('flex');
         }
 
-        function closeInventoryModal() {
+        function closeInventoryModal(force = false) {
             document.getElementById('inventoryModal').classList.add('hidden');
             document.getElementById('inventoryModal').classList.remove('flex');
         }
@@ -5696,7 +6069,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     alert('✅ เพิ่มสินค้าใหม่เข้าคลังเรียบร้อยแล้ว');
                 }
 
-                closeInventoryModal();
+                closeInventoryModal(true);
                 loadInventoryData(); // รีเฟรชตารางใหม่
 
             } catch (error) {
@@ -5860,23 +6233,9 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </html>
             `;
 
-            // เปิดหน้าต่างใหม่เพื่อพิมพ์
-            const printWindow = window.open('', '_blank');
-            
-            // [LILIN'S SURGICAL INSERT] : Safety Check for Pop-up Blocker
-            if (!printWindow) {
-                alert('⚠️ ระบบไม่สามารถเปิดหน้าต่างพิมพ์ได้ (Pop-up ถูกบล็อก)\n\n👉 กรุณาไปที่สัญลักษณ์ แม่กุญแจ/แจ้งเตือน บนแถบ URL ของเบราว์เซอร์\n👉 และเลือก "อนุญาต Pop-ups (Allow pop-ups)" สำหรับเว็บไซต์นี้ค่ะ');
-                return;
-            }
+            const printWindow = null;
 
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            
-            // รอให้โหลดเสร็จแล้วสั่งพิมพ์
-            printWindow.onload = function() {
-                printWindow.print();
-                // printWindow.close(); // ปิดหน้าต่างอัตโนมัติหลังพิมพ์ (optional)
-            };
+            renderResilientPrintDocument(printContent, (typeof docTitle !== "undefined" ? docTitle : "รายงานข้อมูลระบบ ICE FINLIGHT"), printWindow);
         }
 
         function filterInventory() {
@@ -6005,7 +6364,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
 
             if (typeof Html5Qrcode === 'undefined') {
                 alert("⚠️ ไลบรารีสแกนเนอร์กำลังโหลด กรุณารอสักครู่แล้วลองใหม่อีกครั้ง");
-                closeScannerModal();
+                closeScannerModal(true);
                 return;
             }
 
@@ -6158,7 +6517,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
             }
         }
 
-        async function closeScannerModal() {
+        async function closeScannerModal(force = false) {
             const modal = document.getElementById('scannerModal');
             if (modal) {
                 modal.classList.add('hidden');
@@ -6372,10 +6731,10 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     adminBtn.classList.add('hidden');
                     adminBtn.style.display = 'none';
                 }
-                if (techInput && !techInput.value && user.name) {
+                if (!isTransactionCleared && techInput && !techInput.value && user.name) {
                     techInput.value = user.name;
                 }
-                if (techPin && !techPin.value && user.password) {
+                if (!isTransactionCleared && techPin && !techPin.value && user.password) {
                     techPin.value = user.password;
                 }
 
@@ -6512,6 +6871,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     localStorage.removeItem(INDEX_AUTH_KEY);
                 }
 
+                isTransactionCleared = false;
                 updateIndexAuthUI(userSession);
                 alert(`✅ ยินดีต้อนรับคุณ ${userSession.name} (${userSession.role})\nเข้าสู่ระบบสำเร็จ`);
 
@@ -6530,13 +6890,13 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         }
 
         function handleIndexLogout() {
-            if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+            requestExitConfirmation(() => {
                 localStorage.removeItem(INDEX_AUTH_KEY);
                 sessionStorage.removeItem(INDEX_AUTH_KEY);
                 updateIndexAuthUI(null);
                 const pwdInput = document.getElementById('idxLoginPassword');
                 if (pwdInput) pwdInput.value = '';
-            }
+            });
         }
 
         function checkIndexAuthOnLoad() {
@@ -6599,6 +6959,21 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     cats.push({ id: doc.id, ...data });
                 });
 
+                // [LILIN DEDUPLICATION] : กรองชื่อหมวดหมู่ที่ซ้ำกันออก ให้แสดงเพียง 1 การ์ดต่อ 1 หมวดหมู่
+                const seen = new Set();
+                const uniqueCats = [];
+                cats.forEach(c => {
+                    const name = (c.name || '').trim();
+                    if (!name) return;
+                    if (name.includes('\ufffd')) return; // ข้ามชื่อที่มีอักขระเพี้ยน
+                    const key = name.toLowerCase();
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        uniqueCats.push(c);
+                    }
+                });
+                cats = uniqueCats;
+
                 // เรียงลำดับตาม order หากมี หรือตามชื่อ
                 cats.sort((a, b) => {
                     if (typeof a.order === 'number' && typeof b.order === 'number') {
@@ -6616,9 +6991,9 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     const safeName = catName.replace(/'/g, "\\'");
                     
                     html += `
-                        <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2 sm:px-6 space-y-2 sm:space-y-0 sm:space-x-4 group overflow-hidden text-center sm:text-left" onclick="openModal('${safeName}')">
+                        <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('${safeName}')">
                             <div class="text-4xl shrink-0 group-hover:scale-110 transition">${icon}</div>
-                            <h2 class="text-xs sm:text-sm md:text-lg font-bold text-blue-300 whitespace-normal sm:whitespace-nowrap">${catName}</h2>
+                            <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">${formatCategoryDisplayName(catName)}</h2>
                         </div>
                     `;
                 });
@@ -6635,6 +7010,83 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(initRealtimeCategorySync, 200);
         });
+
+
+        // ========================================================
+        // [LILIN'S UNIVERSAL RESILIENT PRINT STUDIO ENGINE]
+        // ========================================================
+        function renderResilientPrintDocument(htmlContent, docTitle = 'เอกสารระบบ ICE FINLIGHT', targetWindow = null) {
+            const modal = document.getElementById('resilientPrintModal');
+            const container = document.getElementById('resilientPrintContent');
+            const titleElem = document.getElementById('resilientPrintDocTitle');
+
+            if (modal && container) {
+                if (titleElem) titleElem.textContent = docTitle;
+
+                let bodyInner = htmlContent;
+                if (typeof htmlContent === 'string') {
+                    let extractedStyles = '';
+                    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+                    let match;
+                    while ((match = styleRegex.exec(htmlContent)) !== null) {
+                        extractedStyles += match[0] + '\n';
+                    }
+
+                    const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+                    if (bodyMatch && bodyMatch[1]) {
+                        bodyInner = extractedStyles + bodyMatch[1];
+                    }
+
+                    // 🛡️ Scope all body selectors within any <style> tags so they apply strictly to the print studio container
+                    bodyInner = bodyInner.replace(/(<style[^>]*>)([\s\S]*?)(<\/style>)/gi, (m, open, css, close) => {
+                        const scopedCss = css.replace(/\bbody\s*\{/gi, '#resilientPrintContent {');
+                        return open + scopedCss + close;
+                    });
+                }
+
+                container.innerHTML = bodyInner;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                modal.scrollTop = 0;
+
+                if (targetWindow && !targetWindow.closed) {
+                    try { targetWindow.close(); } catch(e) {}
+                }
+                return true;
+            }
+
+            // Fallback direct window print
+            try {
+                const win = targetWindow || window.open('', '_blank', 'width=950,height=1200');
+                if (win) {
+                    win.document.open();
+                    win.document.write(htmlContent);
+                    win.document.close();
+                    win.focus();
+                    setTimeout(() => { win.print(); }, 500);
+                    return true;
+                }
+            } catch(err) {
+                console.error("Print window fallback error:", err);
+            }
+            return false;
+        }
+
+        function closeResilientPrintModal() {
+            const modal = document.getElementById('resilientPrintModal');
+            const container = document.getElementById('resilientPrintContent');
+            if (container) {
+                container.innerHTML = ''; // 🧹 ล้าง CSS และเนื้อหาพิมพ์ออกทันที ขจัดปัญหาสีพื้นหลังรั่วไหล 100%
+            }
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function executeResilientDirectPrint() {
+            window.print();
+        }
 
 </script>
     <!-- 📱 MOBILE & TABLET FLOATING NAVIGATION BAR (BOTTOM DOCK) -->

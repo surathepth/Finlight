@@ -147,6 +147,10 @@
                 <!-- Navigation Tabs (Desktop Adaptive Landscape Suite) -->
                 <div class="hidden lg:flex items-center gap-0.5 xl:gap-1 flex-nowrap flex-shrink min-w-0 overflow-visible py-1">
                     <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn whitespace-nowrap px-1.5 xl:px-2 py-1 rounded-lg text-xs xl:text-[13px] 2xl:text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-800 transition">📊 ภาพรวม</button>
+                    <button onclick="switchTab('joborders')" id="tab-joborders" class="tab-btn whitespace-nowrap px-1.5 xl:px-2 py-1 rounded-lg text-xs xl:text-[13px] 2xl:text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-800 transition relative inline-flex items-center">
+                        <span>📝 รับงาน</span>
+                        <span id="badge-joborders-alert" style="display: none; background: #e11d48; color: #ffffff; border-radius: 9999px; padding: 2px 6px; font-size: 10px; font-weight: 800; margin-left: 4px; box-shadow: 0 0 10px rgba(225,29,72,0.8); line-height: 1;" class="animate-pulse">0</span>
+                    </button>
                     <button onclick="switchTab('inventory')" id="tab-inventory" class="tab-btn active whitespace-nowrap px-1.5 xl:px-2 py-1 rounded-lg text-xs xl:text-[13px] 2xl:text-sm font-medium text-blue-400 border-b-2 border-blue-500 bg-blue-500/10 transition"><span>📦 สินค้า</span></button>
                     <button onclick="switchTab('staff')" id="tab-staff" class="tab-btn whitespace-nowrap px-1.5 xl:px-2 py-1 rounded-lg text-xs xl:text-[13px] 2xl:text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-800 transition">👷 พนักงาน</button>
                     <button onclick="switchTab('customers')" id="tab-customers" class="tab-btn whitespace-nowrap px-1.5 xl:px-2 py-1 rounded-lg text-xs xl:text-[13px] 2xl:text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-800 transition">👥 ลูกค้า</button>
@@ -240,6 +244,10 @@
                 <button type="button" onclick="navigateForward()" id="btnMobNavForwardTop" class="w-7 h-7 rounded bg-slate-800 border border-slate-700 text-slate-300 flex items-center justify-center text-xs active:scale-95 disabled:opacity-30 transition" disabled title="เดินหน้า">▶</button>
             </div>
             <button onclick="switchTab('dashboard')" id="mob-tab-dashboard" class="whitespace-nowrap px-3 py-1 rounded text-xs text-gray-300">📊 ภาพรวม</button>
+            <button onclick="switchTab('joborders')" id="mob-tab-joborders" class="whitespace-nowrap px-3 py-1 rounded text-xs text-gray-300 inline-flex items-center">
+                <span>📝 รับงาน</span>
+                <span id="mob-badge-joborders-alert" style="display: none; background: #e11d48; color: #ffffff; border-radius: 9999px; padding: 1px 6px; font-size: 10px; font-weight: 800; margin-left: 4px; box-shadow: 0 0 8px rgba(225,29,72,0.8); line-height: 1;" class="animate-pulse">0</span>
+            </button>
             <button onclick="switchTab('inventory')" id="mob-tab-inventory" class="whitespace-nowrap px-3 py-1 rounded text-xs text-blue-400 bg-blue-500/10 font-bold">📦 สินค้า</button>
             <button onclick="switchTab('staff')" id="mob-tab-staff" class="whitespace-nowrap px-3 py-1 rounded text-xs text-gray-300">👷 พนักงาน-ช่าง</button>
             <button onclick="switchTab('customers')" id="mob-tab-customers" class="whitespace-nowrap px-3 py-1 rounded text-xs text-gray-300">👥 ลูกค้า/ไซต์งาน</button>
@@ -325,7 +333,11 @@
             <!-- Quick Action Links -->
             <div class="glass-panel p-6 rounded-xl border border-slate-700">
                 <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">⚡ ทางลัดการจัดการด่วน (Quick Shortcuts)</h2>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <button onclick="switchTab('joborders')" class="p-3 bg-gradient-to-br from-blue-600/20 to-purple-600/20 hover:from-blue-600/30 hover:to-purple-600/30 border border-blue-500/30 rounded-lg text-blue-300 text-sm font-medium transition text-center flex flex-col items-center justify-center">
+                        <span class="text-base mb-0.5">📝</span>
+                        <span>เปิดเอกสารใบรับงาน</span>
+                    </button>
                     <button onclick="openSkuListModal()" class="p-3 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 rounded-lg text-indigo-300 text-sm font-medium transition text-center flex flex-col items-center justify-center">
                         <span class="text-base mb-0.5">📋</span>
                         <span>จำนวนชื่อสินค้า & SKU</span>
@@ -343,6 +355,297 @@
                     <button onclick="switchTab('reports')" class="p-3 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg text-purple-300 text-sm font-medium transition text-center">
                         🖨️ ดูรายงานใบเบิก A4
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- 1.1 VIEW: JOB ORDERS (ระบบเปิดเอกสารใบรับงานบริการลูกค้า)   -->
+        <!-- ======================================================== -->
+        <div id="view-joborders" class="view-section hidden space-y-6">
+            <!-- Header Section with Dynamic Title & Status -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between border-b-2 border-slate-700 pb-4 gap-4 no-print">
+                <div class="flex-1 min-w-[300px]">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl flex-shrink-0">📝</span>
+                        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-wide">เปิดเอกสารใบรับงานบริการลูกค้า</h1>
+                    </div>
+                    <p class="text-sm font-bold text-cyan-300 mt-1.5 flex items-center gap-2">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse flex-shrink-0"></span>
+                        บันทึกข้อมูลลูกค้ารับงานบริการ (เสียง แสง เวที จอ LED) ซิงก์เชื่อมโยงไปยังหน้าเบิกอุปกรณ์ (index.html) อัตโนมัติ
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    <button type="button" onclick="resetJobOrderForm()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-4 py-2.5 rounded-xl text-white text-sm font-black transition flex items-center gap-1.5 shadow-lg shadow-blue-900/40 border border-blue-400/40 active:scale-95">
+                        ➕ สร้างใบรับงานใหม่
+                    </button>
+                    <button type="button" onclick="loadJobOrdersData()" class="bg-slate-800 hover:bg-slate-700 border-2 border-slate-600 px-4 py-2.5 rounded-xl text-white text-sm font-bold transition flex items-center gap-1.5 shadow-md active:scale-95">
+                        🔄 รีเฟรชรายการ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form Card: แบบฟอร์มใบรับงานบริการลูกค้า (Ultra High Contrast) -->
+            <div class="bg-slate-900/95 p-6 sm:p-7 rounded-2xl border-2 border-slate-700 shadow-2xl relative">
+                <div class="flex items-center justify-between border-b-2 border-slate-700/80 pb-4 mb-6">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-2xl">📋</span>
+                        <h2 id="jobFormTitle" class="text-lg sm:text-xl font-black text-white">แบบฟอร์มเปิดเอกสารใบรับงานบริการ (Customer Service Intake Form)</h2>
+                    </div>
+                    <span id="jobFormModeBadge" class="px-3.5 py-1 text-xs sm:text-sm rounded-full font-black bg-blue-600 text-white border border-blue-300 shadow">
+                        🆕 เปิดใบงานใหม่
+                    </span>
+                </div>
+
+                <form id="jobOrderForm" onsubmit="handleSaveJobOrder(event)" class="space-y-5">
+                    <input type="hidden" id="jobEditId" value="">
+
+                    <!-- แถวที่ 1: เลขที่ใบรับงาน, วันที่ใบรับงาน, กำหนดงานที่เริ่มใช้, เจ้าหน้าที่รับงาน -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-extrabold text-amber-300 mb-1.5 flex items-center gap-1.5">
+                                <span class="bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded text-xs font-black">7</span>
+                                <span>เลขที่ใบรับงาน (อัตโนมัติ)</span>
+                                <span class="text-rose-400">*</span>
+                            </label>
+                            <input type="text" id="jobDocNo" readonly required class="w-full bg-slate-950 border-2 border-amber-500/80 rounded-xl px-3.5 py-2.5 text-amber-300 font-mono font-black text-base sm:text-lg tracking-wider shadow-inner focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-extrabold text-white mb-1.5 flex items-center gap-1.5">
+                                <span class="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs font-black">8</span>
+                                <span>วันที่ใบรับงาน</span>
+                                <span class="text-rose-400">*</span>
+                            </label>
+                            <input type="date" id="jobDate" required style="color-scheme: dark;" class="w-full bg-slate-950 border-2 border-slate-600 rounded-xl px-3.5 py-2.5 text-white font-bold text-sm sm:text-base focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/40 shadow-inner">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-extrabold text-white mb-1.5 flex items-center gap-1.5">
+                                <span class="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs font-black">9</span>
+                                <span>กำหนดงานที่เริ่มใช้ (วัน-เวลาเริ่มงาน)</span>
+                                <span class="text-rose-400">*</span>
+                            </label>
+                            <input type="datetime-local" id="jobStartDate" required style="color-scheme: dark;" class="w-full bg-slate-950 border-2 border-slate-600 rounded-xl px-3.5 py-2.5 text-white font-bold text-sm sm:text-base focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/40 shadow-inner">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-extrabold text-white mb-1.5 flex items-center gap-1.5">
+                                <span class="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs font-black">6</span>
+                                <span>ชื่อเจ้าหน้าที่รับงาน</span>
+                                <span class="text-rose-400">*</span>
+                            </label>
+                            <div class="flex items-center gap-1.5">
+                                <input type="text" id="jobStaffName" required placeholder="ชื่อเจ้าหน้าที่ผู้รับงาน" class="flex-1 bg-slate-950 border-2 border-slate-600 rounded-xl px-3.5 py-2.5 text-white font-bold text-sm sm:text-base placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/40 shadow-inner">
+                                <select id="jobStaffSelect" onchange="applyStaffSelect()" class="bg-slate-800 border-2 border-slate-600 rounded-xl px-2.5 py-2.5 text-xs sm:text-sm text-cyan-300 font-bold focus:outline-none focus:border-cyan-400 cursor-pointer" title="เลือกจากรายชื่อพนักงาน">
+                                    <option value="">เลือกพนักงาน ▾</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- แถวที่ 2: ลูกค้า & สถานที่จัดงาน (Ultra High Contrast Box) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 bg-slate-950/90 p-5 rounded-2xl border-2 border-slate-700 shadow-inner">
+                        <!-- 1. ชื่อลูกค้า -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-sm font-extrabold text-white flex items-center gap-1.5">
+                                    <span class="bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded text-xs font-black">1</span>
+                                    <span>ชื่อลูกค้า / ผู้ว่าจ้าง</span>
+                                    <span class="text-rose-400">*</span>
+                                </label>
+                            </div>
+                            <div class="space-y-2">
+                                <input type="text" id="jobCustomerName" required placeholder="กรอกชื่อลูกค้า หรือเลือกจากประวัติเดิม" class="w-full bg-slate-900 border-2 border-slate-600 rounded-xl px-3.5 py-2.5 text-white font-bold text-sm sm:text-base placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/40 shadow-inner">
+                                <select id="jobCustomerSelect" onchange="applyCustomerSelect()" class="w-full bg-slate-900 border-2 border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-amber-300 font-bold focus:outline-none focus:border-amber-400 cursor-pointer">
+                                    <option value="">-- ดึงจากฐานข้อมูลลูกค้าเดิม (Auto-Fill) ▾ --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 3. เบอร์โทร / LINE / อีเมล -->
+                        <div>
+                            <label class="block text-sm font-extrabold text-white mb-1.5 flex items-center gap-1.5">
+                                <span class="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs font-black">3</span>
+                                <span>เบอร์โทร / ไอดีไลน์ / อีเมล ลูกค้า</span>
+                                <span class="text-rose-400">*</span>
+                            </label>
+                            <input type="text" id="jobCustomerContact" required placeholder="เช่น 081-234-5678 / LINE: icefin / user@mail.com" class="w-full bg-slate-900 border-2 border-slate-600 rounded-xl px-3.5 py-2.5 text-white font-bold text-sm sm:text-base placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/40 shadow-inner">
+                        </div>
+
+                        <!-- 4. แผนที่ / โลเคชั่น -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-sm font-extrabold text-white flex items-center gap-1.5">
+                                    <span class="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs font-black">4</span>
+                                    <span>แผนที่ / โลเคชั่นลูกค้า</span>
+                                </label>
+                                <button type="button" onclick="openJobLocationMap()" class="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-950/80 px-2.5 py-0.5 rounded-lg border border-emerald-600 shadow-sm">
+                                    📍 เปิดดูแผนที่
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <input type="text" id="jobCustomerGps" placeholder="พิกัด GPS หรือลิงก์ Google Maps" class="flex-1 bg-slate-900 border-2 border-slate-600 rounded-xl px-3.5 py-2.5 text-white font-bold text-sm sm:text-base placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/40 shadow-inner">
+                                <button type="button" onclick="openJobLocationMap()" class="px-3.5 py-2.5 bg-emerald-700 hover:bg-emerald-600 border border-emerald-400 rounded-xl text-white text-xs sm:text-sm font-black transition flex items-center gap-1 shadow-md" title="เปิดแผนที่">
+                                    📍 ดู
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2. ที่อยู่ลูกค้า / สถานที่จัดงาน (Full Width in Inner Grid) -->
+                        <div class="lg:col-span-3">
+                            <label class="block text-sm font-extrabold text-white mb-1.5 flex items-center gap-1.5">
+                                <span class="bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded text-xs font-black">2</span>
+                                <span>ที่อยู่ลูกค้า / สถานที่จัดงาน / ไซต์งาน</span>
+                                <span class="text-rose-400">*</span>
+                            </label>
+                            <input type="text" id="jobCustomerAddress" required placeholder="ระบุสถานที่จัดงาน เช่น โรงแรมเซ็นทารา แกรนด์, ลานกิจกรรมหน้าห้าง, ที่อยู่จัดส่ง" class="w-full bg-slate-900 border-2 border-slate-600 rounded-xl px-3.5 py-2.5 text-white font-bold text-sm sm:text-base placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/40 shadow-inner">
+                        </div>
+                    </div>
+
+                    <!-- แถวที่ 3: รายละเอียดงานบริการ (Service Scope) & ชิปด่วน -->
+                    <div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <label class="text-sm sm:text-base font-extrabold text-white flex items-center gap-1.5">
+                                <span class="bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded text-xs font-black">5</span>
+                                <span>รายละเอียดงานบริการที่ลูกค้าต้องการ (Scope of Services)</span>
+                                <span class="text-rose-400">*</span>
+                            </label>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="text-xs text-amber-300 font-bold">กดเพื่อเพิ่มด่วน:</span>
+                                <button type="button" onclick="appendJobTag('ระบบเสียง PA')" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1 rounded-lg border border-blue-300 shadow transition active:scale-95">🔊 ระบบเสียง PA</button>
+                                <button type="button" onclick="appendJobTag('แสงสี / ไฟเวที / มูฟวิ่ง')" class="text-xs bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1 rounded-lg border border-amber-300 shadow transition active:scale-95">💡 แสงสี/ไฟเวที</button>
+                                <button type="button" onclick="appendJobTag('เวทีและโครงสร้าง Truss')" class="text-xs bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1 rounded-lg border border-purple-300 shadow transition active:scale-95">🎪 เวที Truss</button>
+                                <button type="button" onclick="appendJobTag('จอ LED Display Full HD')" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 rounded-lg border border-emerald-300 shadow transition active:scale-95">🖥️ จอ LED</button>
+                                <button type="button" onclick="appendJobTag('งานมินิคอนเสิร์ต / ดนตรีสด')" class="text-xs bg-rose-600 hover:bg-rose-500 text-white font-bold px-3 py-1 rounded-lg border border-rose-300 shadow transition active:scale-95">🎤 ดนตรีสด</button>
+                                <button type="button" onclick="appendJobTag('งานอีเวนต์ / งานสัมมนา / เปิดตัวสินค้า')" class="text-xs bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-3 py-1 rounded-lg border border-cyan-300 shadow transition active:scale-95">🎊 งานอีเวนต์</button>
+                            </div>
+                        </div>
+                        <textarea id="jobServiceScope" required rows="3" placeholder="ระบุรายละเอียดงานบริการอย่างละเอียด เช่น เช่าระบบเครื่องเสียง PA สำหรับคอนเสิร์ต 1,000 คน พร้อมระบบไฟเวที Beam & Par 36 โคม เวทีขนาด 8x6 ม. และจอ LED P3.91 ขนาด 6x3 ม." class="w-full bg-slate-950 border-2 border-slate-600 rounded-xl p-3.5 text-white font-bold text-sm sm:text-base placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/40 shadow-inner custom-scrollbar"></textarea>
+                    </div>
+
+                    <!-- แถวที่ 4: หมายเหตุ / เงื่อนไขมัดจำ / สถานะใบงาน -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-extrabold text-white mb-1.5 flex items-center gap-1.5">
+                                <span class="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs font-black">10</span>
+                                <span>หมายเหตุ / เงื่อนไขมัดจำ / ข้อตกลงเพิ่มเติม</span>
+                            </label>
+                            <input type="text" id="jobNotes" placeholder="เช่น มัดจำ 50% แล้ว, นัดติดตั้ง 09:00 น. ก่อนเริ่มงาน, มีทีมช่างคุมหน้างาน 4 คน" class="w-full bg-slate-950 border-2 border-slate-600 rounded-xl px-3.5 py-2.5 text-white font-bold text-sm sm:text-base placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/40 shadow-inner">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-extrabold text-white mb-1.5">
+                                สถานะงานบริการ
+                            </label>
+                            <select id="jobStatus" class="w-full bg-slate-950 border-2 border-slate-600 rounded-xl px-3.5 py-2.5 text-amber-300 font-black text-sm sm:text-base focus:outline-none focus:border-amber-400 shadow-inner">
+                                <option value="รอดำเนินการ" class="bg-slate-900 text-amber-300">⏳ รอดำเนินการ (ยังไม่เบิกของ)</option>
+                                <option value="กำลังดำเนินงาน" class="bg-slate-900 text-blue-300">⚙️ กำลังดำเนินงาน (เบิกของ/อยู่หน้างาน)</option>
+                                <option value="เสร็จสิ้น" class="bg-slate-900 text-emerald-300">✅ เสร็จสิ้น (รับคืนของครบแล้ว)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- ปุ่มดำเนินการฟอร์ม (Solid High Contrast Buttons) -->
+                    <div class="flex flex-wrap items-center justify-between pt-5 border-t-2 border-slate-700/80 gap-3">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <button type="submit" id="btnSaveJobOrder" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-6 py-3 rounded-xl text-white text-base font-black transition flex items-center gap-2 shadow-xl shadow-emerald-950 border border-emerald-400/50 active:scale-95">
+                                💾 บันทึกใบรับงาน
+                            </button>
+                            <button type="button" onclick="handleSaveAndPrintJobOrder()" id="btnSaveAndPrintJobOrder" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-6 py-3 rounded-xl text-white text-base font-black transition flex items-center gap-2 shadow-xl shadow-blue-950 border border-blue-400/50 active:scale-95">
+                                🖨️ บันทึกและพิมพ์ใบรับงาน A4
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-2.5">
+                            <button type="button" onclick="resetJobOrderForm()" class="bg-slate-800 hover:bg-slate-700 border-2 border-slate-600 px-5 py-3 rounded-xl text-white text-sm font-bold transition flex items-center gap-1.5 shadow-md active:scale-95">
+                                🔄 ล้างข้อมูล / ฟอร์มใหม่
+                            </button>
+                            <button type="button" id="btnCancelJobEdit" onclick="cancelJobEdit()" class="hidden bg-rose-800 hover:bg-rose-700 border-2 border-rose-500 px-5 py-3 rounded-xl text-white text-sm font-bold transition flex items-center gap-1.5 shadow-md active:scale-95">
+                                ✕ ยกเลิกแก้ไข
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Table Card: รายการใบรับงานบริการลูกค้าทั้งหมด (Ultra High Contrast) -->
+            <div class="space-y-3">
+                <!-- Search & Filters Toolbar -->
+                <div class="bg-slate-900 p-4 rounded-xl border-2 border-slate-700 flex flex-wrap items-center justify-between gap-3 text-xs shadow-lg">
+                    <div class="flex items-center gap-2 flex-1 min-w-[280px]">
+                        <span class="text-lg">🔍</span>
+                        <input type="text" id="jobSearchInput" oninput="filterJobOrdersTable()" placeholder="ค้นหาเลขที่ใบรับงาน, ชื่อลูกค้า, ไซต์งาน, ขอบเขตงาน, เจ้าหน้าที่..." class="w-full bg-slate-950 border-2 border-slate-600 rounded-xl px-4 py-2 text-white font-bold text-sm placeholder:text-slate-400 focus:outline-none focus:border-blue-400 shadow-inner">
+                    </div>
+
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-white font-bold">ช่วงเวลา:</span>
+                        <button type="button" onclick="setJobDateFilter('all')" id="btnJobDate_all" class="job-date-btn px-3 py-1.5 rounded-lg bg-blue-600 text-white font-black border border-blue-300 shadow transition">ทั้งหมด</button>
+                        <button type="button" onclick="setJobDateFilter('today')" id="btnJobDate_today" class="job-date-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold border border-slate-600 transition">วันนี้</button>
+                        <button type="button" onclick="setJobDateFilter('7days')" id="btnJobDate_7days" class="job-date-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold border border-slate-600 transition">7 วัน</button>
+                        <button type="button" onclick="setJobDateFilter('month')" id="btnJobDate_month" class="job-date-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold border border-slate-600 transition">เดือนนี้</button>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-white font-bold">สถานะ:</span>
+                        <select id="jobStatusFilter" onchange="filterJobOrdersTable()" class="bg-slate-950 border-2 border-slate-600 rounded-lg px-3 py-1.5 text-white font-bold text-xs sm:text-sm focus:outline-none focus:border-blue-400">
+                            <option value="all">ทั้งหมด</option>
+                            <option value="รอดำเนินการ">⏳ รอดำเนินการ</option>
+                            <option value="กำลังดำเนินงาน">⚙️ กำลังดำเนินงาน</option>
+                            <option value="เสร็จสิ้น">✅ เสร็จสิ้น</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 🎛️ Dual-Layer Permanent Table Scroll Control Toolbar (Rule 13) -->
+                <div class="flex items-center justify-between bg-slate-950 px-4 py-3 rounded-t-xl border-t-2 border-x-2 border-slate-700 text-xs no-print">
+                    <div class="flex items-center gap-2.5 text-white font-black text-sm">
+                        <span>📝 รายการเอกสารใบรับงานบริการลูกค้า</span>
+                        <span id="jobTableCountBadge" class="px-2.5 py-0.5 rounded-full text-xs bg-blue-600 text-white font-black border border-blue-300 shadow">0 รายการ</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="scrollJobOrdersTable(-250)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white rounded-lg border border-slate-500 transition flex items-center gap-1 font-bold shadow-sm" title="เลื่อนตารางไปทางซ้าย">
+                            ◀ เลื่อนซ้าย
+                        </button>
+                        <button type="button" onclick="scrollJobOrdersTable(250)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white rounded-lg border border-slate-500 transition flex items-center gap-1 font-bold shadow-sm" title="เลื่อนตารางไปทางขวา">
+                            เลื่อนขวา ▶
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Job Orders Table -->
+                <div id="jobOrdersTableScrollContainer" class="bg-slate-900/95 rounded-b-xl overflow-x-auto overflow-y-auto max-h-[60vh] border-b-2 border-x-2 border-slate-700 shadow-2xl custom-scrollbar relative">
+                    <table class="w-full text-left text-sm text-white">
+                        <thead class="bg-slate-950 text-white text-xs sm:text-sm font-black uppercase tracking-wider border-b-2 border-slate-700 sticky top-0 z-20">
+                            <tr class="whitespace-nowrap">
+                                <th class="px-3.5 py-3.5 sticky left-0 bg-slate-950 z-30 border-r-2 border-slate-700 w-[140px] shadow-md text-left">เลขที่ / วันที่</th>
+                                <th class="px-3.5 py-3.5 w-[170px] text-left">ชื่อลูกค้า / ติดต่อ</th>
+                                <th class="px-3.5 py-3.5 w-[200px] text-left">สถานที่จัดงาน / แผนที่</th>
+                                <th class="px-3.5 py-3.5 min-w-[220px] text-left">รายละเอียดงานบริการ</th>
+                                <th class="px-3.5 py-3.5 w-[140px] text-left">กำหนดวันเริ่มงาน</th>
+                                <th class="px-3.5 py-3.5 w-[120px] text-left">ผู้รับงาน</th>
+                                <th class="px-3.5 py-3.5 text-center w-[120px]">สถานะ</th>
+                                <th class="px-3.5 py-3.5 text-center no-print w-[240px]">คำสั่งจัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobOrdersTableBody" class="divide-y divide-slate-700/80">
+                            <tr><td colspan="8" class="text-center py-10 text-slate-300 font-bold"><div class="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>กำลังโหลดข้อมูลใบรับงาน...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 🎛️ Bottom Floating Scroll Toolbar (Rule 13) -->
+                <div class="flex items-center justify-between bg-slate-950 px-4 py-2.5 rounded-xl border border-slate-700 text-xs no-print">
+                    <span class="text-slate-300 font-bold text-xs">เลื่อนดูข้อมูลเพิ่มเติมในตาราง:</span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="scrollJobOrdersTable(-250)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white rounded-lg border border-slate-500 transition flex items-center gap-1 font-bold shadow-sm">
+                            ◀ เลื่อนซ้าย
+                        </button>
+                        <button type="button" onclick="scrollJobOrdersTable(250)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white rounded-lg border border-slate-500 transition flex items-center gap-1 font-bold shadow-sm">
+                            เลื่อนขวา ▶
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3064,6 +3367,7 @@
             if (pushHistory && typeof AppNavigator !== 'undefined') {
                 const tabTitles = {
                     dashboard: 'ภาพรวม',
+                    joborders: 'เปิดเอกสารใบรับงาน',
                     inventory: 'สินค้าคงคลัง',
                     staff: 'พนักงาน-ช่าง',
                     customers: 'ลูกค้า/ไซต์งาน',
@@ -3101,6 +3405,7 @@
 
             // Trigger data load per tab
             if (tabId === 'dashboard') initDashboard();
+            if (tabId === 'joborders') loadJobOrdersData();
             if (tabId === 'inventory') { loadInventoryData(); populateWarehouseDropdowns(); }
             if (tabId === 'staff') loadStaffData();
             if (tabId === 'customers') loadCustomerData();
@@ -4467,8 +4772,787 @@
         }
 
         // ========================================================
-        // 7. REPORTS & REQUISITION CONTROLLER
+        // 6.5 JOB ORDERS & WORKFLOW CONTROLLER (ศูนย์บริหารการรับงาน)
         // ========================================================
+                        // ========================================================
+        // 6.5 CLIENT SERVICE JOB ORDERS CONTROLLER (ระบบใบรับงานบริการลูกค้า)
+        // ========================================================
+        let cachedJobOrdersList = [];
+        let currentJobDateFilter = 'all';
+
+        // 🌟 Initializer for Job Orders Form
+        async function initJobOrdersForm() {
+            try {
+                const now = new Date();
+                const pad = (n) => String(n).padStart(2, '0');
+                const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+                const dateInput = document.getElementById('jobDate');
+                if (dateInput && !dateInput.value) {
+                    dateInput.value = todayStr;
+                }
+
+                const startDateInput = document.getElementById('jobStartDate');
+                if (startDateInput && !startDateInput.value) {
+                    // Default to today at 09:00
+                    startDateInput.value = `${todayStr}T09:00`;
+                }
+
+                // Auto-fill logged-in Staff Name
+                const staffInput = document.getElementById('jobStaffName');
+                if (staffInput && !staffInput.value) {
+                    const auth = (typeof getStoredAuthUser === 'function') ? getStoredAuthUser() : null;
+                    if (auth) {
+                        staffInput.value = auth.name || auth.fullName || auth.username || 'เจ้าหน้าที่รับงาน';
+                    }
+                }
+
+                // Populate Staff Select dropdown if empty
+                populateJobStaffDropdown();
+
+                // Populate Customer Select dropdown if empty
+                populateJobCustomerDropdown();
+
+                // Generate Sequential Job Doc No if empty
+                const docNoInput = document.getElementById('jobDocNo');
+                const editId = document.getElementById('jobEditId')?.value;
+                if (docNoInput && (!docNoInput.value || !editId)) {
+                    docNoInput.value = generateNextJobDocNo();
+                }
+            } catch (err) {
+                console.warn("initJobOrdersForm error:", err);
+            }
+        }
+
+        // Generate next sequential Job Order No (e.g. JOB-YYYYMMDD-001)
+        function generateNextJobDocNo() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const prefix = `JOB-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+
+            let maxSeq = 0;
+            if (cachedJobOrdersList && cachedJobOrdersList.length > 0) {
+                cachedJobOrdersList.forEach(item => {
+                    if (item.jobDocNo && item.jobDocNo.startsWith(prefix)) {
+                        const parts = item.jobDocNo.split('-');
+                        if (parts.length >= 3) {
+                            const seq = parseInt(parts[2], 10);
+                            if (!isNaN(seq) && seq > maxSeq) {
+                                maxSeq = seq;
+                            }
+                        }
+                    }
+                });
+            }
+            const nextSeq = String(maxSeq + 1).padStart(3, '0');
+            return `${prefix}-${nextSeq}`;
+        }
+
+        // Populate Staff Select options from cachedStaff
+        async function populateJobStaffDropdown() {
+            const select = document.getElementById('jobStaffSelect');
+            if (!select) return;
+
+            if (!cachedStaff || cachedStaff.length === 0) {
+                try {
+                    const snap = await db.collection('staff').get();
+                    cachedStaff = [];
+                    snap.forEach(d => cachedStaff.push({ _id: d.id, ...d.data() }));
+                } catch (e) {
+                    console.warn("Could not load staff for dropdown:", e);
+                }
+            }
+
+            let html = '<option value="">-- เลือกจากพนักงาน --</option>';
+            if (cachedStaff && cachedStaff.length > 0) {
+                cachedStaff.forEach(s => {
+                    const sName = s.name || s.username || s.fullName || '';
+                    const sRole = s.role ? ` (${s.role})` : '';
+                    if (sName) {
+                        html += `<option value="${escapeHtml(sName)}">${escapeHtml(sName)}${escapeHtml(sRole)}</option>`;
+                    }
+                });
+            }
+            select.innerHTML = html;
+        }
+
+        function applyStaffSelect() {
+            const select = document.getElementById('jobStaffSelect');
+            const input = document.getElementById('jobStaffName');
+            if (select && input && select.value) {
+                input.value = select.value;
+            }
+        }
+
+        // Populate Customer Select options from cachedCustomers
+        async function populateJobCustomerDropdown() {
+            const select = document.getElementById('jobCustomerSelect');
+            if (!select) return;
+
+            if (!cachedCustomers || cachedCustomers.length === 0) {
+                try {
+                    const snap = await db.collection('customers').get();
+                    cachedCustomers = [];
+                    snap.forEach(d => cachedCustomers.push({ _id: d.id, ...d.data() }));
+                } catch (e) {
+                    console.warn("Could not load customers for dropdown:", e);
+                }
+            }
+
+            let html = '<option value="">-- ดึงจากฐานข้อมูลลูกค้าเดิม --</option>';
+            if (cachedCustomers && cachedCustomers.length > 0) {
+                // Sort by name
+                const sorted = [...cachedCustomers].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                sorted.forEach(c => {
+                    const cName = c.name || c.site || '';
+                    const cSite = c.site && c.site !== c.name ? ` [${c.site}]` : '';
+                    if (cName) {
+                        html += `<option value="${escapeHtml(c._id || cName)}">${escapeHtml(cName)}${escapeHtml(cSite)}</option>`;
+                    }
+                });
+            }
+            select.innerHTML = html;
+        }
+
+        function applyCustomerSelect() {
+            const select = document.getElementById('jobCustomerSelect');
+            if (!select || !select.value) return;
+
+            const val = select.value;
+            const cust = (cachedCustomers || []).find(c => c._id === val || c.name === val || c.site === val);
+            if (!cust) return;
+
+            const nameInput = document.getElementById('jobCustomerName');
+            const contactInput = document.getElementById('jobCustomerContact');
+            const addressInput = document.getElementById('jobCustomerAddress');
+            const gpsInput = document.getElementById('jobCustomerGps');
+
+            if (nameInput) nameInput.value = cust.name || cust.site || '';
+            if (contactInput) {
+                let contacts = [];
+                if (cust.phone) contacts.push(cust.phone);
+                if (cust.lineId) contacts.push(`LINE: ${cust.lineId}`);
+                if (cust.email) contacts.push(cust.email);
+                contactInput.value = contacts.join(' / ') || cust.phone || '';
+            }
+            if (addressInput) addressInput.value = cust.address || cust.site || '';
+            if (gpsInput) gpsInput.value = cust.gps || '';
+        }
+
+        // Append quick tag to Service Scope
+        function appendJobTag(tag) {
+            const textarea = document.getElementById('jobServiceScope');
+            if (!textarea) return;
+            const cur = textarea.value.trim();
+            if (cur) {
+                if (!cur.includes(tag)) {
+                    textarea.value = `${cur}, ${tag}`;
+                }
+            } else {
+                textarea.value = tag;
+            }
+            textarea.focus();
+        }
+
+        // Open GPS / Google Maps Location
+        function openJobLocationMap() {
+            const gpsVal = document.getElementById('jobCustomerGps')?.value?.trim();
+            if (!gpsVal) {
+                alert("⚠️ ยังไม่ได้ระบุพิกัดหรือลิงก์แผนที่ของลูกค้า");
+                document.getElementById('jobCustomerGps')?.focus();
+                return;
+            }
+
+            let url = '';
+            if (gpsVal.startsWith('http://') || gpsVal.startsWith('https://')) {
+                url = gpsVal;
+            } else {
+                // Assume coordinates or address
+                url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(gpsVal)}`;
+            }
+            window.open(url, '_blank');
+        }
+
+        // Save Job Order
+        async function handleSaveJobOrder(event, andPrint = false) {
+            if (event && event.preventDefault) event.preventDefault();
+
+            const docNo = document.getElementById('jobDocNo')?.value?.trim();
+            const jobDate = document.getElementById('jobDate')?.value?.trim();
+            const startDate = document.getElementById('jobStartDate')?.value?.trim();
+            const staffName = document.getElementById('jobStaffName')?.value?.trim();
+            const customerName = document.getElementById('jobCustomerName')?.value?.trim();
+            const customerContact = document.getElementById('jobCustomerContact')?.value?.trim();
+            const customerAddress = document.getElementById('jobCustomerAddress')?.value?.trim();
+            const customerGps = document.getElementById('jobCustomerGps')?.value?.trim() || '';
+            const serviceScope = document.getElementById('jobServiceScope')?.value?.trim();
+            const notes = document.getElementById('jobNotes')?.value?.trim() || '';
+            const status = document.getElementById('jobStatus')?.value || 'รอดำเนินการ';
+            const editId = document.getElementById('jobEditId')?.value?.trim();
+
+            if (!docNo || !jobDate || !startDate || !staffName || !customerName || !customerContact || !customerAddress || !serviceScope) {
+                alert("⚠️ กรุณากรอกข้อมูลที่จำเป็น (*) ให้ครบถ้วน");
+                return;
+            }
+
+            const btnSave = document.getElementById('btnSaveJobOrder');
+            const btnSavePrint = document.getElementById('btnSaveAndPrintJobOrder');
+            if (btnSave) btnSave.disabled = true;
+            if (btnSavePrint) btnSavePrint.disabled = true;
+
+            const jobData = {
+                jobDocNo: docNo,
+                jobDate: jobDate,
+                startDate: startDate,
+                staffName: staffName,
+                customerName: customerName,
+                customerContact: customerContact,
+                customerAddress: customerAddress,
+                customerGps: customerGps,
+                serviceScope: serviceScope,
+                notes: notes,
+                status: status,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                let savedId = editId;
+                if (editId) {
+                    await db.collection('job_orders').doc(editId).update(jobData);
+                    alert(`✅ บันทึกการแก้ไขใบรับงาน ${docNo} เรียบร้อยแล้ว`);
+                } else {
+                    jobData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    const docRef = await db.collection('job_orders').add(jobData);
+                    savedId = docRef.id;
+                    alert(`✅ เปิดเอกสารใบรับงาน ${docNo} เรียบร้อยแล้ว`);
+                }
+
+                // 🔄 Seamless Linkage to Firestore `customers` (so index.html immediately sees the site!)
+                try {
+                    const cleanName = customerName.trim();
+                    const existingCust = (cachedCustomers || []).find(c => 
+                        (c.name && c.name.trim().toLowerCase() === cleanName.toLowerCase()) ||
+                        (c.site && c.site.trim().toLowerCase() === cleanName.toLowerCase())
+                    );
+                    const siteTitle = cleanName + (serviceScope ? ` (${serviceScope.substring(0, 25).trim()})` : '');
+                    
+                    if (existingCust && existingCust._id) {
+                        await db.collection('customers').doc(existingCust._id).update({
+                            name: cleanName,
+                            site: existingCust.site || siteTitle,
+                            phone: customerContact,
+                            lineId: customerContact,
+                            address: customerAddress,
+                            gps: customerGps,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } else {
+                        const newCustRef = await db.collection('customers').add({
+                            name: cleanName,
+                            site: siteTitle,
+                            phone: customerContact,
+                            lineId: customerContact,
+                            address: customerAddress,
+                            gps: customerGps,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        // Add to local cachedCustomers
+                        if (cachedCustomers) {
+                            cachedCustomers.push({
+                                _id: newCustRef.id,
+                                name: cleanName,
+                                site: siteTitle,
+                                phone: customerContact,
+                                lineId: customerContact,
+                                address: customerAddress,
+                                gps: customerGps
+                            });
+                        }
+                    }
+                    populateJobCustomerDropdown();
+                } catch (syncErr) {
+                    console.warn("Auto-sync to customers collection note:", syncErr);
+                }
+
+                // Reload Job Orders list
+                await loadJobOrdersData();
+
+                // If user chose Save & Print
+                if (andPrint && savedId) {
+                    printJobOrderA4(savedId);
+                }
+
+                // Reset form to fresh new state
+                resetJobOrderForm();
+
+            } catch (err) {
+                console.error("Save job order error:", err);
+                alert("❌ เกิดข้อผิดพลาดในการบันทึกใบรับงาน: " + err.message);
+            } finally {
+                if (btnSave) btnSave.disabled = false;
+                if (btnSavePrint) btnSavePrint.disabled = false;
+            }
+        }
+
+        function handleSaveAndPrintJobOrder() {
+            handleSaveJobOrder(new Event('submit'), true);
+        }
+
+        // Reset Job Order Form
+        function resetJobOrderForm() {
+            const form = document.getElementById('jobOrderForm');
+            if (form) form.reset();
+
+            const editId = document.getElementById('jobEditId');
+            if (editId) editId.value = '';
+
+            const title = document.getElementById('jobFormTitle');
+            if (title) title.textContent = 'แบบฟอร์มเปิดเอกสารใบรับงานบริการ (Customer Service Intake Form)';
+
+            const badge = document.getElementById('jobFormModeBadge');
+            if (badge) {
+                badge.className = 'px-2.5 py-1 text-xs rounded-full font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30';
+                badge.textContent = '🆕 เปิดใบงานใหม่';
+            }
+
+            const btnCancel = document.getElementById('btnCancelJobEdit');
+            if (btnCancel) btnCancel.classList.add('hidden');
+
+            const btnSave = document.getElementById('btnSaveJobOrder');
+            if (btnSave) btnSave.innerHTML = '💾 บันทึกใบรับงาน';
+
+            initJobOrdersForm();
+        }
+
+        function cancelJobEdit() {
+            resetJobOrderForm();
+        }
+
+        // Load Job Orders from Firestore
+        async function loadJobOrdersData() {
+            const tbody = document.getElementById('jobOrdersTableBody');
+            if (tbody && (!cachedJobOrdersList || cachedJobOrdersList.length === 0)) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-slate-400"><div class="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>กำลังโหลดข้อมูลใบรับงาน...</td></tr>';
+            }
+
+            try {
+                let snapshot;
+                try {
+                    snapshot = await db.collection('job_orders').orderBy('createdAt', 'desc').get();
+                } catch (orderErr) {
+                    console.warn("Falling back to unordered job_orders fetch:", orderErr);
+                    snapshot = await db.collection('job_orders').get();
+                }
+
+                cachedJobOrdersList = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    let dateObj = null;
+                    if (data.createdAt && data.createdAt.toDate) {
+                        dateObj = data.createdAt.toDate();
+                    } else if (data.createdAt) {
+                        dateObj = new Date(data.createdAt);
+                    } else if (data.jobDate) {
+                        dateObj = new Date(data.jobDate);
+                    }
+                    cachedJobOrdersList.push({
+                        id: doc.id,
+                        ...data,
+                        _dateObj: dateObj
+                    });
+                });
+
+                // Sort descending by date if fallback was used
+                cachedJobOrdersList.sort((a, b) => {
+                    const timeA = a._dateObj ? a._dateObj.getTime() : 0;
+                    const timeB = b._dateObj ? b._dateObj.getTime() : 0;
+                    return timeB - timeA;
+                });
+
+                filterJobOrdersTable();
+                initJobOrdersForm();
+
+            } catch (err) {
+                console.error("Load job_orders error:", err);
+                if (tbody) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-red-400">❌ ไม่สามารถโหลดข้อมูลใบรับงานได้: ${escapeHtml(err.message)}</td></tr>`;
+                }
+            }
+        }
+
+        // Filter and Render Table
+        function filterJobOrdersTable() {
+            const tbody = document.getElementById('jobOrdersTableBody');
+            if (!tbody) return;
+
+            let filtered = [...cachedJobOrdersList];
+
+            // 1. Filter by Date
+            if (currentJobDateFilter === 'today') {
+                const now = new Date();
+                const pad = (n) => String(n).padStart(2, '0');
+                const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+                filtered = filtered.filter(item => (item.jobDate === todayStr) || (item._dateObj && item._dateObj.toISOString().slice(0, 10) === todayStr));
+            } else if (currentJobDateFilter === '7days') {
+                const cutoff = new Date();
+                cutoff.setDate(cutoff.getDate() - 7);
+                filtered = filtered.filter(item => item._dateObj && item._dateObj >= cutoff);
+            } else if (currentJobDateFilter === 'month') {
+                const cutoff = new Date();
+                cutoff.setDate(1);
+                cutoff.setHours(0, 0, 0, 0);
+                filtered = filtered.filter(item => item._dateObj && item._dateObj >= cutoff);
+            }
+
+            // 2. Filter by Status
+            const statusFilter = document.getElementById('jobStatusFilter')?.value;
+            if (statusFilter && statusFilter !== 'all') {
+                filtered = filtered.filter(item => (item.status || 'รอดำเนินการ') === statusFilter);
+            }
+
+            // 3. Filter by Search Query
+            const q = document.getElementById('jobSearchInput')?.value?.trim().toLowerCase();
+            if (q) {
+                filtered = filtered.filter(item => {
+                    const matchDoc = (item.jobDocNo || '').toLowerCase().includes(q);
+                    const matchCust = (item.customerName || '').toLowerCase().includes(q);
+                    const matchAddr = (item.customerAddress || '').toLowerCase().includes(q);
+                    const matchScope = (item.serviceScope || '').toLowerCase().includes(q);
+                    const matchStaff = (item.staffName || '').toLowerCase().includes(q);
+                    const matchContact = (item.customerContact || '').toLowerCase().includes(q);
+                    return matchDoc || matchCust || matchAddr || matchScope || matchStaff || matchContact;
+                });
+            }
+
+            // Update Badge Count
+            const countBadge = document.getElementById('jobTableCountBadge');
+            if (countBadge) {
+                countBadge.textContent = `${filtered.length} รายการ`;
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-slate-500">ไม่พบรายการใบรับงานบริการตามเงื่อนไขที่ค้นหา</td></tr>';
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(item => {
+                const docNo = escapeHtml(item.jobDocNo || '-');
+                const jobDate = escapeHtml(item.jobDate || '-');
+                const custName = escapeHtml(item.customerName || '-');
+                const custContact = escapeHtml(item.customerContact || '-');
+                const address = escapeHtml(item.customerAddress || '-');
+                const scope = escapeHtml(item.serviceScope || '-');
+                const staff = escapeHtml(item.staffName || '-');
+                const startDate = item.startDate ? escapeHtml(item.startDate.replace('T', ' ')) : '-';
+                const status = item.status || 'รอดำเนินการ';
+
+                let statusBadge = '<span class="px-2.5 py-1 rounded-lg text-xs font-black bg-amber-500 text-slate-950 border border-amber-300 shadow">⏳ รอดำเนินการ</span>';
+                if (status === 'กำลังดำเนินงาน') {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-lg text-xs font-black bg-blue-600 text-white border border-blue-300 shadow">⚙️ กำลังดำเนินงาน</span>';
+                } else if (status === 'เสร็จสิ้น') {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-600 text-white border border-emerald-300 shadow">✅ เสร็จสิ้น</span>';
+                }
+
+                const mapBtn = item.customerGps ? `
+                    <a href="${item.customerGps.startsWith('http') ? escapeHtml(item.customerGps) : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(item.customerGps)}" target="_blank" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-300 hover:text-white bg-emerald-950 px-2 py-0.5 rounded border border-emerald-600 mt-1 shadow-sm">
+                        📍 แผนที่
+                    </a>
+                ` : '';
+
+                html += `
+                    <tr class="hover:bg-slate-800/80 transition border-b border-slate-700/80">
+                        <td class="px-3.5 py-3.5 sticky left-0 bg-slate-950 z-10 border-r-2 border-slate-700 shadow-md w-[140px]">
+                            <div class="font-black font-mono text-amber-300 text-sm tracking-wider">${docNo}</div>
+                            <div class="text-xs font-mono text-slate-300 font-bold mt-1">📅 ${jobDate}</div>
+                        </td>
+                        <td class="px-3.5 py-3.5 w-[170px]">
+                            <div class="font-extrabold text-white text-sm">${custName}</div>
+                            <div class="text-xs text-cyan-300 font-bold mt-1 truncate max-w-[160px]" title="${custContact}">📞 ${custContact}</div>
+                        </td>
+                        <td class="px-3.5 py-3.5 w-[200px]">
+                            <div class="text-xs sm:text-sm text-emerald-300 font-bold max-w-[190px]" title="${address}">📍 ${address}</div>
+                            ${mapBtn}
+                        </td>
+                        <td class="px-3.5 py-3.5 min-w-[220px]">
+                            <div class="text-xs sm:text-sm text-amber-100 font-bold max-w-[240px]" title="${scope}">${scope}</div>
+                            ${item.notes ? `<div class="text-xs text-yellow-300/90 font-medium mt-1 italic truncate max-w-[250px]" title="${escapeHtml(item.notes)}">หมายเหตุ: ${escapeHtml(item.notes)}</div>` : ''}
+                        </td>
+                        <td class="px-3.5 py-3.5 w-[140px] whitespace-nowrap text-xs sm:text-sm text-white font-mono font-bold">
+                            ⏰ ${startDate}
+                        </td>
+                        <td class="px-3.5 py-3.5 w-[120px] text-xs sm:text-sm text-white font-bold truncate" title="${staff}">
+                            👷 ${staff}
+                        </td>
+                        <td class="px-3.5 py-3.5 text-center w-[120px]">
+                            ${statusBadge}
+                        </td>
+                        <td class="px-3.5 py-3.5 text-center no-print w-[240px]">
+                            <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                                <button type="button" onclick="printJobOrderA4('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow border border-indigo-400 active:scale-95" title="พิมพ์ใบรับงาน A4">
+                                    🖨️ A4
+                                </button>
+                                <button type="button" onclick="goToPickingRequisition('${escapeHtml(item.customerName || '')}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow border border-emerald-400 active:scale-95" title="ไปหน้าเบิกสินค้าสำหรับงานนี้">
+                                    📦 เบิกของ
+                                </button>
+                                <button type="button" onclick="editJobOrder('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow border border-blue-400 active:scale-95" title="แก้ไขใบรับงาน">
+                                    ✏️
+                                </button>
+                                <button type="button" onclick="deleteJobOrder('${item.id}', '${docNo}')" class="px-2.5 py-1.5 rounded-lg bg-rose-700 hover:bg-rose-600 text-white text-xs font-black shadow border border-rose-400 active:scale-95" title="ลบใบรับงาน">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // Backward compatibility alias for any existing caller
+        window.filterJobOrdersData = filterJobOrdersTable;
+
+        // Set Date Filter
+        function setJobDateFilter(filter) {
+            currentJobDateFilter = filter;
+            document.querySelectorAll('.job-date-btn').forEach(btn => {
+                btn.className = 'job-date-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition';
+            });
+            const activeBtn = document.getElementById(`btnJobDate_${filter}`);
+            if (activeBtn) {
+                activeBtn.className = 'job-date-btn px-2.5 py-1 rounded-lg bg-blue-600 text-white font-bold transition';
+            }
+            filterJobOrdersTable();
+        }
+
+        // Edit Job Order
+        function editJobOrder(id) {
+            const job = cachedJobOrdersList.find(j => j.id === id);
+            if (!job) return;
+
+            document.getElementById('jobEditId').value = job.id;
+            document.getElementById('jobDocNo').value = job.jobDocNo || '';
+            document.getElementById('jobDate').value = job.jobDate || '';
+            document.getElementById('jobStartDate').value = job.startDate || '';
+            document.getElementById('jobStaffName').value = job.staffName || '';
+            document.getElementById('jobCustomerName').value = job.customerName || '';
+            document.getElementById('jobCustomerContact').value = job.customerContact || '';
+            document.getElementById('jobCustomerAddress').value = job.customerAddress || '';
+            document.getElementById('jobCustomerGps').value = job.customerGps || '';
+            document.getElementById('jobServiceScope').value = job.serviceScope || '';
+            document.getElementById('jobNotes').value = job.notes || '';
+            document.getElementById('jobStatus').value = job.status || 'รอดำเนินการ';
+
+            const title = document.getElementById('jobFormTitle');
+            if (title) title.textContent = `✏️ แก้ไขใบรับงานบริการ: ${job.jobDocNo}`;
+
+            const badge = document.getElementById('jobFormModeBadge');
+            if (badge) {
+                badge.className = 'px-2.5 py-1 text-xs rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                badge.textContent = '✏️ โหมดแก้ไข';
+            }
+
+            const btnCancel = document.getElementById('btnCancelJobEdit');
+            if (btnCancel) btnCancel.classList.remove('hidden');
+
+            const btnSave = document.getElementById('btnSaveJobOrder');
+            if (btnSave) btnSave.innerHTML = '💾 บันทึกการแก้ไข';
+
+            // Smooth scroll to form
+            const formSection = document.getElementById('jobOrderForm');
+            if (formSection) {
+                formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Delete Job Order
+        async function deleteJobOrder(id, docNo) {
+            if (!confirm(`⚠️ ยืนยันการลบใบรับงานบริการเลขที่ ${docNo} หรือไม่?\n(การลบนี้ไม่สามารถเรียกคืนได้)`)) {
+                return;
+            }
+
+            try {
+                await db.collection('job_orders').doc(id).delete();
+                alert(`✅ ลบใบรับงาน ${docNo} เรียบร้อยแล้ว`);
+                await loadJobOrdersData();
+            } catch (err) {
+                alert("❌ เกิดข้อผิดพลาดในการลบ: " + err.message);
+            }
+        }
+
+        // Switch to picking requisition in index.html
+        function goToPickingRequisition(customerName) {
+            const url = `index.html?site=${encodeURIComponent(customerName)}`;
+            if (confirm(`📦 ต้องการเปิดหน้าต่างเบิกสินค้า (index.html) เพื่อจัดเตรียมอุปกรณ์สำหรับลูกค้า "${customerName}" ใช่หรือไม่?`)) {
+                window.open(url, '_blank');
+            }
+        }
+
+        // Print Job Order A4 Document (Rule 14 Resilient Print Studio)
+        function printJobOrderA4(id) {
+            const job = cachedJobOrdersList.find(j => j.id === id);
+            if (!job) {
+                alert("⚠️ ไม่พบข้อมูลใบรับงานที่ต้องการพิมพ์");
+                return;
+            }
+
+            const docNo = escapeHtml(job.jobDocNo || '-');
+            const jobDate = escapeHtml(job.jobDate || '-');
+            const startDate = job.startDate ? escapeHtml(job.startDate.replace('T', ' เวลา ')) : '-';
+            const custName = escapeHtml(job.customerName || '-');
+            const custContact = escapeHtml(job.customerContact || '-');
+            const custAddress = escapeHtml(job.customerAddress || '-');
+            const custGps = escapeHtml(job.customerGps || '-');
+            const scope = escapeHtml(job.serviceScope || '-').replace(/\n/g, '<br>');
+            const notes = escapeHtml(job.notes || '-').replace(/\n/g, '<br>');
+            const staff = escapeHtml(job.staffName || '-');
+            const status = escapeHtml(job.status || 'รอดำเนินการ');
+
+            const printHtml = `
+                <div style="font-family: 'Sarabun', sans-serif; color: #000000; background: #ffffff; padding: 25px; line-height: 1.5; font-size: 13px;">
+                    <!-- Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2.5px solid #1e40af; padding-bottom: 12px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <div style="font-size: 34px; font-weight: 900; color: #1e40af; letter-spacing: -1px; font-family: 'Allerta Stencil', sans-serif;">ICE</div>
+                            <div>
+                                <h1 style="margin: 0; font-size: 19px; font-weight: 900; color: #000000; letter-spacing: -0.2px;">บริษัท ไอซ์ ฟินไลท์ จำกัด (สำนักงานใหญ่)</h1>
+                                <p style="margin: 3px 0 0 0; font-size: 11.5px; font-weight: 700; color: #0f172a;">ศูนย์บริการให้เช่าระบบเสียง แสง สี เวที จอ LED และโครงสร้างจัดงานอีเวนต์ครบวงจร</p>
+                                <p style="margin: 2px 0 0 0; font-size: 11.5px; font-weight: 700; color: #0f172a;">โทร: 081-000-0000 | อีเมล: contact@icefinlight.com</p>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="display: inline-block; background: #1e40af; color: #ffffff; font-weight: 900; font-size: 15px; padding: 6px 16px; border-radius: 6px; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+                                ใบรับงานบริการ
+                            </div>
+                            <div style="font-size: 12px; font-weight: 900; color: #1e3a8a; margin-top: 4px; letter-spacing: 0.5px;">SERVICE JOB ORDER</div>
+                        </div>
+                    </div>
+
+                    <!-- Meta Information Grid (Ultra Crisp Black) -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+                        <!-- Customer Info Box -->
+                        <div style="border: 2px solid #475569; border-radius: 8px; padding: 12px; background: #f8fafc;">
+                            <div style="font-weight: 900; color: #000000; border-bottom: 2px solid #64748b; padding-bottom: 5px; margin-bottom: 8px; font-size: 13.5px;">
+                                👤 ข้อมูลลูกค้า / ผู้ว่าจ้าง
+                            </div>
+                            <table style="width: 100%; font-size: 12.5px; border-collapse: collapse;">
+                                <tr>
+                                    <td style="width: 95px; color: #000000; font-weight: 800; padding: 3px 0;">ชื่อผู้ว่าจ้าง:</td>
+                                    <td style="font-weight: 800; color: #000000; font-size: 13px; padding: 3px 0;">${custName}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #000000; font-weight: 800; padding: 3px 0;">เบอร์โทร/ติดต่อ:</td>
+                                    <td style="font-weight: 700; color: #000000; padding: 3px 0;">${custContact}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #000000; font-weight: 800; padding: 3px 0; vertical-align: top;">สถานที่จัดงาน:</td>
+                                    <td style="font-weight: 700; color: #000000; padding: 3px 0;">${custAddress}</td>
+                                </tr>
+                                ${custGps !== '-' ? `
+                                <tr>
+                                    <td style="color: #000000; font-weight: 800; padding: 3px 0;">พิกัด / แผนที่:</td>
+                                    <td style="color: #1e40af; font-weight: 700; font-size: 11.5px; padding: 3px 0;">${custGps}</td>
+                                </tr>` : ''}
+                            </table>
+                        </div>
+
+                        <!-- Job Meta Box -->
+                        <div style="border: 2px solid #475569; border-radius: 8px; padding: 12px; background: #f8fafc;">
+                            <div style="font-weight: 900; color: #000000; border-bottom: 2px solid #64748b; padding-bottom: 5px; margin-bottom: 8px; font-size: 13.5px;">
+                                📋 ข้อมูลเอกสารและกำหนดการ
+                            </div>
+                            <table style="width: 100%; font-size: 12.5px; border-collapse: collapse;">
+                                <tr>
+                                    <td style="width: 115px; color: #000000; font-weight: 800; padding: 3px 0;">เลขที่ใบรับงาน:</td>
+                                    <td style="font-weight: 900; font-family: monospace; color: #1e40af; font-size: 14px; padding: 3px 0;">${docNo}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #000000; font-weight: 800; padding: 3px 0;">วันที่รับงาน:</td>
+                                    <td style="font-weight: 700; color: #000000; padding: 3px 0;">${jobDate}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #000000; font-weight: 800; padding: 3px 0;">กำหนดเริ่มใช้งาน:</td>
+                                    <td style="font-weight: 900; color: #9a3412; font-size: 13px; padding: 3px 0;">${startDate}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #000000; font-weight: 800; padding: 3px 0;">เจ้าหน้าที่รับงาน:</td>
+                                    <td style="font-weight: 700; color: #000000; padding: 3px 0;">${staff}</td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #000000; font-weight: 800; padding: 3px 0;">สถานะงาน:</td>
+                                    <td style="font-weight: 900; color: #000000; padding: 3px 0;">${status}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Scope of Services Box (Ultra Crisp) -->
+                    <div style="border: 2px solid #475569; border-radius: 8px; margin-bottom: 16px; overflow: hidden;">
+                        <div style="background: #e2e8f0; padding: 8px 12px; font-weight: 900; color: #000000; font-size: 13.5px; border-bottom: 1.5px solid #64748b;">
+                            🛠️ รายละเอียดงานบริการที่ลูกค้าต้องการ (Scope of Services)
+                        </div>
+                        <div style="padding: 14px; background: #ffffff; min-height: 120px; font-size: 13.5px; line-height: 1.6; color: #000000; font-weight: 700;">
+                            ${scope}
+                        </div>
+                    </div>
+
+                    <!-- Notes & Terms Box (Ultra Crisp) -->
+                    <div style="border: 2px solid #475569; border-radius: 8px; margin-bottom: 24px; overflow: hidden;">
+                        <div style="background: #e2e8f0; padding: 7px 12px; font-weight: 900; color: #000000; font-size: 12.5px; border-bottom: 1.5px solid #64748b;">
+                            📝 เงื่อนไขการมัดจำ / ข้อตกลงเพิ่มเติม (Terms & Remarks)
+                        </div>
+                        <div style="padding: 10px 12px; font-size: 12.5px; color: #000000; line-height: 1.5; font-weight: 700;">
+                            ${notes}
+                        </div>
+                    </div>
+
+                    <!-- Signatures Section (Ultra Crisp) -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 25px; text-align: center;">
+                        <div style="border: 2px solid #475569; border-radius: 8px; padding: 16px 8px; background: #f8fafc;">
+                            <div style="height: 50px;"></div>
+                            <div style="border-top: 1.5px solid #0f172a; width: 85%; margin: 0 auto 6px auto;"></div>
+                            <div style="font-weight: 900; color: #000000; font-size: 12.5px;">( ${custName} )</div>
+                            <div style="font-size: 11.5px; font-weight: 800; color: #0f172a; margin-top: 2px;">ผู้ว่าจ้าง / ลูกค้า</div>
+                            <div style="font-size: 11px; font-weight: 700; color: #0f172a; margin-top: 3px;">วันที่: ..... / ..... / .........</div>
+                        </div>
+
+                        <div style="border: 2px solid #475569; border-radius: 8px; padding: 16px 8px; background: #f8fafc;">
+                            <div style="height: 50px;"></div>
+                            <div style="border-top: 1.5px solid #0f172a; width: 85%; margin: 0 auto 6px auto;"></div>
+                            <div style="font-weight: 900; color: #000000; font-size: 12.5px;">( ${staff} )</div>
+                            <div style="font-size: 11.5px; font-weight: 800; color: #0f172a; margin-top: 2px;">เจ้าหน้าที่ผู้รับงาน</div>
+                            <div style="font-size: 11px; font-weight: 700; color: #0f172a; margin-top: 3px;">วันที่: ..... / ..... / .........</div>
+                        </div>
+
+                        <div style="border: 2px solid #475569; border-radius: 8px; padding: 16px 8px; background: #f8fafc;">
+                            <div style="height: 50px;"></div>
+                            <div style="border-top: 1.5px solid #0f172a; width: 85%; margin: 0 auto 6px auto;"></div>
+                            <div style="font-weight: 900; color: #000000; font-size: 12.5px;">( .................................................... )</div>
+                            <div style="font-size: 11.5px; font-weight: 800; color: #0f172a; margin-top: 2px;">ผู้จัดการ / ผู้อนุมัติ</div>
+                            <div style="font-size: 11px; font-weight: 700; color: #0f172a; margin-top: 3px;">วันที่: ..... / ..... / .........</div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Note (Ultra Crisp) -->
+                    <div style="margin-top: 25px; padding-top: 8px; border-top: 1.5px solid #475569; display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #0f172a;">
+                        <span>พิมพ์จากระบบ ICE FINLIGHT ERP Admin Control Center</span>
+                        <span>เอกสารต้นฉบับสำหรับการรับงานบริการ</span>
+                    </div>
+                </div>
+            `;
+
+            renderResilientPrintDocument(printHtml, `ใบรับงานบริการ_${docNo}`);
+        }
+
+        function scrollJobOrdersTable(amount) {
+            const container = document.getElementById('jobOrdersTableScrollContainer');
+            if (container) {
+                container.scrollBy({ left: amount, behavior: 'smooth' });
+            }
+        }
+
+
         let cachedRequisitionsList = [];
         let currentReportTab = 'pending'; // 'pending' | 'returned' | 'all'
 
@@ -6001,19 +7085,17 @@
         function updateRequisitionBadge(count) {
             const badge = document.getElementById('badge-reports-alert');
             const mobBadge = document.getElementById('mob-badge-reports-alert');
+            const jobBadge = document.getElementById('badge-joborders-alert');
+            const jobMobBadge = document.getElementById('mob-badge-joborders-alert');
             const displayStyle = (count && count > 0) ? 'inline-flex' : 'none';
-            if (badge) {
-                badge.textContent = count || 0;
-                badge.style.display = displayStyle;
-                if (count > 0) badge.classList.remove('hidden');
-                else badge.classList.add('hidden');
-            }
-            if (mobBadge) {
-                mobBadge.textContent = count || 0;
-                mobBadge.style.display = displayStyle;
-                if (count > 0) mobBadge.classList.remove('hidden');
-                else mobBadge.classList.add('hidden');
-            }
+            [badge, mobBadge, jobBadge, jobMobBadge].forEach(b => {
+                if (b) {
+                    b.textContent = count || 0;
+                    b.style.display = displayStyle;
+                    if (count > 0) b.classList.remove('hidden');
+                    else b.classList.add('hidden');
+                }
+            });
         }
 
         function initRequisitionAlertBadge() {

@@ -9,12 +9,33 @@
     <!-- Tailwind CSS (CDN for UI) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Dark Theme Core Styles (Brightened for clarity & professionalism) */
+        /* Dark Theme Core Styles (60 FPS Zero-Jitter Optimization) */
+        html {
+            overflow-x: clip;
+            width: 100%;
+        }
         body {
-            background-color: #1e293b; /* สว่างขึ้น เป็นโทน Slate 800 ดูสากลและสบายตา */
-            color: #f8fafc; /* ข้อความสีขาวสว่างขึ้น (Slate 50) ให้อ่านง่าย */
+            background-color: #1e293b;
+            color: #f8fafc;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             position: relative;
+            overflow-x: clip;
+            width: 100%;
+        }
+        .backdrop-blur-sm, .backdrop-blur-md, .backdrop-blur-lg, .backdrop-blur-xl, .backdrop-blur-2xl, .backdrop-blur {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        .animate-pulse {
+            animation: none !important;
+        }
+        #indexMainReportTable tbody tr, #modalItemList > div {
+            content-visibility: auto;
+            contain-intrinsic-size: 64px;
+        }
+        #indexReportTableScrollContainer, .overflow-x-auto {
+            contain: layout style;
+            overscroll-behavior-x: contain;
         }
         
         /* 🎨 ลายน้ำจักรวาล (The Supreme Watermark) - ผสาน 3 ภาพเข้าด้วยกันอย่างกลมกลืน */
@@ -73,10 +94,11 @@
         }
 
         .glass-panel {
-            background: rgba(30, 41, 59, 0.85); /* Slate 800 ทึบขึ้นเป็น 85% ป้องกันลายน้ำกวนตัวหนังสือ */
-            backdrop-filter: blur(12px);
+            background: rgba(24, 34, 52, 0.94);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.25);
         }
         .ice-glow {
             box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
@@ -196,6 +218,97 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
+        // 🚀 TURBO INDEXEDDB FAST MIRROR & PRELOADED INVENTORY CACHE (index.html)
+        window.cachedIndexInventory = window.cachedIndexInventory || [];
+        const FinlightIdxIDB = (() => {
+            const DB_NAME = 'finlight_index_fast_v1';
+            const STORE = 'snapshots';
+            let _dbP = null;
+            function open() {
+                if (_dbP) return _dbP;
+                _dbP = new Promise((resolve) => {
+                    try {
+                        if (typeof indexedDB === 'undefined') return resolve(null);
+                        const req = indexedDB.open(DB_NAME, 1);
+                        req.onupgradeneeded = () => {
+                            const idb = req.result;
+                            if (!idb.objectStoreNames.contains(STORE)) idb.createObjectStore(STORE);
+                        };
+                        req.onsuccess = () => resolve(req.result);
+                        req.onerror = () => resolve(null);
+                    } catch (e) { resolve(null); }
+                });
+                return _dbP;
+            }
+            async function get(key) {
+                const idb = await open();
+                if (!idb) return null;
+                return new Promise((resolve) => {
+                    try {
+                        const tx = idb.transaction(STORE, 'readonly');
+                        const req = tx.objectStore(STORE).get(key);
+                        req.onsuccess = () => resolve(req.result || null);
+                        req.onerror = () => resolve(null);
+                    } catch (e) { resolve(null); }
+                });
+            }
+            async function set(key, val) {
+                const idb = await open();
+                if (!idb) return;
+                try {
+                    const tx = idb.transaction(STORE, 'readwrite');
+                    tx.objectStore(STORE).put(val, key);
+                } catch (e) {}
+            }
+            return { get, set };
+        })();
+
+        // ⚡ ULTRA-FAST FIRESTORE REST BOOTSTRAPPER (index.html — โหลดเร็ว < 1 วินาที)
+        function decodeIdxRestValue(v) {
+            if (!v || typeof v !== 'object') return v;
+            if ('stringValue' in v) return v.stringValue;
+            if ('integerValue' in v) return Number(v.integerValue);
+            if ('doubleValue' in v) return Number(v.doubleValue);
+            if ('booleanValue' in v) return Boolean(v.booleanValue);
+            if ('nullValue' in v) return null;
+            if ('timestampValue' in v) {
+                const iso = v.timestampValue;
+                return { toDate: () => new Date(iso), _iso: iso, toString: () => iso };
+            }
+            if ('arrayValue' in v) {
+                const vals = (v.arrayValue && Array.isArray(v.arrayValue.values)) ? v.arrayValue.values : [];
+                return vals.map(decodeIdxRestValue);
+            }
+            if ('mapValue' in v) {
+                const fields = (v.mapValue && v.mapValue.fields) ? v.mapValue.fields : {};
+                const out = {};
+                Object.keys(fields).forEach(k => { out[k] = decodeIdxRestValue(fields[k]); });
+                return out;
+            }
+            return null;
+        }
+        async function fastFetchIdxRest(colName, pageSize = 300) {
+            const baseUrl = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/${colName}?pageSize=${pageSize}`;
+            const all = [];
+            let token = '';
+            while (true) {
+                const url = token ? `${baseUrl}&pageToken=${encodeURIComponent(token)}` : baseUrl;
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error(`REST ${colName} HTTP ${resp.status}`);
+                const json = await resp.json();
+                const docs = Array.isArray(json.documents) ? json.documents : [];
+                docs.forEach(d => {
+                    const obj = { _id: d.name.split('/').pop() };
+                    const fields = d.fields || {};
+                    Object.keys(fields).forEach(k => { obj[k] = decodeIdxRestValue(fields[k]); });
+                    all.push(obj);
+                });
+                if (!json.nextPageToken) break;
+                token = json.nextPageToken;
+            }
+            return all;
+        }
     </script>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -430,7 +543,13 @@
 
             <!-- Categories Grid (17 หมวดหมู่หลักจากระบบ) -->
             <div id="categoryGridContainer" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 mt-6">
-                <!-- Image 1 Categories -->
+                <!-- Group 1: จอ LED (แผ่นงานใบงานจอ) -->
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('จอ LED และอุปกรณ์ประกอบ')">
+                    <div class="text-4xl shrink-0 group-hover:scale-110 transition">🖥️</div>
+                    <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2"><span class="inline-block whitespace-nowrap">จอ LED และ</span> <span class="inline-block whitespace-nowrap">อุปกรณ์ประกอบ</span></h2>
+                </div>
+
+                <!-- Group 2: ระบบไฟ (แผ่นงานใบงานไฟ & 7.7.1.1. -01.jpg) -->
                 <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการโคมไฟ')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">💡</div>
                     <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">รายการโคมไฟ</h2>
@@ -456,7 +575,7 @@
                     <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2"><span class="inline-block whitespace-nowrap">หมวก+</span> <span class="inline-block whitespace-nowrap">แขนโคมไฟ</span></h2>
                 </div>
 
-                <!-- Image 2 Categories -->
+                <!-- Group 3: ระบบเสียง (แผ่นงานใบงานเสียง & 7.7.1.1. -02.jpg) -->
                 <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('ลำโพง')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🔊</div>
                     <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">ลำโพง</h2>
@@ -482,24 +601,24 @@
                     <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2"><span class="inline-block whitespace-nowrap">ชุดไมโครโฟน+</span> <span class="inline-block whitespace-nowrap">เครื่องควบคุม+</span> <span class="inline-block whitespace-nowrap">ขาไมค์</span></h2>
                 </div>
 
-                <!-- Image 3 Categories -->
+                <!-- Group 4: อุปกรณ์โครงสร้าง / เวที / Truss (แผ่นงานใบงานอุปกรณ์ & 7.7.1.1. -03.jpg) -->
                 <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการ Truss')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">⛩️</div>
                     <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">รายการ Truss</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการรอกไฟฟ้')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการรอกไฟฟ้า')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">⛓️</div>
                     <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">รายการรอกไฟฟ้า</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการนั่งร้านเหล็ก')">
-                    <div class="text-4xl shrink-0 group-hover:scale-110 transition">🪜</div>
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการนั่งร้านลิ่มล็อค')">
+                    <div class="text-4xl shrink-0 group-hover:scale-110 transition">🏗️</div>
                     <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2"><span class="inline-block whitespace-nowrap">รายการนั่งร้าน</span> <span class="inline-block whitespace-nowrap">ลิ่มล็อค</span></h2>
                 </div>
                 <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการเวที')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">🎭</div>
                     <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">รายการเวที</h2>
                 </div>
-                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการเต็นท์')">
+                <div class="glass-panel p-2 sm:p-4 rounded-lg hover:border-blue-500 transition cursor-pointer flex flex-col sm:flex-row items-center justify-center sm:justify-start px-2.5 sm:px-3 space-y-1.5 sm:space-y-0 sm:space-x-2.5 group text-center sm:text-left min-h-[72px] sm:min-h-[78px]" onclick="openModal('รายการเมการูฟ')">
                     <div class="text-4xl shrink-0 group-hover:scale-110 transition">⛺</div>
                     <h2 class="text-xs sm:text-sm font-bold text-blue-300 break-words leading-tight line-clamp-2">รายการเมการูฟ</h2>
                 </div>
@@ -547,7 +666,7 @@
         
         <!-- Copyright -->
         <div class="mt-8 pt-4 border-t border-slate-700/50 text-center text-xs text-slate-500">
-            &copy; 2026 ICE FINLIGHT System. Developed with love by Lilin & Boss Thep-Apai.
+            &copy; 2026 ICE Finlight & ICE Prosound System. Developed with love by Lilin & Boss Thep-Apai.
         </div>
     </footer>
 
@@ -819,18 +938,60 @@
         </div>
 
         <!-- 🔍 ค้นหาและกรองสินค้า -->
-        <div class="glass-panel p-4 rounded-xl border border-gray-700 flex flex-col md:flex-row gap-4 mb-4">
+        <div id="idxSearchRowWrap" class="glass-panel p-4 rounded-xl border border-gray-700 flex flex-col md:flex-row gap-4 mb-4 relative">
             <div class="flex-1 relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="text-gray-400">🔍</span>
                 </div>
-                <input type="text" id="invSearchInput" onkeyup="filterInventory()" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white focus:border-blue-500 outline-none transition" placeholder="พิมพ์ชื่อ หรือ SKU เพื่อค้นหา...">
+                <input type="text" id="invSearchInput" autocomplete="off"
+                       onfocus="handleIdxSearchFocus()"
+                       oninput="handleIdxSearchInput()"
+                       onkeyup="filterInventory()"
+                       onkeydown="handleIdxSearchKeydown(event)"
+                       class="w-full bg-gray-900/50 border border-gray-600 rounded-lg pl-10 pr-24 py-2 text-white focus:border-cyan-400 outline-none transition"
+                       placeholder="พิมพ์รหัส / SKU / ชื่อรายละเอียด เพื่อค้นหาและเปรียบเทียบ...">
+                <button type="button" id="btnToggleIdxExpress" onclick="toggleIdxTableExpressPanel()" title="เปิด/ซ่อนหน้าต่างเปรียบเทียบสินค้าใต้ช่องค้นหา" class="absolute inset-y-1 right-1 px-2.5 rounded-md bg-cyan-500/20 hover:bg-cyan-500/35 text-cyan-300 border border-cyan-500/40 text-xs font-semibold transition flex items-center gap-1">
+                    🔎 เทียบ
+                </button>
             </div>
             <div class="flex-1 relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="text-gray-400">📁</span>
                 </div>
-                <input type="text" id="invCategorySearchInput" onkeyup="filterInventory()" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white focus:border-blue-500 outline-none transition" placeholder="พิมพ์หมวดหมู่เพื่อกรอง...">
+                <input type="text" id="invCategorySearchInput" onkeyup="filterInventory(); if(!document.getElementById('idxTableExpressPanel')?.classList.contains('hidden')) renderIdxTableExpressPanel();" class="w-full bg-gray-900/50 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white focus:border-blue-500 outline-none transition" placeholder="พิมพ์หมวดหมู่เพื่อกรอง...">
+            </div>
+
+            <!-- 🔎 Express Comparison Popup (เกาะติดชิดใต้บรรทัดค้นหา #invSearchInput โดยตรงเท่านั้น) -->
+            <div id="idxTableExpressPanel" style="background-color:#0f172a" class="hidden absolute left-0 right-0 top-full mt-1.5 z-50 rounded-2xl border-2 border-cyan-400/80 bg-slate-900 shadow-[0_22px_55px_rgba(0,0,0,0.92)] p-3 space-y-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-base">🔎</span>
+                        <h4 class="text-xs sm:text-sm font-bold text-cyan-300">เปรียบเทียบสินค้าจากรหัส / SKU / ชื่อรายละเอียด</h4>
+                        <span id="idxTableExpressBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-cyan-200 border border-slate-700 font-mono">0 รายการ</span>
+                    </div>
+                    <button type="button" onclick="closeIdxTableExpressPanel()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-600/80 text-slate-300 hover:text-white text-xs border border-slate-600 transition whitespace-nowrap">
+                        ✕ ปิด (Esc)
+                    </button>
+                </div>
+                <div class="overflow-x-auto overflow-y-auto max-h-72 rounded-xl border border-slate-700 bg-slate-950/95 shadow-inner custom-scrollbar">
+                    <table class="w-full text-left text-xs text-gray-200 border-collapse">
+                        <thead class="bg-slate-800 text-cyan-300 uppercase text-[11px] sticky top-0 z-10 border-b border-slate-700">
+                            <tr>
+                                <th class="px-2.5 py-2 border-r border-slate-700/70 whitespace-nowrap">รูป</th>
+                                <th class="px-2.5 py-2 border-r border-slate-700/70 whitespace-nowrap">รหัส / SKU</th>
+                                <th class="px-3 py-2 border-r border-slate-700/70 min-w-[200px]">ชื่อสินค้า / รายละเอียด</th>
+                                <th class="px-2.5 py-2 border-r border-slate-700/70 whitespace-nowrap">หมวดหมู่</th>
+                                <th class="px-2.5 py-2 border-r border-slate-700/70 text-right whitespace-nowrap">คงเหลือคลังหลัง</th>
+                                <th class="px-2.5 py-2 border-r border-slate-700/70 text-right whitespace-nowrap">ราคาปลีก</th>
+                                <th class="px-2.5 py-2 border-r border-slate-700/70 whitespace-nowrap">ล็อก</th>
+                                <th class="px-2.5 py-2 text-center whitespace-nowrap">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="idxTableExpressBody" class="divide-y divide-slate-800">
+                            <tr><td colspan="8" class="text-center py-4 text-slate-400">พิมพ์รหัส / SKU หรือชื่อสินค้าเพื่อเปรียบเทียบ...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -915,12 +1076,12 @@
                         </div>
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <label class="block text-sm text-gray-400 font-medium">หน่วยนับ <span class="text-red-400">*</span></label>
+                                <label class="block text-sm text-gray-400 font-medium">หน่วยหลัก <span class="text-red-400">*</span></label>
                                 <button type="button" onclick="quickAddUnitPrompt()" class="text-xs text-purple-400 hover:text-purple-300 font-medium transition flex items-center gap-0.5" title="เพิ่มหน่วยนับใหม่">
                                     ➕ เพิ่มหน่วย
                                 </button>
                             </div>
-                            <select id="invUnit" required class="w-full bg-gray-900/50 border border-gray-600 rounded p-2 text-white focus:border-blue-500 outline-none">
+                            <select id="invUnit" required onchange="refreshIdxMultiUnitBaseLabel()" class="w-full bg-gray-900/50 border border-gray-600 rounded p-2 text-white focus:border-blue-500 outline-none">
                                 <option value="ชิ้น">ชิ้น</option>
                                 <option value="ตัว">ตัว</option>
                                 <option value="ชุด">ชุด</option>
@@ -935,6 +1096,23 @@
                             <label class="block text-sm text-gray-400 mb-1">ราคาทุน (บาท)</label>
                             <input type="number" id="invCost" min="0" step="0.01" class="w-full bg-gray-900/50 border border-gray-600 rounded p-2 text-white focus:border-blue-500 outline-none" placeholder="0.00">
                         </div>
+                    </div>
+
+                    <!-- 🔄 หน่วยนับหลายระดับ (Multi-Level Units) -->
+                    <div id="idxMultiUnitsBox" class="p-3 rounded-lg bg-purple-950/20 border border-purple-500/35 space-y-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-xs font-bold text-purple-300">🔄 หน่วยนับหลายระดับ</span>
+                                <span class="text-[11px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300">
+                                    หน่วยหลัก: <strong id="idxMultiUnitBaseName" class="text-emerald-300">ชิ้น</strong> (= 1)
+                                </span>
+                            </div>
+                            <button type="button" onclick="addIdxMultiUnitRow()" class="px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold">
+                                ➕ เพิ่มระดับหน่วย
+                            </button>
+                        </div>
+                        <datalist id="idxAllUnitsDatalist"></datalist>
+                        <div id="idxMultiUnitsList" class="space-y-1.5"></div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-800/30 p-4 rounded-lg border border-gray-700">
@@ -1103,33 +1281,103 @@
         </div>
     </section>
 
-    <!-- 🌟 MODAL (ป๊อปอัปเลือกสินค้าย่อย) 🌟 -->
-    <div id="itemModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="glass-panel w-full max-w-2xl rounded-2xl border border-gray-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transform scale-95 transition-transform duration-300" id="modalContent">
-            
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center p-5 border-b border-gray-700 bg-gray-800/50">
-                <div class="flex items-center space-x-3">
-                    <span id="modalIcon" class="text-3xl">📦</span>
-                    <h3 id="modalTitle" class="text-xl md:text-2xl font-bold text-blue-400">ชื่อหมวดหมู่</h3>
-                </div>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-red-400 hover:bg-red-400/10 p-2 rounded-lg transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
+    <!-- 🌟 MODAL (ป๊อปอัป 2 ฝั่ง: ซ้าย=เลือกสินค้าในหมวดหมู่ / ขวา=รายละเอียด & รายการเบิกยืมอุปกรณ์) 🌟 -->
+    <div id="itemModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[108] hidden flex-col items-center justify-center p-2 sm:p-4 opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-7xl rounded-2xl border border-gray-700 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] transform scale-95 transition-transform duration-300" id="modalContent">
+            <div class="grid grid-cols-1 lg:grid-cols-12 flex-1 min-h-0 overflow-hidden">
+                <!-- ฝั่งซ้าย: รายการสินค้าในหมวดหมู่ + ยอดคงเหลือคลังหลัง -->
+                <div class="lg:col-span-6 flex flex-col min-h-0 max-h-[46vh] lg:max-h-[92vh] border-b lg:border-b-0 lg:border-r border-slate-700">
+                    <!-- Modal Header (Left) -->
+                    <div class="flex justify-between items-center p-4 sm:p-5 border-b border-gray-700 bg-gray-800/60 shrink-0">
+                        <div class="flex items-center space-x-3 min-w-0">
+                            <span id="modalIcon" class="text-2xl sm:text-3xl shrink-0">📦</span>
+                            <div class="min-w-0">
+                                <h3 id="modalTitle" class="text-lg sm:text-xl font-bold text-blue-400 truncate">ชื่อหมวดหมู่</h3>
+                                <p class="text-[11px] text-slate-400">ยอดคงเหลือแสดงเฉพาะสินค้าจริงในคลังหลัง (ไม่รวมยอดเบิก/ยืม/โอน/ซ่อม/สูญหาย)</p>
+                            </div>
+                        </div>
+                        <button onclick="closeModal()" class="lg:hidden text-gray-400 hover:text-red-400 hover:bg-red-400/10 p-2 rounded-lg transition shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
 
-            <!-- Modal Body (รายการสินค้า Scroll ได้) -->
-            <div class="p-4 overflow-y-auto flex-grow custom-scrollbar">
-                <div id="modalItemList" class="space-y-2">
-                    <!-- รายการสินค้าจะถูกสร้างที่นี่ด้วย JavaScript -->
-                </div>
-            </div>
+                    <!-- Modal Body (รายการสินค้า Scroll ได้) -->
+                    <div class="p-3 sm:p-4 overflow-y-auto flex-grow custom-scrollbar">
+                        <div id="modalItemList" class="space-y-2">
+                            <!-- รายการสินค้าจะถูกสร้างที่นี่ด้วย JavaScript -->
+                        </div>
+                    </div>
 
-            <!-- Modal Footer -->
-            <div class="p-4 border-t border-gray-700 bg-gray-800/30 flex justify-end">
-                <button onclick="saveCategoryToCart()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition font-medium shadow-lg shadow-blue-500/30">กดบันทึกลงตะกร้า</button>
+                    <!-- Modal Footer (Left) -->
+                    <div class="p-3 sm:p-4 border-t border-gray-700 bg-gray-800/40 flex items-center justify-between gap-2 shrink-0">
+                        <span class="text-xs text-slate-400 hidden sm:inline">ใส่จำนวนแล้วกดส่งไปฝั่งขวา ➔</span>
+                        <button onclick="saveCategoryToCart()" class="w-full sm:w-auto px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition font-bold shadow-lg shadow-blue-500/30 flex items-center justify-center gap-1.5">
+                            <span>กดบันทึกลงตะกร้า</span> <span>➔</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ฝั่งขวา (กรอบสีแดงที่มาร์ก): รายการเบิกยืมอุปกรณ์ + รายละเอียด + ยอดคงเหลือคลังหลัง -->
+                <div class="lg:col-span-6 flex flex-col min-h-0 max-h-[46vh] lg:max-h-[92vh] bg-slate-900/80">
+                    <!-- Right Header -->
+                    <div class="flex justify-between items-center p-4 sm:p-5 border-b border-slate-700 bg-slate-800/75 shrink-0 gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="text-2xl">🛒</span>
+                            <h3 class="text-base sm:text-xl font-bold text-cyan-300 truncate">รายการเบิกยืมอุปกรณ์</h3>
+                            <span id="itemModalCartCount" class="bg-blue-900/80 text-blue-200 font-medium text-xs px-2.5 py-0.5 rounded-full border border-blue-500/50 shrink-0">0 รายการ</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="openScannerModal()" class="px-2.5 py-1.5 bg-blue-600/80 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1" title="สแกนเพิ่มสินค้า">
+                                <span>📷</span> <span class="hidden sm:inline">สแกน</span>
+                            </button>
+                            <button type="button" onclick="closeModal(true); openCartModal();" class="px-2.5 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-semibold border border-slate-600 transition whitespace-nowrap" title="เปิดหน้าต่างรายการเบิกเต็มจอ">
+                                ⛶ เต็มจอ
+                            </button>
+                            <button onclick="closeModal()" class="text-gray-400 hover:text-red-400 hover:bg-red-400/10 p-2 rounded-lg transition" title="ปิดหน้าต่าง">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Preview รายละเอียดสินค้าที่คลิก (ถ้าเลือกดู) -->
+                    <div id="itemModalDetailPreview" class="hidden mx-3 sm:mx-4 mt-3 p-3 rounded-xl bg-cyan-950/35 border border-cyan-500/40 shrink-0">
+                    </div>
+
+                    <!-- Right Scrollable Cart List (แสดงยอดคงเหลือในคลังหลังเหมือน #cartModal) -->
+                    <div class="p-3 sm:p-4 overflow-y-auto flex-grow custom-scrollbar space-y-2.5" id="itemModalCartList">
+                        <div class="text-center text-slate-400 py-8 text-sm">
+                            <div class="text-4xl mb-2 opacity-50">📦</div>
+                            <p>ยังไม่มีรายการในตะกร้า</p>
+                            <p class="text-xs text-slate-500 mt-1">เลือกจำนวนสินค้าฝั่งซ้าย แล้วกด "กดบันทึกลงตะกร้า"</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Footer: ฟอร์มด่วนซิงก์ตรงกับ #cartModal + ปุ่มบันทึกทันที -->
+                    <div class="p-3 sm:p-4 border-t border-slate-700 bg-slate-800/70 space-y-2.5 shrink-0">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                            <input type="text" id="imTechName" list="dynamicStaffList" oninput="syncItemModalFieldToCart('techName', this.value)" placeholder="ชื่อผู้เบิก/พนักงาน *" class="w-full bg-slate-700 border border-slate-500 rounded-lg px-2.5 py-1.5 text-white outline-none focus:border-blue-400">
+                            <input type="password" id="imTechPin" oninput="syncItemModalFieldToCart('techPin', this.value)" placeholder="รหัส PIN ยืนยัน *" class="w-full bg-slate-700 border border-slate-500 rounded-lg px-2.5 py-1.5 text-white text-center outline-none focus:border-blue-400">
+                            <input type="text" id="imJobSite" list="jobSitesList" oninput="syncItemModalFieldToCart('jobSite', this.value)" placeholder="ไซต์งาน (รับงานแล้ว) *" class="w-full bg-slate-700 border border-slate-500 rounded-lg px-2.5 py-1.5 text-white outline-none focus:border-blue-400">
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <button type="button" onclick="clearCart()" class="px-3 py-2 bg-red-600/20 hover:bg-red-600/40 border border-red-500/50 text-red-300 rounded-lg text-xs font-semibold transition">
+                                🗑️ ล้างตะกร้า
+                            </button>
+                            <div class="flex items-center gap-2 ml-auto">
+                                <button type="button" onclick="closeModal(true); openCartModal();" class="px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-semibold border border-slate-500 transition">
+                                    📋 ฟอร์มเต็ม (#cart)
+                                </button>
+                                <button type="button" onclick="saveFromItemModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs sm:text-sm font-bold shadow-lg ice-glow transition">
+                                    บันทึกใบเบิกและยืม 📝
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1189,7 +1437,7 @@
                         ศูนย์รวมเอกสารทางเดินงาน (8 ชนิด)
                         <span id="hubDocNoBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/40">REQ-...</span>
                     </h3>
-                    <p class="text-xs text-slate-400">ระบบเชื่อมโยงและตรวจสอบย้อนกลับทางเดินเอกสาร ICE FINLIGHT</p>
+                    <p class="text-xs text-slate-400">ระบบเชื่อมโยงและตรวจสอบย้อนกลับทางเดินเอกสาร ICE Finlight & ICE Prosound</p>
                 </div>
             </div>
             <button onclick="closeDocumentHubModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-600/60 text-lg">
@@ -1581,11 +1829,11 @@
         }
         window.formatCategoryDisplayName = formatCategoryDisplayName;
 
-        // 🎛️ Universal Table Scroll Navigation & Synchronized Scrollbar (Lilin Standard)
+        // 🎛️ Universal Table Scroll Navigation & rAF Synchronized Scrollbar (Zero Ping-Pong Jitter)
         function scrollIndexReportTable(offset) {
             const container = document.getElementById('indexReportTableScrollContainer');
             if (container) {
-                container.scrollBy({ left: offset, behavior: 'smooth' });
+                container.scrollLeft += offset;
             }
         }
 
@@ -1603,26 +1851,30 @@
                 }
             };
             updateWidth();
-            window.addEventListener('resize', updateWidth);
+            window.addEventListener('resize', updateWidth, { passive: true });
 
-            let isSyncingTop = false;
-            let isSyncingBottom = false;
+            let syncLock = null;
+            let rafId = 0;
 
             topScroll.addEventListener('scroll', () => {
-                if (!isSyncingTop) {
-                    isSyncingBottom = true;
+                if (syncLock === 'bottom') { syncLock = null; return; }
+                syncLock = 'top';
+                if (rafId) cancelAnimationFrame(rafId);
+                rafId = requestAnimationFrame(() => {
                     tableContainer.scrollLeft = topScroll.scrollLeft;
-                }
-                isSyncingTop = false;
-            });
+                    requestAnimationFrame(() => { syncLock = null; });
+                });
+            }, { passive: true });
 
             tableContainer.addEventListener('scroll', () => {
-                if (!isSyncingBottom) {
-                    isSyncingTop = true;
+                if (syncLock === 'top') { syncLock = null; return; }
+                syncLock = 'bottom';
+                if (rafId) cancelAnimationFrame(rafId);
+                rafId = requestAnimationFrame(() => {
                     topScroll.scrollLeft = tableContainer.scrollLeft;
-                }
-                isSyncingBottom = false;
-            });
+                    requestAnimationFrame(() => { syncLock = null; });
+                });
+            }, { passive: true });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1631,35 +1883,99 @@
 
 
 
-        // 1. ฐานข้อมูลจำลอง (ดึงจากภาพ 3 ใบของบอสเทพอภัย)
+        // 1. ฐานข้อมูลแม่บทสินค้าแยกเดี่ยว 100% (ตรงตาม Excel 7 แผ่นงาน และภาพถ่ายใบงานจริง 3 ใบ)
         const categoryData = {
-            'รายการโคมไฟ': { icon: '💡', items: ['Moving Beam F-580', 'Moving Beam T-580 TUNA', 'Moving Beam ip650F', 'BSW Moving Beam K600', 'BSWF Moving Beam XT800', 'Beam 80W / ไฟพาร์', 'Tilt Strobe 1200W', 'Strobe LED 1000W', 'Strobe LED 200W', 'Strobe MB-H001', 'Bar Dot / AM-F55510', 'Bar Pixell / AM-CP3216', 'Moving Zoom 3715', 'Tilt Bar', 'BEE EYE 1940 / K10', 'BEE EYE 1940 กันน้ำ', 'ไฟสปอร์ตไลท์ 2 หน้า (4 หัว)', 'ไฟสปอร์ตไลท์ 1 หน้า (2 หัว)', 'ไฟสปอร์ตไลท์ COB', 'LED PAR กันน้ำ', 'Super PAR', 'LED PAR 3Wx54 / 3IN1', 'LED PAR 3Wx54 / 4IN1', 'LED PAR 10Wx18 / 4IN1', 'LED PAR 12Wx18 / 6IN1', 'LED PAR 64/1000W'] },
-            'ไฟเลเซอร์ + CO2': { icon: '💨', items: ['เลเซอร์ เขียว / ออกสี', 'เลเซอร์ 50W สีสันทวีป', 'เลเซอร์ 30W สีสันทวีป', 'เครื่องพ่น CO2'] },
-            'บอร์ดคอนโทรลไฟ+บูทเตอร์': { icon: '🎛️', items: ['บอร์ดคอนโทรล MA2, NPU, Grand MA3', 'บอร์ดสไลด์ MA / ปีก, DMX Mixer 36', 'บูทเตอร์ AM-SP8 ตัวเล็ก', 'บูทเตอร์ PM2 / DMX Splitter 4CH, RDM8402J / DMX Splitter 4', 'บูทเตอร์ DMX 4 ช่อง, RDM DMX512', 'ตู้ DIMMER 6K. 12 CH.'] },
-            'สายสัญญาณไฟ': { icon: '🔌', items: ['สายสัญญาณลิงค์ (3ม., 5ม., 10ม., 20ม., LED PAR กันน้ำ 3ม.)', 'พ่วงไฟ (จั้ม Y, ปลั๊ก Y-2 ตา 16A, ปลั๊ก Y-4 ตา 16A, ปลั๊กผู้-เมีย 5ม./10ม.)'] },
-            'สายไฟ': { icon: '⚡', items: ['สายไฟเมน 16A/32A (10ม., 20ม., 25ม.), พาวเวอร์คอน 5ม., สาย LED PAR กันน้ำ 3ม.'] },
-            'หมวก+แขนโคมไฟ': { icon: '🏗️', items: ['หมวก (สวม/กลาง/ใหญ่, หมวก Moving Bar, แขนสวม)'] },
-            'ลำโพง': { icon: '🔊', items: ['ลำโพง NEXO: M46, B112, S118/SUB, GEO M1220, GEO M1210, RS18, PS15 UR, STM M28, STM 118', 'ลำโพง RCF & Admark: RCF ART 310A, Admark AD-L5A, AD-728C/SUB, AD-321A/SUB', 'ลำโพง ICE: ICE SUB 218, ICE SUB 18 นิ้ว (RS18, RS28, LS18), ICE LINE ARRAY 212, ICE PA 10 นิ้ว/V8', 'ลำโพง Active: Active 12 นิ้ว/FPJ 12AD, Active 15 นิ้ว/FPJ 15AD'] },
-            'เพาเวอร์แอมป์': { icon: '🔋', items: ['เพาเวอร์ NEXO', 'เพาเวอร์ ICE FINLIGHT/PA', 'เพาเวอร์ ICE FINLIGHT/SUB'] },
-            'มิกซ์+คอนโทรล': { icon: '🎚️', items: ['Mixers: DIGICO X-SD08, Midas M32 Live, YAMAHA DM7, YAMAHA MG12XU, YAMAHA DM3', 'Stage Boxes: DIGICO, Midas DL32, YAMAHA Rio3224-D2', 'Controllers: ชุดคอนโทรล Admark DX428, คอนโทรล LAKE LMX88, คอนโทรล Marani MIR-260E', 'ชุดกล่องรับ MRT MADI แร็ค, กล่อง DI BOX'] },
-            'สายไฟ+สายสัญญาณ+ตู้ไฟ': { icon: '🔌', items: ['สายไฟ+สายสัญญาณ+พ่วง (ลำโพง 4/8 คอร์, สายสัญญาณ XLR 4/8/12 คอร์, ตู้ไฟ, โหลด, นั่งร้าน, รอกกว้าน)'] },
-            'แร็คอุปกรณ์': { icon: '🗄️', items: ['อุปกรณ์เสริม (อุปกรณ์แขวนลำโพงทอง/แดง/ดำ/เงิน, Fly Bar แขวนลำโพง NEXO/Admark/J8/V8/LS18)'] },
-            'ชุดไมโครโฟน+เครื่องควบคุม+ขาไมค์': { icon: '🎤', items: ['ชุดไมค์ลอย+เครื่องรับสัญญาณ+หูฟัง (Wireless Intercom, Sound Vision, SHURE SM58/SM57, ขาตั้งไมค์ใหญ่/Baby Boom/ไมค์กลอง, ขาตั้งลำโพง)'] },
-            'รายการ Truss': { icon: '⛩️', items: ['Truss 1ม., 2ม., 3ม., 3ม.(40cm) (กล่อง: มีสลัก/จอยท์)', 'ตอม่อ (ดำ/เงิน), แป้นหน้าแปลน (1ม./2ม.), ข้อต่อ, ลูกเต๋า, สลัก+พิน, แขนยื่นกล่อง, ผ้าใบหุ้มท่อ, ผ้าใบหุ้มตอม่อ'] },
-            'รายการรอกไฟฟ้า': { icon: '⛓️', items: ['รอกไฟฟ้า 1T x 20M, 2T x 36M', 'ตู้คอนโทรลรอกไฟฟ้า HGK-G-4, HGK-G-8, HGK-G-16'] },
-            'รายการนั่งร้านลิ่มล็อค': { icon: '🪜', items: ['เสา 1ม., เสา 2ม., แขน 2ม., ทะแยง 2.40ม., แผ่นทางเดิน 2ม., ขาปรับ 50cm, บันได, ยูเฮด'] },
-            'รายการเวที': { icon: '🎭', items: ['แผ่นพื้นเวที (120*240mm, 120*120mm)', 'ขาเวที (เหล็ก/มิเนียม ขาดำเงา), ขาเวที (1.20-1.80m, 0.80-1.40m, 0.60-0.80m), ขาปรับ, บันไดเวที'] },
-            'รายการเมการูฟ': { icon: '⛺', items: ['คาน 5 คอร์ด (5ม./2ม.), เสา (5ม./1.70ม.), ขาเต็นท์ 3.30ม., คานตั้ง (กล่อง/กล่อง)', 'อุปกรณ์ยึด (ผ้าใบหุ้ม, แป้นกลม, ชุดซับกลม, พิน M30, น็อต)', 'อุปกรณ์สลิง/รอก (รอกกว้าน 4T/2T, ชุดสเตย์ กลม/แบน, สเตย์ ดำ/เงิน, ยูเฮด 3 ขนาด)'] }
-        };
+    'จอ LED และอุปกรณ์ประกอบ': {
+        icon: '🖥️',
+        items: ["จอ LED", "สายไฟไลน์หลัง สั้น", "สายไฟไลน์หลัง ยาว", "สายสัญญาณไลน์หลัง สั้น", "สายสัญญาณไลน์หลัง ยาว", "สายสัญญาณยาว/สายแลนยาว", "สายเมนท์ไฟ ยาว", "หัวปลั๊กพาวเวอร์", "เบรกเกอร์", "มือเสือ", "แผ่นรองจอ", "ประกับ", "จับ 4", "ขาปรับ", "น๊อต 6 เหลี่ยม", "น๊อตเบอร์ 17", "ฝาครอบนั่งร้าน", "ตะเกียบสั้น ยาว 50/90/180", "ขานั่งร้าน 60/90/180", "ฐาน 4/6", "เสาค้ำหลัง 2.4-5.2 เมตร", "ตะเกียบค้ำหลัง", "แป๊ปค้ำหลัง", "ชุดคอนโทรล NOVA", "จอมอนิเตอร์", "สวิตซิ่ง", "อุปกรณ์จออื่นๆ"]
+    },
+    'รายการโคมไฟ': {
+        icon: '💡',
+        items: ["โคมไฟ Moving Beam F-580", "โคมไฟ Moving Beam T-580 TUNA", "โคมไฟ Moving Beam ip650F", "โคมไฟ BSW Moving Beam K600", "โคมไฟ BSWF Moving Beam XT800", "โคมไฟ Beam 80W /ทอร์นาโด", "โคมไฟ Tilt Strobe 1200W", "โคมไฟ Strobe LED 1000W", "โคมไฟ Strobe LED 200W", "โคมไฟ Strobe MB-H001", "โคมไฟ Bar Dot /AM-FS5510", "โคมไฟ Bar Pixell /AM-CP3216", "โคมไฟ Moving Zoom 3715", "โคมไฟ Tilt Bar", "โคมไฟ BEE EYE 1940 /K10", "โคมไฟ BEE EYE 1940 กันน้ำ", "โคมไฟโมเฟ่ 2 แถว (4 ตา)", "โคมไฟโมเฟ่ 1 แถว (2 ตา)", "โคมไฟ COB", "โคมไฟ LED PAR กันน้ำ", "โคมไฟ Super PAR", "โคมไฟ LED PAR 3Wx54 /3IN1", "โคมไฟ LED PAR 3Wx54 /4IN1", "โคมไฟ LED PAR 10Wx18 /4IN1", "โคมไฟ LED PAR 12Wx18 /6IN1", "โคมไฟ LED PAR 64/1000W"]
+    },
+    'ไฟเลเซอร์ + CO2': {
+        icon: '💨',
+        items: ["ไฟเลเซอร์ /ตัวเล็ก", "ไฟเลเซอร์ 50W พร้อมแล็ค", "ไฟเลเซอร์ 30W พร้อมแล็ค", "เครื่องพ่น CO2"]
+    },
+    'บอร์ดคอนโทรลไฟ+บูทเตอร์': {
+        icon: '🎛️',
+        items: ["บอร์ดคอนโทรลไฟ MA2", "บอร์ดคอนโทรลไฟ NPU", "บอร์ดคอนโทรลไฟ Grand MA3", "มิกเซอร์ MA/พร้อมแล็ค", "DMX Mixer 36", "บูทเตอร์ AM-SP8 พร้อมแล็ค", "บูทเตอร์ PM2 /DMX Splitter 4CH", "บูทเตอร์ RDM8402J/DMX Splitter 4", "บูทเตอร์ DMX 4 ช่อง", "บูทเตอร์ RDM DMX512", "แล็ค DIMMER 6K. 12 CH."]
+    },
+    'สายสัญญาณไฟ': {
+        icon: '🔌',
+        items: ["สายสัญญาณไฟ ยาว 3 ม.", "สายสัญญาณไฟ ยาว 5 ม.", "สายสัญญาณไฟ ยาว 10 ม.", "สายสัญญาณไฟ ยาว 20 ม.", "สายสัญญาณไฟ LED PAR กันน้ำ 3 ม."]
+    },
+    'สายไฟ': {
+        icon: '⚡',
+        items: ["สายไฟ Y", "สายไฟ บล๊อค Y -2 สาย 16A", "สายไฟ บล๊อค Y -4 สาย 16A", "สายไฟ หัวผู้-เมีย ยาว 5 เมตร", "สายไฟ หัวผู้-เมีย ยาว 10 เมตร", "สายไฟ หัวฟ้า 16A ผู้-เมีย ยาว 10 ม.", "สายไฟ หัวฟ้า 16A ผู้-เมีย ยาว 20 ม.", "สายไฟ หัวฟ้า 32A ผู้-เมีย ยาว 20 ม.", "สายไฟ หัวฟ้า 32A ผู้-เมีย ยาว 25 ม.", "สายไฟหัวคอนเน็ก 5 เมตร(น้ำเงิน-ส้ม)", "สายไฟ LED PAR กันน้ำ ยาว 3 เมตร"]
+    },
+    'หมวก+แขนโคมไฟ': {
+        icon: '🏗️',
+        items: ["หมวก เล็ก / กลาง / ใหญ่", "หมวก Moving Bar (ยาว)", "แขนโคมไฟ"]
+    },
+    'ลำโพง': {
+        icon: '🔊',
+        items: ["ลำโพง NEXO M46", "ลำโพง NEXO B112", "ลำโพง NEXO S118 /SUB", "ลำโพง NEXO GEO M1220", "ลำโพง NEXO GEO M1210", "ลำโพง NEXO RS18", "ลำโพง NEXO PS15 UR", "ลำโพง NEXO STM M28", "ลำโพง NEXO STM 118", "ลำโพง RCF ART 310A", "ลำโพง Admark AD-L5A", "ลำโพง Admark AD-728C /SUB", "ลำโพง Admark AD-321A /SUB", "ลำโพง ICE SUB 218", "ลำโพง ICE SUB 18 นิ้ว /RS18", "ลำโพง ICE SUB 18 นิ้ว /RS28", "ลำโพง ICE SUB 18 นิ้ว /LS18", "ลำโพง ICE LINE ARRAY 212", "ลำโพง ICE PA 10 นิ้ว /V8", "ลำโพง Active 12 นิ้ว/FPJ 12AD", "ลำโพง Active 15 นิ้ว/FPJ 15AD"]
+    },
+    'เพาเวอร์แอมป์': {
+        icon: '🔋',
+        items: ["แล็คเพาเวอร์แอมป์ NEXO", "แล็คเพาเวอร์แอมป์ ICE PROSOUND/PA", "แล็คเพาเวอร์แอมป์ ICE PROSOUND/SUB"]
+    },
+    'มิกซ์+คอนโทรล': {
+        icon: '🎚️',
+        items: ["MIXER DIGICO X-SD08", "MIXER Midas M32 Live", "MIXER YAMAHA DM7", "MIXER YAMAHA MG12XU", "MIXER YAMAHA DM3", "STAGE BOX DIGICO", "STAGE BOX Midas DL32", "STAGE BOX YAMAHA Rio3224-D2", "ชุดคอนโทรล Admark DX428", "โปรเซสเซอร์ LAKE LMX88", "โปรเซสเซอร์ Marani MIR-260E", "ชุด MRT MADI พร้อมสาย", "กล่อง DI BOX"]
+    },
+    'สายไฟ+สายสัญญาณ+ตู้ไฟ': {
+        icon: '🔌',
+        items: ["สายไฟลำโพงสั้น-4 คอร์", "สายไฟลำโพงสั้น-8 คอร์", "สายไฟลำโพงยาว-4 คอร์", "สายไฟลำโพงยาว-8 คอร์", "สายสัญญาณ XLR สั้น", "สายสัญญาณ XLR ยาว", "สายสัญญาณ XLR -4 คอร์", "สายสัญญาณ XLR -8 คอร์", "สายสัญญาณ XLR -12 คอร์", "สายสัญญาณสเตจบล๊อก XLR -8คอร์", "สายสัญญาณสเตจบล๊อก XLR -12คอร์", "สายเมนท์ไฟ", "ตู้โหลด", "ปลั๊กราง 4 ช่อง", "เบรกเกอร์ 1 เฟส /8ช่อง(สีส้ม)"]
+    },
+    'แร็คอุปกรณ์': {
+        icon: '🗄️',
+        items: ["อุปกรณ์แขวนลำโพง(NO.1) /สีเหลือง", "อุปกรณ์แขวนลำโพง(NO.2) /สีแดง", "อุปกรณ์แขวนลำโพง(NO.3) /สีเขียว", "อุปกรณ์แขวนลำโพง(NO.4) /สีส้ม", "Fly Bar แขวนลำโพง NEXO", "Fly Bar แขวนลำโพง Admark", "Fly Bar แขวนลำโพง J8", "Fly Bar แขวนลำโพง V8", "Fly Bar แขวนลำโพง LS18"]
+    },
+    'ชุดไมโครโฟน+เครื่องควบคุม+ขาไมค์': {
+        icon: '🎤',
+        items: ["ชุด Wireless Intercom /แบบหูครอบ", "ชุดไมค์ Sound Vision SU-990D", "ชุดไมค์ SHURE+ชุดรับสัญญาณ", "ชุดอินเตอร์เฟส EVO 16+RTA", "ชุดอินเตอร์เฟส HAMONIC", "ไมโครโฟน SHURE SM58", "ไมโครโฟน SHURE SM57", "ไมโครโฟน GIP MG V50s", "ไมโครโฟน Earthworks SR-40", "ขาตั้งไมค์บูมใหญ่ GIP GMS-345", "ขาตั้งไมค์ Baby Boom", "ขาตั้งไมค์โต๊ะคออ่อนฐาน V MS-016", "ขาตั้งลำโพง"]
+    },
+    'รายการ Truss': {
+        icon: '⛩️',
+        items: ["Truss 1 ม. (ดำ / เงิน)", "Truss 2 ม. (ดำ / เงิน)", "Truss 3 ม. (ดำ / เงิน)", "Truss 3 ม. 40 cm.", "เต๋า (ดำ / เงิน)", "ไปป์ (1 ม. / 2 ม.)", "แผ่นเพลส", "จ๊อย", "สลัก+กิ๊ฟ", "แขนแขวนรอก", "สลิฟบล๊อค", "ฐานสลิฟบล๊อค"]
+    },
+    'รายการรอกไฟฟ้า': {
+        icon: '⛓️',
+        items: ["รอกไฟฟ้า 1T x 20M", "รอกไฟฟ้า 2T x 36M", "ตัวควบคุมรอกไฟฟ้า HGK-G-4", "ตัวควบคุมรอกไฟฟ้า HGK-G-8", "ตัวควบคุมรอกไฟฟ้า HGK-G-16"]
+    },
+    'รายการนั่งร้านลิ่มล็อค': {
+        icon: '🏗️',
+        items: ["เสา 2 เมตร", "เสา 1 เมตร", "แขน 2 เมตร", "ทะแยง 2.40 เมตร", "แผ่นทางเดิน 2 เมตร", "ขาปรับ 50 cm.", "เคเบิ้ลการ์ด", "ถังน้ำ"]
+    },
+    'รายการเวที': {
+        icon: '🎭',
+        items: ["แผ่นพื้นเวที 120*240 mm.", "แผ่นพื้นเวที 120*120 mm.", "เฟรมยาว 2359*1000 mm.", "เฟรมยาว 2359*600 mm.", "เฟรมสั้น 1139*1000 mm", "เฟรมสั้น 1139*600 mm", "เฟรมสั้น 1139*300 mm", "เสา 1.20-1.80 m.", "เสา 0.80-1.40 m.", "เสา 060-0.80 m.", "ขาปรับ 20 cm.", "บันไดเวที"]
+    },
+    'รายการเมการูฟ': {
+        icon: '⛺',
+        items: ["คาน 5 เมตร (5 ม. / 2 ม.)", "เสา (5 ม. / 1.70 ม.)", "เสาต่อ 3.30 เมตร", "ฐานบน (มีรอก / ไม่มีรอก)", "ตัวต่อสลิฟบล๊อค", "บีมต่อสลิฟบล๊อค", "ฐานล่าง", "ชุดจับกลาง", "เหล็กบีมต่อฐาน", "สลัก M30*150MM", "น็อต 6 เหลี่ยม+ตัวเมีย : M22*60MM", "สายยกของ 4T (2 ม. / 3 ม.)", "สายยกของ 2T (2 ม. / 5 ม.)", "ชุดสเต (ดำ / ส้ม)", "สเก็น (ดำ / เงิน)", "ผ้าใบหลังคา (3400*10000 / 3400*17600 / 5400*10000)"]
+    },
+};
+
+        let isModalOpening = false; // ป้องกันการดักคลิกขณะที่เพิ่งเปิดหน้าต่าง
 
         // 2. ฟังก์ชันเปิดป๊อปอัป
         // 2. ฟังก์ชันเปิดป๊อปอัป (อัปเดต: ดึงข้อมูลจากคลังสินค้าจริง Firebase)
         async function openModal(categoryName) {
+            isModalOpening = true;
+            setTimeout(() => { isModalOpening = false; }, 400);
+
             const modal = document.getElementById('itemModal');
             const modalContent = document.getElementById('modalContent');
             const title = document.getElementById('modalTitle');
             const icon = document.getElementById('modalIcon');
             const itemList = document.getElementById('modalItemList');
+            
+            if (modal) {
+                modal.style.pointerEvents = 'auto';
+            }
             
             title.textContent = categoryName;
             
@@ -1672,6 +1988,11 @@
             
             // แสดง Modal
             modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if (typeof syncCartFieldsToItemModal === 'function') syncCartFieldsToItemModal();
+            if (typeof loadStaffListForCart === 'function') loadStaffListForCart();
+            if (typeof loadCustomersListForCart === 'function') loadCustomersListForCart();
+            if (typeof updateCartUI === 'function') updateCartUI();
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
                 modalContent.classList.remove('scale-95');
@@ -1684,10 +2005,14 @@
                 
                 // ระบบจับคู่หมวดหมู่พ้องความหมาย / นามแฝง (Smart Category Aliases & Synonyms)
                 const categoryAliases = {
+                    'จอ LED และอุปกรณ์ประกอบ': ['จอ LED และอุปกรณ์ประกอบ', 'ใบงานจอ', 'จอ LED', 'อุปกรณ์จอ', 'LED (จอภาพ/โปรเจคเตอร์)'],
+                    'LED (จอภาพ/โปรเจคเตอร์)': ['LED (จอภาพ/โปรเจคเตอร์)', 'จอ LED และอุปกรณ์ประกอบ', 'ใบงานจอ', 'จอ LED', 'อุปกรณ์จอ'],
+                    'ใบงานจอ': ['จอ LED และอุปกรณ์ประกอบ', 'ใบงานจอ', 'จอ LED', 'LED (จอภาพ/โปรเจคเตอร์)'],
                     'รายการบอร์ดไฟ': ['รายการบอร์ดไฟ', 'บอร์ดคอนโทรลไฟ+บูทเตอร์', 'บอร์ดคอนทรลไฟ+บูทเตอร์'],
                     'บอร์ดคอนโทรลไฟ+บูทเตอร์': ['บอร์ดคอนโทรลไฟ+บูทเตอร์', 'รายการบอร์ดไฟ', 'บอร์ดคอนทรลไฟ+บูทเตอร์'],
-                    '001-Test-ทดสอบ-0001-1': ['001-Test-ทดสอบ-0001-1', '001-Test-ทดสอบ-0001'],
-                    '001-Test-ทดสอบ-0001': ['001-Test-ทดสอบ-0001', '001-Test-ทดสอบ-0001-1'],
+                    'ไฟเลเซอร์ + CO2': ['ไฟเลเซอร์ + CO2', 'ไฟเลเซอร์+ CO2', 'เอฟเฟกต์ (พัดลม/สโมค/ดรายไอซ์)'],
+                    'ไฟเลเซอร์+ CO2': ['ไฟเลเซอร์+ CO2', 'ไฟเลเซอร์ + CO2', 'เอฟเฟกต์ (พัดลม/สโมค/ดรายไอซ์)'],
+                    'เอฟเฟกต์ (พัดลม/สโมค/ดรายไอซ์)': ['เอฟเฟกต์ (พัดลม/สโมค/ดรายไอซ์)', 'ไฟเลเซอร์ + CO2', 'ไฟเลเซอร์+ CO2'],
                     'รายการเต็นท์': ['รายการเต็นท์', 'รายการเมการูฟ'],
                     'รายการเมการูฟ': ['รายการเมการูฟ', 'รายการเต็นท์'],
                     'รายการนั่งร้านลิ่มล็อค': ['รายการนั่งร้านลิ่มล็อค', 'รายการนั่งร้านเหล็ก'],
@@ -1709,14 +2034,23 @@
                     candidates.push(strippedNumber);
                 }
 
-                // ค้นหาใน Firestore ด้วย in query (รองรับได้สูงสุด 10 ค่าพร้อมกัน)
-                let snapshot = await db.collection('inventory').where('category', 'in', candidates.slice(0, 10)).get();
-
-                if (snapshot.empty && cleanCategoryName !== categoryName) {
-                    snapshot = await db.collection('inventory').where('category', '==', categoryName).get();
+                // 🚀 TURBO MEMORY-FIRST: ใช้คลังสินค้าในความจำ/แคชทันที (< 5ms) ถ้ามีแล้ว เพื่อไม่ต้องหมุนรอ ⏳
+                let prodDocs = [];
+                if (Array.isArray(window.cachedIndexInventory) && window.cachedIndexInventory.length > 0) {
+                    const candSet = new Set(candidates.map(x => String(x || '').trim()));
+                    prodDocs = window.cachedIndexInventory.filter(p => {
+                        const c = String(p.category || '').trim();
+                        return candSet.has(c) || (cleanCategoryName !== categoryName && c === String(categoryName || '').trim());
+                    });
+                } else {
+                    let snapshot = await db.collection('inventory').where('category', 'in', candidates.slice(0, 10)).get();
+                    if (snapshot.empty && cleanCategoryName !== categoryName) {
+                        snapshot = await db.collection('inventory').where('category', '==', categoryName).get();
+                    }
+                    snapshot.forEach(doc => prodDocs.push({ _id: doc.id, ...doc.data() }));
                 }
-                
-                if(snapshot.empty) {
+
+                if (prodDocs.length === 0) {
                     itemList.innerHTML = `
                         <div class="text-center p-6 bg-slate-800/40 rounded-lg border border-slate-700/60 my-4">
                             <div class="text-4xl mb-2">📦</div>
@@ -1728,24 +2062,43 @@
                 }
                 
                 let html = '';
-                snapshot.forEach(doc => {
-                    const product = doc.data();
+                let rowIdx = 0;
+                window._idxProdUnitsMap = window._idxProdUnitsMap || {};
+                prodDocs.forEach(product => {
+                    const pKey = (product.name || '').trim();
+                    window._idxProdUnitsMap[pKey] = {
+                        sku: product.sku || '',
+                        unit: product.unit || 'ชิ้น',
+                        multiUnits: Array.isArray(product.multiUnits) ? product.multiUnits : []
+                    };
+                    const rIdx = rowIdx++;
+                    const stk = parseFloat(product.stock) || 0;
+                    const baseU = product.unit || 'ชิ้น';
+                    const stkBadge = stk > 0
+                        ? `<span class="text-emerald-300 font-bold">คงเหลือในคลังหลัง: ${stk.toLocaleString()} ${escapeHtml(baseU)}</span> <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">มีของ</span>`
+                        : `<span class="text-rose-400 font-bold">คงเหลือในคลังหลัง: 0 ${escapeHtml(baseU)}</span> <span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">หมดคลัง</span>`;
+                    const thumbSrc = product.thumbUrl || product.imageUrl || (Array.isArray(product.images) && product.images[0]) || '';
+                    const thumbHtml = thumbSrc
+                        ? `<img src="${escapeHtml(thumbSrc)}" alt="" loading="lazy" class="w-10 h-10 rounded-lg object-cover border border-slate-600 bg-slate-900 shrink-0">`
+                        : `<span class="w-10 h-10 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center text-sm text-slate-500 shrink-0">📦</span>`;
+                    const multiBadges = (Array.isArray(product.multiUnits) && product.multiUnits.length > 0)
+                        ? ` | <span class="text-purple-300 text-[11px]">${product.multiUnits.map(u => `1${escapeHtml(u.name)}=${u.ratio}`).join(', ')}</span>` : '';
                     html += `
-                        <div class="flex items-center justify-between p-3 bg-gray-800/40 rounded border border-gray-700/50 hover:bg-blue-900/30 hover:border-blue-500/50 transition cursor-pointer group">
-                            <div>
-                                <span class="text-gray-200 group-hover:text-blue-300 font-medium">${product.name}</span>
-                                <div class="text-xs text-slate-400 mt-1">คงเหลือ: <span class="text-yellow-400">${product.stock || 0} ${product.unit || 'ชิ้น'}</span>${product.location || product.binLocation ? ` | <span class="text-emerald-400 font-semibold">📍 ล็อก: ${escapeHtml(product.location || product.binLocation)}</span>` : ''}</div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <div class="flex items-center space-x-2 bg-slate-900 rounded border border-slate-700 overflow-hidden shadow-sm">
-                                    <!-- ปุ่มลด -->
-                                    <button type="button" onclick="const inp=this.nextElementSibling; if(!inp.value) inp.value=0; inp.stepDown();" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold border-r border-slate-700">-</button>
-                                    <!-- ช่องใส่ตัวเลข (เลข 0 หายทันทีเมื่อคลิก/จิ้ม พร้อมคีย์ตัวเลขใหม่ได้ทันที) -->
-                                    <input type="number" data-product-name="${product.name}" data-product-location="${escapeHtml(product.location || product.binLocation || '')}" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='' || isNaN(this.value)) this.value='0';" class="w-16 bg-transparent text-white text-center font-bold focus:outline-none focus:bg-slate-800 modal-qty-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value="0" min="0">
-                                    <!-- ปุ่มเพิ่ม -->
-                                    <button type="button" onclick="const inp=this.previousElementSibling; if(!inp.value) inp.value=0; inp.stepUp();" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold border-l border-slate-700">+</button>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-gray-800/50 rounded-xl border border-gray-700/60 hover:border-blue-500/50 gap-2 group">
+                            <div class="flex items-start gap-2.5 min-w-0 cursor-pointer" onclick="showItemModalProductDetail('${escapeHtml(product._id || '')}', '${escapeHtml(pKey)}')">
+                                ${thumbHtml}
+                                <div class="min-w-0">
+                                    <div class="text-gray-100 group-hover:text-blue-300 font-medium leading-snug">${product.sku ? `<span class="font-mono text-[11px] text-cyan-300 mr-1.5">[${escapeHtml(product.sku)}]</span>` : ''}${escapeHtml(product.name)}</div>
+                                    <div class="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-1.5">${stkBadge}${multiBadges}${product.location || product.binLocation ? ` <span class="text-emerald-400 font-semibold">| 📍 ล็อก: ${escapeHtml(product.location || product.binLocation)}</span>` : ''}</div>
                                 </div>
                             </div>
+                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                ${buildIdxUnitPickerHtml('cat', rIdx, product.name, product.unit || 'ชิ้น', product.multiUnits || [])}
+                                <div class="flex items-center space-x-1 bg-slate-900 rounded border border-slate-700 overflow-hidden shadow-sm">
+                                    <button type="button" onclick="const inp=this.nextElementSibling; if(!inp.value) inp.value=0; inp.stepDown();" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold border-r border-slate-700">-</button>
+                                    <input type="number" data-row-idx="${rIdx}" data-product-name="${escapeHtml(product.name)}" data-product-sku="${escapeHtml(product.sku || '')}" data-base-unit="${escapeHtml(product.unit || 'ชิ้น')}" data-product-location="${escapeHtml(product.location || product.binLocation || '')}" onfocus="if(this.value==='0') this.value=''; this.select();" onblur="if(this.value==='' || isNaN(this.value)) this.value='0';" class="w-16 bg-transparent text-white text-center font-bold focus:outline-none focus:bg-slate-800 modal-qty-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value="0" min="0">
+                                    <button type="button" onclick="const inp=this.previousElementSibling; if(!inp.value) inp.value=0; inp.stepUp();" class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold border-l border-slate-700">+</button>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1806,6 +2159,9 @@
             const modal = document.getElementById('itemModal');
             const modalContent = document.getElementById('modalContent');
             
+            // ป้องกันการดักคลิกซ้ำขณะกำลังเฟดปิด (Prevent click interception during fade out)
+            if (modal) modal.style.pointerEvents = 'none';
+
             // Effect เฟดเอาท์
             if (modal) modal.classList.add('opacity-0');
             if (modalContent) {
@@ -1814,12 +2170,17 @@
             }
             
             setTimeout(() => {
-                if (modal) modal.classList.add('hidden');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    modal.style.pointerEvents = 'auto';
+                }
             }, 300); // รอ effect จบ 300ms
         }
 
         // 4. ปิดเมื่อคลิกพื้นที่ว่างรอบๆ (Backdrop)
         document.getElementById('itemModal').addEventListener('click', function(e) {
+            if (isModalOpening) return; // ป้องกันการดักคลิกขณะที่เพิ่งเปิดหน้าต่าง
             if (e.target === this) {
                 closeModal();
             }
@@ -1857,30 +2218,57 @@
             let itemsAdded = 0;
             
             inputs.forEach(input => {
-                const qty = parseInt(input.value || 0);
+                const qty = parseFloat(input.value || 0);
                 if (qty > 0) {
+                    const rIdx = input.getAttribute('data-row-idx');
                     const itemName = input.getAttribute('data-product-name');
+                    const itemSku = input.getAttribute('data-product-sku') || '';
+                    const baseUnit = input.getAttribute('data-base-unit') || 'ชิ้น';
                     const itemLocation = input.getAttribute('data-product-location') || '';
-                    const existingItem = cart.find(item => item.name === itemName);
+                    const unitInp = document.getElementById(`catUnitInput_${rIdx}`);
+                    const chosenUnit = (unitInp?.value || '').trim() || baseUnit;
+                    const ratioEl = document.getElementById(`catUnitRatio_${rIdx}`);
+                    const prodMeta = window._idxProdUnitsMap?.[itemName] || { unit: baseUnit, multiUnits: [] };
+                    const ratio = getIdxProductUnitRatio(prodMeta, chosenUnit) || parseFloat(ratioEl?.value) || 1;
+
+                    const existingItem = cart.find(item => item.name === itemName && (item.unit || baseUnit) === chosenUnit);
                     if (existingItem) {
                         existingItem.qty += qty;
+                        existingItem.baseQty = existingItem.qty * (existingItem.unitRatio || ratio);
                         if (!existingItem.location && itemLocation) existingItem.location = itemLocation;
                     } else {
-                        cart.push({ name: itemName, qty: qty, location: itemLocation });
+                        cart.push({
+                            name: itemName,
+                            sku: itemSku,
+                            qty: qty,
+                            unit: chosenUnit,
+                            baseUnit: baseUnit,
+                            unitRatio: ratio,
+                            baseQty: qty * ratio,
+                            location: itemLocation
+                        });
                     }
                     itemsAdded++;
                 }
             });
             
             if (itemsAdded > 0) {
+                inputs.forEach(inp => { inp.value = '0'; });
                 updateCartUI();
                 // ทำให้ไอคอนตะกร้ากระเด้งเตือนเบาๆ
                 const cartBtn = document.getElementById('cartBtn');
-                cartBtn.classList.add('scale-110', 'text-blue-400');
-                setTimeout(() => cartBtn.classList.remove('scale-110', 'text-blue-400'), 300);
+                if (cartBtn) {
+                    cartBtn.classList.add('scale-110', 'text-blue-400');
+                    setTimeout(() => cartBtn.classList.remove('scale-110', 'text-blue-400'), 300);
+                }
+                const rightPanel = document.getElementById('itemModalCartList');
+                if (rightPanel) {
+                    rightPanel.classList.add('ring-2', 'ring-cyan-400/70', 'rounded-lg');
+                    setTimeout(() => rightPanel.classList.remove('ring-2', 'ring-cyan-400/70', 'rounded-lg'), 500);
+                }
+            } else {
+                alert('⚠️ กรุณาระบุจำนวนสินค้าอย่างน้อย 1 ชิ้นก่อนกดบันทึกลงตะกร้าค่ะ');
             }
-            
-            closeModal(true); // กวาดเสร็จแล้วปิดหน้าต่างอัตโนมัติ
         }
 
         function addToCartBulk(itemName) {
@@ -1914,55 +2302,158 @@
         }
 
 
+        // 🔎 ดึงยอดคงเหลือจริงในคลังหลัง (ห้ามรวมยอดเบิก/ยืม/โอน/ซ่อม/สูญหาย)
+        function getIdxWarehouseStockMeta(itemOrName) {
+            const list = Array.isArray(window.cachedIndexInventory) ? window.cachedIndexInventory : [];
+            const qId = typeof itemOrName === 'object' ? (itemOrName._id || itemOrName.id || '') : '';
+            const qSku = typeof itemOrName === 'object' ? String(itemOrName.sku || '').trim().toLowerCase() : '';
+            const qName = typeof itemOrName === 'object' ? String(itemOrName.name || '').trim().toLowerCase() : String(itemOrName || '').trim().toLowerCase();
+            let prod = null;
+            if (qId) prod = list.find(p => (p._id || p.id) === qId);
+            if (!prod && qSku && qSku !== '-') prod = list.find(p => String(p.sku || '').trim().toLowerCase() === qSku);
+            if (!prod && qName) prod = list.find(p => String(p.name || '').trim().toLowerCase() === qName);
+            const fallbackObj = (typeof itemOrName === 'object' && itemOrName) ? itemOrName : {};
+            const src = prod || fallbackObj;
+            const rawStock = parseFloat(prod ? prod.stock : fallbackObj.stock);
+            const warehouseStock = isNaN(rawStock) ? 0 : rawStock;
+            const unit = src.unit || fallbackObj.baseUnit || 'ชิ้น';
+            const thumb = src.thumbUrl || src.imageUrl || (Array.isArray(src.images) && src.images[0]) || '';
+            return {
+                foundInDb: !!prod,
+                _id: (prod && (prod._id || prod.id)) || qId || '',
+                sku: src.sku || '',
+                name: src.name || qName || '',
+                category: src.category || '',
+                stock: warehouseStock,
+                unit: unit,
+                location: src.location || src.binLocation || fallbackObj.location || '',
+                priceRetail: (typeof getIdxRetailValue === 'function') ? getIdxRetailValue(src) : (parseFloat(src.priceRetail) || 0),
+                thumb: thumb,
+                multiUnits: Array.isArray(src.multiUnits) ? src.multiUnits : []
+            };
+        }
+
+        function buildIdxCartRowHtml(item, index) {
+            const pMeta = (window._idxProdUnitsMap && window._idxProdUnitsMap[item.name]) || { unit: item.baseUnit || item.unit || 'ชิ้น', multiUnits: [] };
+            const wh = getIdxWarehouseStockMeta(item);
+            const curU = item.unit || wh.unit || pMeta.unit || 'ชิ้น';
+            const baseU = item.baseUnit || wh.unit || pMeta.unit || 'ชิ้น';
+            const ratio = parseFloat(item.unitRatio) || 1;
+            const reqBaseQty = (parseFloat(item.qty) || 0) * ratio;
+            const convTxt = (ratio > 1 && curU !== baseU)
+                ? `<div class="text-[11px] text-purple-300 font-mono mt-0.5">(= ${reqBaseQty.toLocaleString()} ${escapeHtml(baseU)})</div>` : '';
+
+            let stockBadge = '';
+            if (wh.stock <= 0) {
+                stockBadge = `<span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-rose-950/70 text-rose-300 border border-rose-500/50 font-bold">❌ หมดคลัง (คลังหลัง: 0 ${escapeHtml(wh.unit)})</span>`;
+            } else if (reqBaseQty > wh.stock) {
+                stockBadge = `<span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-amber-950/70 text-amber-300 border border-amber-500/60 font-bold">⚠️ คงเหลือในคลังหลัง: ${wh.stock.toLocaleString()} ${escapeHtml(wh.unit)} (เบิกเกินคลัง!)</span>`;
+            } else {
+                stockBadge = `<span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 font-semibold">📦 คงเหลือในคลังหลัง: ${wh.stock.toLocaleString()} ${escapeHtml(wh.unit)}</span>`;
+            }
+
+            const locText = item.location || wh.location;
+            const thumbHtml = wh.thumb
+                ? `<img src="${escapeHtml(wh.thumb)}" alt="" loading="lazy" class="w-9 h-9 rounded-lg object-cover border border-slate-600 bg-slate-900 shrink-0">`
+                : '';
+
+            return `
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 bg-gray-800/80 rounded-xl border border-gray-700 hover:border-blue-500/50 gap-2.5">
+                <div class="flex items-start gap-2.5 flex-grow min-w-0">
+                    ${thumbHtml}
+                    <div class="min-w-0 flex-grow">
+                        <h4 class="text-gray-100 font-medium leading-snug cursor-pointer hover:text-cyan-300" onclick="showItemModalProductDetail('${escapeHtml(wh._id)}', '${escapeHtml(item.name)}')">${wh.sku ? `<span class="font-mono text-[11px] text-cyan-300 mr-1.5">[${escapeHtml(wh.sku)}]</span>` : ''}${escapeHtml(item.name)}</h4>
+                        <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                            ${stockBadge}
+                            ${locText ? `<span class="text-[11px] text-emerald-400 font-medium">📍 ล็อก: ${escapeHtml(locText)}</span>` : ''}
+                        </div>
+                        ${convTxt}
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end shrink-0">
+                    ${buildIdxUnitPickerHtml('cart', index, item.name, curU, (wh.multiUnits && wh.multiUnits.length ? wh.multiUnits : pMeta.multiUnits) || [])}
+                    <div class="flex items-center space-x-1.5 bg-gray-900 rounded-lg p-1 border border-gray-700">
+                        <button onclick="decreaseQty(${index})" class="w-7 h-7 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 flex items-center justify-center">-</button>
+                        <input type="number" min="1" value="${item.qty}" onfocus="this.select();" onblur="if(!this.value || parseInt(this.value)<1) { this.value = ${item.qty}; updateCartItemQty(${index}, ${item.qty}); }" onchange="updateCartItemQty(${index}, this.value)" class="w-14 h-7 text-center bg-gray-800 text-white font-bold border border-gray-600 rounded focus:border-blue-500 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        <button onclick="increaseQty(${index})" class="w-7 h-7 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 flex items-center justify-center">+</button>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded" title="ลบรายการนี้">
+                        🗑️
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        function showItemModalProductDetail(docId, prodName) {
+            const box = document.getElementById('itemModalDetailPreview');
+            if (!box) return;
+            const meta = getIdxWarehouseStockMeta({ _id: docId, name: prodName });
+            const stkCls = meta.stock > 0 ? 'text-emerald-300' : 'text-rose-400';
+            box.innerHTML = `
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        ${meta.thumb ? `<img src="${escapeHtml(meta.thumb)}" class="w-14 h-14 rounded-xl object-cover border border-cyan-500/40 bg-slate-900 shrink-0">` : `<div class="w-14 h-14 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl shrink-0">📦</div>`}
+                        <div class="min-w-0 text-xs">
+                            <div class="font-bold text-white truncate">${meta.sku ? `<span class="text-cyan-300 font-mono mr-1">[${escapeHtml(meta.sku)}]</span>` : ''}${escapeHtml(meta.name || prodName)}</div>
+                            <div class="text-slate-400 mt-0.5">${escapeHtml(meta.category || '-')} ${meta.location ? `| 📍 ล็อก: <span class="text-emerald-300">${escapeHtml(meta.location)}</span>` : ''}</div>
+                            <div class="mt-1 font-bold ${stkCls}">📦 คงเหลือในคลังหลัง: ${meta.stock.toLocaleString()} ${escapeHtml(meta.unit)} ${meta.priceRetail > 0 ? `<span class="text-amber-300 font-normal ml-2">| ปลีก ฿${meta.priceRetail.toLocaleString(undefined,{minimumFractionDigits:2})}</span>` : ''}</div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('itemModalDetailPreview').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 shrink-0">✕ ซ่อน</button>
+                </div>`;
+            box.classList.remove('hidden');
+        }
+
+        function syncItemModalFieldToCart(targetId, val) {
+            const el = document.getElementById(targetId);
+            if (el) el.value = val;
+        }
+        function syncCartFieldsToItemModal() {
+            [['techName', 'imTechName'], ['techPin', 'imTechPin'], ['jobSite', 'imJobSite']].forEach(([srcId, dstId]) => {
+                const s = document.getElementById(srcId);
+                const d = document.getElementById(dstId);
+                if (s && d) d.value = s.value || '';
+            });
+        }
+        function saveFromItemModal() {
+            syncItemModalFieldToCart('techName', document.getElementById('imTechName')?.value || '');
+            syncItemModalFieldToCart('techPin', document.getElementById('imTechPin')?.value || '');
+            syncItemModalFieldToCart('jobSite', document.getElementById('imJobSite')?.value || '');
+            saveToFirebase();
+        }
+
         // 2. อัปเดต UI หน้าจอ
         function updateCartUI() {
             const badge = document.getElementById('cartCountBadge');
             const totalItemsSpan = document.getElementById('cartTotalItems');
             const cartList = document.getElementById('cartItemList');
+            const itemModalCartList = document.getElementById('itemModalCartList');
+            const itemModalCartCount = document.getElementById('itemModalCartCount');
             
             // นับจำนวนชิ้นรวมทั้งหมด
             const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
             
             // อัปเดตตัวเลขบนตะกร้าลอย
-            badge.textContent = totalQty;
-            if (totalQty > 0) {
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
+            if (badge) {
+                badge.textContent = totalQty;
+                if (totalQty > 0) badge.classList.remove('hidden');
+                else badge.classList.add('hidden');
             }
 
             // อัปเดตตัวเลขใน Modal
-            totalItemsSpan.textContent = totalQty + " รายการ";
+            if (totalItemsSpan) totalItemsSpan.textContent = totalQty + " รายการ";
+            if (itemModalCartCount) itemModalCartCount.textContent = totalQty + " รายการ";
 
-            // สร้างรายการในตะกร้า
-            if (cart.length === 0) {
-                cartList.innerHTML = `
-                    <div class="text-center text-gray-500 py-10">
-                        <div class="text-5xl mb-3 opacity-50">📦</div>
-                        <p>ยังไม่มีรายการเบิกอุปกรณ์</p>
-                        <p class="text-sm mt-1">กรุณากด "+ เลือก" จากหมวดหมู่สินค้า</p>
-                    </div>
-                `;
-            } else {
-                cartList.innerHTML = cart.map((item, index) => `
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-800/80 rounded-lg border border-gray-700 hover:border-blue-500/50 transition gap-3">
-                        <div class="flex-grow">
-                            <h4 class="text-gray-200 font-medium">${item.name}</h4>
-                            ${item.location ? `<div class="text-[11px] text-emerald-400 font-medium mt-0.5">📍 ล็อก: ${escapeHtml(item.location)}</div>` : ''}
-                        </div>
-                        <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
-                            <div class="flex items-center space-x-2 bg-gray-900 rounded-lg p-1 border border-gray-700">
-                                <button onclick="decreaseQty(${index})" class="w-8 h-8 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 flex items-center justify-center transition">-</button>
-                                <input type="number" min="1" value="${item.qty}" onfocus="this.select();" onblur="if(!this.value || parseInt(this.value)<1) { this.value = ${item.qty}; updateCartItemQty(${index}, ${item.qty}); }" onchange="updateCartItemQty(${index}, this.value)" class="w-16 h-8 text-center bg-gray-800 text-white font-bold border border-gray-600 rounded focus:border-blue-500 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
-                                <button onclick="increaseQty(${index})" class="w-8 h-8 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 flex items-center justify-center transition">+</button>
-                            </div>
-                            <button onclick="removeFromCart(${index})" class="p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded transition" title="ลบรายการนี้">
-                                🗑️
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
+            const emptyHtml = `
+                <div class="text-center text-gray-500 py-10">
+                    <div class="text-5xl mb-3 opacity-50">📦</div>
+                    <p>ยังไม่มีรายการเบิกอุปกรณ์</p>
+                    <p class="text-sm mt-1">กรุณาเลือกสินค้าและกด "บันทึกลงตะกร้า"</p>
+                </div>
+            `;
+            const rowsHtml = cart.length === 0 ? emptyHtml : cart.map((item, index) => buildIdxCartRowHtml(item, index)).join('');
+            if (cartList) cartList.innerHTML = rowsHtml;
+            if (itemModalCartList) itemModalCartList.innerHTML = rowsHtml;
         }
 
         // 3. ลดจำนวน
@@ -2040,8 +2531,10 @@
                 // 4. คืนค่าปุ่มบันทึก
                 const saveBtnText = document.getElementById('saveBtnText');
                 if (saveBtnText) saveBtnText.innerText = 'บันทึกใบเบิกและยืม 📝';
+                if (typeof syncCartFieldsToItemModal === 'function') syncCartFieldsToItemModal();
 
                 closeCartModal(true);
+                if (typeof closeModal === 'function' && !document.getElementById('itemModal')?.classList.contains('hidden')) closeModal(true);
             }
         }
 
@@ -2553,7 +3046,7 @@
                         <td style="border: 1px solid #000000; padding: 7px 8px; text-align: left; line-height: 1.35; word-break: break-word;">
                             ${item.name || '-'}${item.location ? ` <span style="font-size: 10px; color: #047857; font-weight: bold;">(📍 ล็อก: ${item.location})</span>` : ''}
                         </td>
-                        <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; white-space: nowrap; font-weight: 600; font-size: 11.5px;">${item.qty || 0} ${item.unit || 'ชิ้น'}</td>
+                        <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; white-space: nowrap; font-weight: 600; font-size: 11.5px;">${formatIdxDocQtyWithUnit(item, item.qty)}</td>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; color: #000000; font-size: 12px;">${item.issuedQty !== undefined && item.issuedQty !== null && item.issuedQty !== '' ? item.issuedQty : ''}</td>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; color: #000000; font-size: 12px;">${item.missingQty !== undefined && item.missingQty !== null && item.missingQty !== '' ? item.missingQty : ''}</td>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; color: #000000; font-size: 12px;">${item.returnedQty !== undefined && item.returnedQty !== null && item.returnedQty !== '' ? item.returnedQty : ''}</td>
@@ -2776,7 +3269,7 @@
                     <div class="container">
                         <div class="header-wrapper">
                             <div class="company-block">
-                                <h1 class="company-name">ICE FINLIGHT</h1>
+                                <h1 class="company-name">ICE Finlight & ICE Prosound</h1>
                                 <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                             </div>
                             <div class="doc-block">
@@ -2903,7 +3396,7 @@
 </body>
                 </html>
             `;
-            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
+            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE Finlight & ICE Prosound'), printWindow);
         }
 
         // ========================================================
@@ -2932,7 +3425,7 @@
                     <tr>
                         <td style="border: 1px solid #475569; padding: 7px 6px; text-align: center; font-weight: 600;">${index + 1}</td>
                         <td style="border: 1px solid #475569; padding: 7px 10px; text-align: left; line-height: 1.35;">${item.name || '-'}</td>
-                        <td style="border: 1px solid #475569; padding: 7px 10px; text-align: right; font-weight: 600;">${origQty} ${item.unit || 'ชิ้น'}</td>
+                        <td style="border: 1px solid #475569; padding: 7px 10px; text-align: right; font-weight: 600;">${origQty} ${formatIdxUnitPrintLabel(item)}</td>
                         <td style="border: 1px solid #475569; padding: 7px 10px; text-align: right; font-weight: bold; color: #047857;">${retQty} ${item.unit || 'ชิ้น'}</td>
                         <td style="border: 1px solid #475569; padding: 7px 10px; text-align: right; font-weight: bold; color: ${remQty > 0 ? '#b45309' : '#047857'};">${remQty} ${item.unit || 'ชิ้น'}</td>
                         <td style="border: 1px solid #475569; padding: 7px 8px; text-align: center; color: #475569;">${item.note || '-'}</td>
@@ -3007,7 +3500,7 @@
                     <div class="container">
                         <div class="header-wrapper">
                             <div class="company-block">
-                                <h1 class="company-name">ICE FINLIGHT</h1>
+                                <h1 class="company-name">ICE Finlight & ICE Prosound</h1>
                                 <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                             </div>
                             <div class="doc-block">
@@ -3091,7 +3584,7 @@
                 </body>
                 </html>
             `;
-            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
+            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE Finlight & ICE Prosound'), printWindow);
         }
 
         async function printDamageLossA4ById(docId) {
@@ -3114,7 +3607,7 @@
                     <tr>
                         <td style="border: 1px solid #475569; padding: 7px 6px; text-align: center; font-weight: 600;">${index + 1}</td>
                         <td style="border: 1px solid #475569; padding: 7px 10px; text-align: left; line-height: 1.35;">${item.itemName || '-'}</td>
-                        <td style="border: 1px solid #475569; padding: 7px 10px; text-align: center; font-weight: bold; color: #b91c1c;">${item.qty || 0} ${item.unit || 'ชิ้น'}</td>
+                        <td style="border: 1px solid #475569; padding: 7px 10px; text-align: center; font-weight: bold; color: #b91c1c;">${formatIdxDocQtyWithUnit(item, item.qty)}</td>
                         <td style="border: 1px solid #475569; padding: 7px 10px; text-align: center; font-weight: bold; color: #b91c1c;">${item.actionType || 'สูญหาย'}</td>
                         <td style="border: 1px solid #475569; padding: 7px 8px; text-align: left; color: #475569;">${item.note || '-'}</td>
                     </tr>
@@ -3179,7 +3672,7 @@
                     <div class="container">
                         <div class="header-wrapper">
                             <div class="company-block">
-                                <h1 class="company-name">ICE FINLIGHT</h1>
+                                <h1 class="company-name">ICE Finlight & ICE Prosound</h1>
                                 <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                             </div>
                             <div class="doc-block">
@@ -3248,7 +3741,7 @@
                 </body>
                 </html>
             `;
-            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
+            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE Finlight & ICE Prosound'), printWindow);
         }
 
         async function printTransferA4ById(docId) {
@@ -3271,7 +3764,7 @@
                     <tr>
                         <td style="border: 1px solid #475569; padding: 7px 6px; text-align: center; font-weight: 600;">${index + 1}</td>
                         <td style="border: 1px solid #475569; padding: 7px 10px; text-align: left; line-height: 1.35;">${item.itemName || '-'}</td>
-                        <td style="border: 1px solid #475569; padding: 7px 10px; text-align: center; font-weight: bold; color: #4338ca;">${item.qty || 0} ${item.unit || 'ชิ้น'}</td>
+                        <td style="border: 1px solid #475569; padding: 7px 10px; text-align: center; font-weight: bold; color: #4338ca;">${formatIdxDocQtyWithUnit(item, item.qty)}</td>
                         <td style="border: 1px solid #475569; padding: 7px 10px; text-align: left; font-weight: 600; color: #1e293b;">${item.toSite || '-'}</td>
                         <td style="border: 1px solid #475569; padding: 7px 8px; text-align: left; color: #475569;">${item.note || '-'}</td>
                     </tr>
@@ -3336,7 +3829,7 @@
                     <div class="container">
                         <div class="header-wrapper">
                             <div class="company-block">
-                                <h1 class="company-name">ICE FINLIGHT</h1>
+                                <h1 class="company-name">ICE Finlight & ICE Prosound</h1>
                                 <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                             </div>
                             <div class="doc-block">
@@ -3405,7 +3898,7 @@
                 </body>
                 </html>
             `;
-            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
+            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE Finlight & ICE Prosound'), printWindow);
         }
 
 
@@ -3623,7 +4116,7 @@ function printTransportSlipA4(data, items, existingWindow = null) {
                 <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-weight: bold; font-size: 12px;">${idx + 1}</td>
                 <td style="border: 1px solid #000000; padding: 7px 8px; text-align: left; line-height: 1.35; word-break: break-word;">${item.name || '-'}</td>
                 <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-weight: bold; color: #0284c7; font-size: 13px;">${issued}</td>
-                <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-size: 12px;">${item.unit || 'ชิ้น'}</td>
+                <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-size: 12px;">${formatIdxUnitPrintLabel(item)}</td>
                 <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-size: 12px;">1 กล่อง/แร็ค</td>
                 <td style="border: 1px solid #000000; padding: 7px 6px; text-align: left; font-size: 12px;">${item.note || '-'}</td>
             </tr>
@@ -3686,7 +4179,7 @@ function printTransportSlipA4(data, items, existingWindow = null) {
         <body>
             <div class="header-wrapper">
                 <div>
-                    <h1 class="company-name">ICE FINLIGHT</h1>
+                    <h1 class="company-name">ICE Finlight & ICE Prosound</h1>
                     <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                 </div>
                 <div class="doc-block">
@@ -3701,7 +4194,7 @@ function printTransportSlipA4(data, items, existingWindow = null) {
                         <div class="info-row"><span class="info-label">เลขที่เอกสารอ้างอิง :</span><span class="info-val" style="font-weight: 700; color: #0284c7;">${docNo}</span></div>
                         <div class="info-row"><span class="info-label">ผู้รับงาน / ผู้เบิก :</span><span class="info-val">${data.techName || data.technician || data.techFullName || '-'}</span></div>
                         <div class="info-row"><span class="info-label">ผู้ขนส่งสินค้า :</span><span class="info-val">${data.transportName || data.techName || '-'}</span></div>
-                        <div class="info-row"><span class="info-label">ทะเบียนรถ / รอบส่ง :</span><span class="info-val">${data.vehiclePlate || 'รถตู้ขนส่งอุปกรณ์ ICE FINLIGHT'}</span></div>
+                        <div class="info-row"><span class="info-label">ทะเบียนรถ / รอบส่ง :</span><span class="info-val">${data.vehiclePlate || 'รถตู้ขนส่งอุปกรณ์ ICE Finlight & ICE Prosound'}</span></div>
                     </div>
                     <div class="info-col-right">
                         <div class="info-row"><span class="info-label">วันที่ขนส่ง :</span><span class="info-val">${dateStr}</span></div>
@@ -3757,7 +4250,7 @@ function printTransportSlipA4(data, items, existingWindow = null) {
         </body>
         </html>
     `;
-    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
+    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE Finlight & ICE Prosound'), printWindow);
 }
 
 // -------------------------------------------------------------------------
@@ -3799,7 +4292,7 @@ function printOnSiteReceivingA4(data, items, existingWindow = null) {
                 <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-weight: bold; font-size: 12px;">${idx + 1}</td>
                 <td style="border: 1px solid #000000; padding: 7px 8px; text-align: left; line-height: 1.35; word-break: break-word;">${item.name || '-'}</td>
                 <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-weight: bold; color: #059669; font-size: 13px;">${issued}</td>
-                <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-size: 12px;">${item.unit || 'ชิ้น'}</td>
+                <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-size: 12px;">${formatIdxUnitPrintLabel(item)}</td>
                 <td style="border: 1px solid #000000; padding: 7px 6px; text-align: center; color: #059669; font-weight: 600; font-size: 12px;">✓ ครบถ้วนสมบูรณ์</td>
                 <td style="border: 1px solid #000000; padding: 7px 6px; text-align: left; font-size: 12px;">${item.note || '-'}</td>
             </tr>
@@ -3862,7 +4355,7 @@ function printOnSiteReceivingA4(data, items, existingWindow = null) {
         <body>
             <div class="header-wrapper">
                 <div>
-                    <h1 class="company-name">ICE FINLIGHT</h1>
+                    <h1 class="company-name">ICE Finlight & ICE Prosound</h1>
                     <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                 </div>
                 <div class="doc-block">
@@ -3913,21 +4406,27 @@ function printOnSiteReceivingA4(data, items, existingWindow = null) {
             <div class="signatures">
                 <div class="sig-box">
                     <div class="sig-line"></div>
-                    <p class="sig-name">( ${data.transportName || data.techName || '........................................'} )</p>
+                    <p class="sig-name">( ${data.transportName || data.techName || '.............................................'} )</p>
                     <p class="sig-title">ผู้ส่งมอบสินค้า (พนักงานขนส่ง)</p>
                     <p class="sig-date">วันที่ ......./......./.......</p>
                 </div>
                 <div class="sig-box">
                     <div class="sig-line"></div>
-                    <p class="sig-name">( ${data.techName || data.technician || '........................................'} )</p>
+                    <p class="sig-name">( ${data.techName || data.technician || '.............................................'} )</p>
                     <p class="sig-title">ผู้รับมอบสินค้าหน้างาน (ช่าง/ลูกค้า)</p>
+                    <p class="sig-date">วันที่ ......./......./.......</p>
+                </div>
+                <div class="sig-box">
+                    <div class="sig-line"></div>
+                    <p class="sig-name">( ${data.approverName || '.............................................'} )</p>
+                    <p class="sig-title">ผู้ตรวจสอบ / ผู้อนุมัติ (คลังสินค้า)</p>
                     <p class="sig-date">วันที่ ......./......./.......</p>
                 </div>
             </div>
         </body>
         </html>
     `;
-    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
+    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE Finlight & ICE Prosound'), printWindow);
 }
 
 // -------------------------------------------------------------------------
@@ -3973,7 +4472,7 @@ function printReturnReceiptA4(data, items, existingWindow = null) {
                 <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-weight: 600; font-size: 12px;">${origQty}</td>
                 <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-weight: bold; color: #047857; font-size: 13px;">${retQty}</td>
                 <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-weight: bold; color: ${remQty > 0 ? '#b45309' : '#047857'}; font-size: 12px;">${remQty}</td>
-                <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-size: 12px;">${item.unit || 'ชิ้น'}</td>
+                <td style="border: 1px solid #000000; padding: 7px 4px; text-align: center; font-size: 12px;">${formatIdxUnitPrintLabel(item)}</td>
                 <td style="border: 1px solid #000000; padding: 7px 6px; text-align: left; font-size: 12px;">${item.note || (remQty === 0 ? 'คืนครบสภาพปกติ' : 'ค้างส่งคืน')}</td>
             </tr>
         `;
@@ -4036,7 +4535,7 @@ function printReturnReceiptA4(data, items, existingWindow = null) {
         <body>
             <div class="header-wrapper">
                 <div>
-                    <h1 class="company-name">ICE FINLIGHT</h1>
+                    <h1 class="company-name">ICE Finlight & ICE Prosound</h1>
                     <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                 </div>
                 <div class="doc-block">
@@ -4108,7 +4607,7 @@ function printReturnReceiptA4(data, items, existingWindow = null) {
         </body>
         </html>
     `;
-    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
+    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE Finlight & ICE Prosound'), printWindow);
 }
 
 // -------------------------------------------------------------------------
@@ -4145,7 +4644,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
     (items || []).forEach((item, idx) => {
         const name = item.name || item.itemName || '-';
         const qty = item.qty || 1;
-        const unit = item.unit || 'ชิ้น';
+        const unit = formatIdxUnitPrintLabel(item);
         const fault = item.actionType === 'ส่งซ่อม' || item.faultDesc ? (item.faultDesc || item.note || 'ตรวจพบชำรุดจากการใช้งาน') : (item.note || 'ตรวจเช็กระบบ/ชำรุด');
         tableRows += `
             <tr>
@@ -4215,7 +4714,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         <body>
             <div class="header-wrapper">
                 <div>
-                    <h1 class="company-name">ICE FINLIGHT</h1>
+                    <h1 class="company-name">ICE Finlight & ICE Prosound</h1>
                     <div class="company-subtitle">บริการระบบเสียง ระบบไฟเวที และอุปกรณ์จัดงานอีเวนต์ครบวงจร</div>
                 </div>
                 <div class="doc-block">
@@ -4286,7 +4785,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         </body>
         </html>
     `;
-    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
+    renderResilientPrintDocument(html, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE Finlight & ICE Prosound'), printWindow);
 }
 
 
@@ -4450,7 +4949,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     <tr>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; white-space: nowrap; font-weight: 600; font-size: 12px;">${index + 1}</td>
                         <td style="border: 1px solid #000000; padding: 7px 8px; text-align: left; line-height: 1.35; word-break: break-word;">${item.name || '-'}</td>
-                        <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; white-space: nowrap; font-weight: 600; font-size: 11.5px;">${item.qty || 0} ${item.unit || 'ชิ้น'}</td>
+                        <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; white-space: nowrap; font-weight: 600; font-size: 11.5px;">${formatIdxDocQtyWithUnit(item, item.qty)}</td>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; color: #000000; font-size: 12px; font-weight: bold;">${issuedDisplay}</td>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; color: #000000; font-size: 12px;">${item.missingQty !== undefined && item.missingQty !== null && item.missingQty !== '' ? item.missingQty : ''}</td>
                         <td style="border: 1px solid #000000; padding: 7px 2px; text-align: center; color: #000000; font-size: 12px;">${item.returnedQty !== undefined && item.returnedQty !== null && item.returnedQty !== '' ? item.returnedQty : ''}</td>
@@ -4578,8 +5077,8 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     <div class="container">
                         <div class="header-wrapper">
                             <div class="company-block">
-                                <h1 class="company-name">ICE FINLIGHT</h1>
-                                <div class="company-subtitle">ให้เช่าไฟแอลอีดี เครื่องเสียง / งานอีเว้นท์ทุกประเภท (ICE FINLIGHT)</div>
+                                <h1 class="company-name">ICE Finlight & ICE Prosound</h1>
+                                <div class="company-subtitle">ให้เช่าไฟแอลอีดี เครื่องเสียง / งานอีเว้นท์ทุกประเภท (ICE Finlight & ICE Prosound)</div>
                             </div>
                             <div class="doc-block">
                                 <div class="doc-badge">${docTitle}</div>
@@ -4676,7 +5175,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </body>
                 </html>
             `;
-            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE FINLIGHT'), printWindow);
+            renderResilientPrintDocument(htmlContent, (typeof docTitle !== 'undefined' ? docTitle : 'เอกสารระบบ ICE Finlight & ICE Prosound'), printWindow);
         }
 
         // ==========================================
@@ -4817,28 +5316,41 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                             const querySnapshot = await db.collection("inventory").where("name", "==", item.name).get();
                             if (!querySnapshot.empty) {
                                 for (const invDoc of querySnapshot.docs) {
+                                    const invData = invDoc.data();
+                                    const baseU = invData.unit || item.baseUnit || item.unit || 'ชิ้น';
+                                    const chosenU = item.unit || baseU;
+                                    const ratio = getIdxProductUnitRatio(invData, chosenU) || parseFloat(item.unitRatio) || 1;
+                                    const baseDeductQty = (parseFloat(item.qty) || 0) * ratio;
+
                                     await db.collection("inventory").doc(invDoc.id).update({
-                                        stock: firebase.firestore.FieldValue.increment(-item.qty),
+                                        stock: firebase.firestore.FieldValue.increment(-baseDeductQty),
                                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                                     });
 
                                     await db.collection("stock_card").add({
                                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                                         docNo: reqDocNo,
-                                        sku: invDoc.data().sku || '-',
+                                        sku: invData.sku || '-',
                                         name: item.name,
-                                        category: invDoc.data().category || 'ทั่วไป',
-                                        cost: invDoc.data().cost || 0,
-                                        price: invDoc.data().priceRetail || 0,
+                                        category: invData.category || 'ทั่วไป',
+                                        cost: invData.cost || 0,
+                                        price: invData.priceRetail || 0,
                                         type: 'เบิกใช้งาน',
-                                        changeQty: -item.qty,
+                                        changeQty: -baseDeductQty,
+                                        displayQty: item.qty,
+                                        unit: chosenU,
+                                        baseUnit: baseU,
+                                        unitRatio: ratio,
+                                        baseQty: baseDeductQty,
                                         operator: techName,
                                         site: jobSite,
                                         address: requisitionData.jobAddress || '',
-                                        note: "ไซต์งาน: " + jobSite
+                                        note: "ไซต์งาน: " + jobSite + (chosenU !== baseU ? ` (${item.qty} ${chosenU} = ${baseDeductQty} ${baseU})` : '')
                                     });
                                 }
                             } else {
+                                const fallbackRatio = parseFloat(item.unitRatio) || 1;
+                                const fallbackBaseQty = (parseFloat(item.qty) || 0) * fallbackRatio;
                                 await db.collection("stock_card").add({
                                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                                     docNo: reqDocNo,
@@ -4846,7 +5358,12 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                                     name: item.name,
                                     category: 'ทั่วไป',
                                     type: 'เบิกใช้งาน',
-                                    changeQty: -item.qty,
+                                    changeQty: -fallbackBaseQty,
+                                    displayQty: item.qty,
+                                    unit: item.unit || 'ชิ้น',
+                                    baseUnit: item.baseUnit || item.unit || 'ชิ้น',
+                                    unitRatio: fallbackRatio,
+                                    baseQty: fallbackBaseQty,
                                     operator: techName,
                                     site: jobSite,
                                     address: requisitionData.jobAddress || '',
@@ -5137,7 +5654,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 <html lang="th">
                 <head>
                     <meta charset="UTF-8">
-                    <title>รายงานสรุปใบเบิกและอุปกรณ์ - ICE FINLIGHT</title>
+                    <title>รายงานสรุปใบเบิกและอุปกรณ์ - ICE Finlight & ICE Prosound</title>
                     <style>
                         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
                         @page { size: A4 landscape; margin: 8mm; }
@@ -5162,7 +5679,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </head>
                 <body>
                     <div class="header">
-                        <div class="company-name">💡 บริษัท ไอซ์ ฟินไลท์ จำกัด (ICE FINLIGHT CO., LTD.)</div>
+                        <div class="company-name">💡 ICE Finlight & ICE Prosound</div>
                         <div class="doc-title">รายงานสรุปภาพรวมใบเบิกและอุปกรณ์ (Requisition Summary Report)</div>
                         <div class="meta">
                             <span><strong>ข้อมูล:</strong> รายการล่าสุดจากระบบ Real-time</span>
@@ -5195,23 +5712,23 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     </div>
 
                     <div class="signatures">
-                        <div class="sign-box">
-                            <div>ลงชื่อ ..................................................... ผู้จัดทำรายงาน</div>
-                            <div class="sign-line"></div>
-                            <div>( ..................................................... )</div>
-                            <div style="font-size: 10px; color: #64748b; margin-top: 4px;">วันที่ ......./......./...........</div>
+                        <div class="sig-box">
+                            <div class="sig-line"></div>
+                            <p class="sig-name">( ............................................. )</p>
+                            <p class="sig-title">ผู้จัดทำรายงาน</p>
+                            <p class="sig-date">วันที่ ......./......./.......</p>
                         </div>
-                        <div class="sign-box">
-                            <div>ลงชื่อ ..................................................... ผู้จัดการคลังสินค้า</div>
-                            <div class="sign-line"></div>
-                            <div>( ..................................................... )</div>
-                            <div style="font-size: 10px; color: #64748b; margin-top: 4px;">วันที่ ......./......./...........</div>
+                        <div class="sig-box">
+                            <div class="sig-line"></div>
+                            <p class="sig-name">( ............................................. )</p>
+                            <p class="sig-title">ผู้จัดการคลังสินค้า</p>
+                            <p class="sig-date">วันที่ ......./......./.......</p>
                         </div>
-                        <div class="sign-box">
-                            <div>ลงชื่อ ..................................................... กรรมการผู้มีอำนาจ / ผู้อนุมัติ</div>
-                            <div class="sign-line"></div>
-                            <div>( ..................................................... )</div>
-                            <div style="font-size: 10px; color: #64748b; margin-top: 4px;">วันที่ ......./......./...........</div>
+                        <div class="sig-box">
+                            <div class="sig-line"></div>
+                            <p class="sig-name">( ............................................. )</p>
+                            <p class="sig-title">กรรมการผู้มีอำนาจ / ผู้อนุมัติ</p>
+                            <p class="sig-date">วันที่ ......./......./.......</p>
                         </div>
                     </div>
 
@@ -5260,7 +5777,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 }
 
                 let csvContent = "\uFEFF";
-                csvContent += `"บริษัท ไอซ์ ฟินไลท์ จำกัด (ICE FINLIGHT CO., LTD.)"\n`;
+                csvContent += `"ICE Finlight & ICE Prosound"\n`;
                 csvContent += `"ใบจัดสินค้าอุปกรณ์ (EQUIPMENT PICKING ORDER)"\n`;
                 csvContent += `"เลขที่เอกสาร: ${docNo}"\n`;
                 csvContent += `"วันที่ทำรายการ: ${dateStr}"\n`;
@@ -5389,6 +5906,13 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         async function loadReportData() {
             const tableBody = document.getElementById('reportTableBody');
             if (!tableBody) return;
+            if (_indexReqsSynced) {
+                filterReportData();
+                if (cachedRequisitionsForReport.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-gray-500">ยังไม่มีข้อมูลการเบิกของ</td></tr>';
+                }
+                return;
+            }
             tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-gray-400"><div class="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>กำลังดึงข้อมูล...</td></tr>';
 
             try {
@@ -5861,12 +6385,12 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </head>
                 <body>
                     <h1>รายงานฐานข้อมูลพนักงาน</h1>
-                    <div class="subtitle">บริษัท ไอซ์ ฟินไลท์ จำกัด (ICE FINLIGHT CO., LTD.) - ข้อมูล ณ วันที่ ${date}</div>
+                    <div class="subtitle">ICE Finlight & ICE Prosound - ข้อมูล ณ วันที่ ${date}</div>
 
                     ${tableHTML}
                     
                     <div class="footer">
-                        ออกรายงานโดยระบบ ICE FINLIGHT
+                        ออกรายงานโดยระบบ ICE Finlight & ICE Prosound
                     </div>
                 </body>
                 </html>
@@ -5874,7 +6398,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
 
             const printWindow = null;
 
-            renderResilientPrintDocument(printContent, (typeof docTitle !== "undefined" ? docTitle : "รายงานข้อมูลระบบ ICE FINLIGHT"), printWindow);
+            renderResilientPrintDocument(printContent, (typeof docTitle !== "undefined" ? docTitle : "รายงานข้อมูลระบบ ICE Finlight & ICE Prosound"), printWindow);
         }
 
         // ฟังก์ชันส่งออก Excel (CSV format แบบรองรับภาษาไทย UTF-8)
@@ -5923,6 +6447,192 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         }
 
         // ==========================================
+        // 🔄 MULTI-LEVEL UNITS ENGINE (index.html)
+        // ==========================================
+        window._idxProdUnitsMap = window._idxProdUnitsMap || {};
+
+        function normalizeIdxMultiUnits(baseUnit, rawMulti) {
+            const b = (baseUnit || 'ชิ้น').trim();
+            const out = [];
+            const seen = new Set([b.toLowerCase()]);
+            (Array.isArray(rawMulti) ? rawMulti : []).forEach(u => {
+                const name = (u && u.name ? String(u.name) : '').trim();
+                const ratio = parseFloat(u && u.ratio) || 0;
+                if (!name || ratio <= 0 || seen.has(name.toLowerCase())) return;
+                seen.add(name.toLowerCase());
+                out.push({ name, ratio });
+            });
+            return out;
+        }
+
+        function getIdxProductUnitOptions(prod) {
+            const baseUnit = (prod && prod.unit ? String(prod.unit).trim() : '') || 'ชิ้น';
+            const opts = [{ name: baseUnit, ratio: 1, isBase: true }];
+            const seen = new Set([baseUnit.toLowerCase()]);
+            normalizeIdxMultiUnits(baseUnit, prod && prod.multiUnits).forEach(u => {
+                seen.add(u.name.toLowerCase());
+                opts.push({ name: u.name, ratio: u.ratio, isBase: false });
+            });
+            const stdUnits = (typeof cachedUnits !== 'undefined' && Array.isArray(cachedUnits) && cachedUnits.length > 0)
+                ? cachedUnits.map(u => u.name)
+                : ['ชิ้น', 'ตัว', 'ชุด', 'กล่อง', 'ลัง', 'ม้วน', 'เมตร', 'เส้น'];
+            stdUnits.forEach(uName => {
+                const n = (uName || '').trim();
+                if (n && !seen.has(n.toLowerCase())) {
+                    seen.add(n.toLowerCase());
+                    opts.push({ name: n, ratio: 1, isBase: false });
+                }
+            });
+            return opts;
+        }
+
+        function getIdxProductUnitRatio(prod, unitName) {
+            const uLower = (unitName || '').trim().toLowerCase();
+            if (!uLower) return 1;
+            const baseUnit = (prod && prod.unit ? String(prod.unit).trim() : 'ชิ้น').toLowerCase();
+            if (uLower === baseUnit) return 1;
+            const found = normalizeIdxMultiUnits(baseUnit, prod && prod.multiUnits).find(u => u.name.toLowerCase() === uLower);
+            return found ? found.ratio : 1;
+        }
+
+        function formatIdxUnitPrintLabel(item) {
+            if (!item) return 'ชิ้น';
+            const u = (item.unit || 'ชิ้น').trim();
+            const b = (item.baseUnit || '').trim();
+            const r = parseFloat(item.unitRatio) || 1;
+            const bQty = parseFloat(item.baseQty);
+            if (b && b !== u && r > 1) {
+                return bQty ? `${u} (${bQty.toLocaleString()} ${b})` : `${u} (x${r} ${b})`;
+            }
+            return u;
+        }
+
+        function formatIdxDocQtyWithUnit(item, qtyVal) {
+            const q = parseFloat(qtyVal) || 0;
+            if (!item) return `${q} ชิ้น`;
+            const u = (item.unit || 'ชิ้น').trim();
+            const b = (item.baseUnit || '').trim();
+            const r = parseFloat(item.unitRatio) || 1;
+            if (b && b !== u && r > 1) {
+                const totalBase = q * r;
+                return `${q} ${u} <span style="font-size:10px;color:#475569;">(${totalBase.toLocaleString()} ${b})</span>`;
+            }
+            return `${q} ${u}`;
+        }
+
+        let currentIdxMultiUnits = [];
+        function refreshIdxMultiUnitBaseLabel() {
+            const baseName = document.getElementById('invUnit')?.value?.trim() || 'ชิ้น';
+            const lbl = document.getElementById('idxMultiUnitBaseName');
+            if (lbl) lbl.textContent = baseName;
+        }
+        function resetIdxMultiUnitsUI(baseUnit = 'ชิ้น', multiUnits = []) {
+            refreshIdxMultiUnitBaseLabel();
+            currentIdxMultiUnits = normalizeIdxMultiUnits(baseUnit, multiUnits);
+            renderIdxMultiUnitsList();
+        }
+        function addIdxMultiUnitRow() {
+            currentIdxMultiUnits.push({ name: '', ratio: 12 });
+            renderIdxMultiUnitsList();
+        }
+        function removeIdxMultiUnitRow(idx) {
+            currentIdxMultiUnits.splice(idx, 1);
+            renderIdxMultiUnitsList();
+        }
+        function collectIdxMultiUnits() {
+            const baseUnit = document.getElementById('invUnit')?.value?.trim() || 'ชิ้น';
+            return normalizeIdxMultiUnits(baseUnit, currentIdxMultiUnits);
+        }
+        function renderIdxMultiUnitsList() {
+            const box = document.getElementById('idxMultiUnitsList');
+            if (!box) return;
+            const baseUnit = document.getElementById('invUnit')?.value?.trim() || 'ชิ้น';
+            if (currentIdxMultiUnits.length === 0) {
+                box.innerHTML = `<div class="text-[11px] text-slate-400 italic">ยังไม่ได้ตั้งหน่วยนับระดับที่ 2 (กด "➕ เพิ่มระดับหน่วย" เช่น 1 ลัง = 12 ${escapeHtml(baseUnit)})</div>`;
+                return;
+            }
+            box.innerHTML = currentIdxMultiUnits.map((u, idx) => `
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-900/90 border border-purple-500/30 rounded px-2.5 py-1.5 text-xs">
+                    <span class="text-purple-300 font-bold">ระดับ ${idx + 2}: 1</span>
+                    <input type="text" list="idxAllUnitsDatalist" value="${escapeHtml(u.name)}"
+                           oninput="currentIdxMultiUnits[${idx}].name = this.value;"
+                           placeholder="แพ็ค, กล่อง, ลัง..."
+                           class="w-32 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white outline-none">
+                    <span class="text-slate-400">=</span>
+                    <input type="number" min="0.01" step="any" value="${u.ratio}"
+                           oninput="currentIdxMultiUnits[${idx}].ratio = parseFloat(this.value) || 0;"
+                           class="w-20 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-right text-emerald-300 font-bold outline-none">
+                    <span class="text-emerald-300">${escapeHtml(baseUnit)}</span>
+                    <button type="button" onclick="removeIdxMultiUnitRow(${idx})" class="ml-auto text-rose-400 hover:text-rose-200 px-1.5">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function buildIdxUnitPickerHtml(scope, idx, prodName, curUnit, multiUnits) {
+            const prod = { unit: (window._idxProdUnitsMap?.[prodName]?.unit) || curUnit || 'ชิ้น', multiUnits: multiUnits || [] };
+            const opts = getIdxProductUnitOptions(prod);
+            const activeUnit = (curUnit || prod.unit || 'ชิ้น').trim();
+            const curLower = activeUnit.toLowerCase();
+            let inOpts = false;
+            let optTags = opts.map(o => {
+                const sel = o.name.toLowerCase() === curLower;
+                if (sel) inOpts = true;
+                const lbl = o.isBase ? `${o.name} (x1)` : (o.ratio > 1 ? `${o.name} (x${o.ratio})` : o.name);
+                return `<option value="${escapeHtml(o.name)}" data-ratio="${o.ratio}" ${sel ? 'selected' : ''}>${escapeHtml(lbl)}</option>`;
+            }).join('');
+            if (!inOpts && activeUnit) {
+                optTags = `<option value="${escapeHtml(activeUnit)}" data-ratio="1" selected>${escapeHtml(activeUnit)}</option>` + optTags;
+            }
+            optTags += `<option value="__CUSTOM__">✏️ คีย์หน่วยเอง...</option>`;
+            const activeRatio = getIdxProductUnitRatio(prod, activeUnit);
+            return `<div class="flex items-center gap-1">
+                <select id="${scope}UnitSel_${idx}" onchange="handleIdxUnitSelect('${scope}', ${idx}, '${escapeHtml(prodName)}')" class="bg-slate-800 border border-purple-500/40 rounded px-1.5 py-1 text-white text-[11px] outline-none max-w-[105px]">
+                    ${optTags}
+                </select>
+                <input type="text" id="${scope}UnitInput_${idx}" list="idxAllUnitsDatalist" value="${escapeHtml(activeUnit)}"
+                       oninput="handleIdxUnitText('${scope}', ${idx}, '${escapeHtml(prodName)}', this.value)"
+                       placeholder="คีย์หน่วย"
+                       class="w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-cyan-200 text-[11px] outline-none">
+                <input type="hidden" id="${scope}UnitRatio_${idx}" value="${activeRatio}">
+            </div>`;
+        }
+
+        function handleIdxUnitSelect(scope, idx, prodName) {
+            const sel = document.getElementById(`${scope}UnitSel_${idx}`);
+            const inp = document.getElementById(`${scope}UnitInput_${idx}`);
+            const ratioEl = document.getElementById(`${scope}UnitRatio_${idx}`);
+            if (!sel || !inp) return;
+            if (sel.value === '__CUSTOM__') {
+                inp.focus();
+                inp.select();
+                if (ratioEl) ratioEl.value = '1';
+                return;
+            }
+            const ratio = parseFloat(sel.options[sel.selectedIndex]?.getAttribute('data-ratio')) || 1;
+            inp.value = sel.value;
+            if (ratioEl) ratioEl.value = String(ratio);
+            if (scope === 'cart' && cart[idx]) {
+                cart[idx].unit = sel.value;
+                cart[idx].unitRatio = ratio;
+                cart[idx].baseQty = (parseFloat(cart[idx].qty) || 0) * ratio;
+                updateCartUI();
+            }
+        }
+
+        function handleIdxUnitText(scope, idx, prodName, textVal) {
+            const clean = (textVal || '').trim() || 'ชิ้น';
+            const pMeta = window._idxProdUnitsMap?.[prodName] || { unit: 'ชิ้น', multiUnits: [] };
+            const ratio = getIdxProductUnitRatio(pMeta, clean);
+            const ratioEl = document.getElementById(`${scope}UnitRatio_${idx}`);
+            if (ratioEl) ratioEl.value = String(ratio);
+            if (scope === 'cart' && cart[idx]) {
+                cart[idx].unit = clean;
+                cart[idx].unitRatio = ratio;
+                cart[idx].baseQty = (parseFloat(cart[idx].qty) || 0) * ratio;
+            }
+        }
+
+        // ==========================================
         // 📦 ระบบคลังสินค้า (Inventory Management)
         // ==========================================
         function openInventoryModal() {
@@ -5940,6 +6650,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
             document.getElementById('invModalTitle').innerHTML = '➕ เพิ่มสินค้าใหม่';
             document.getElementById('invBtnText').innerText = '💾 บันทึกข้อมูล';
             syncUnitSelectDropdowns();
+            if (typeof resetIdxMultiUnitsUI === 'function') resetIdxMultiUnitsUI('ชิ้น', []);
             document.getElementById('inventoryModal').classList.remove('hidden');
             document.getElementById('inventoryModal').classList.add('flex');
         }
@@ -5949,66 +6660,100 @@ function printMaintenanceA4(data, items, existingWindow = null) {
             document.getElementById('inventoryModal').classList.remove('flex');
         }
 
+        function getIdxCostValue(item) {
+            if (!item) return 0;
+            const raw = (item.cost !== undefined && item.cost !== null && item.cost !== '')
+                ? item.cost
+                : ((item.costPrice !== undefined && item.costPrice !== null && item.costPrice !== '') ? item.costPrice : 0);
+            return parseFloat(raw) || 0;
+        }
+        function getIdxRetailValue(item) {
+            if (!item) return 0;
+            const raw = (item.priceRetail !== undefined && item.priceRetail !== null && item.priceRetail !== '')
+                ? item.priceRetail
+                : ((item.retailPrice !== undefined && item.retailPrice !== null && item.retailPrice !== '') ? item.retailPrice : 0);
+            return parseFloat(raw) || 0;
+        }
+
+        function renderIdxInventoryRows(items) {
+            const tableBody = document.getElementById('inventoryTableBody');
+            if (!tableBody) return;
+            if (!items || items.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-gray-500">ยังไม่มีสินค้าในระบบคลัง</td></tr>';
+                document.getElementById('totalInventoryItems').innerText = '0';
+                document.getElementById('totalInventoryValue').innerText = '0.00';
+                return;
+            }
+            let totalItems = 0, totalValue = 0;
+            items.forEach(data => {
+                totalItems += (parseFloat(data.stock) || 0);
+                totalValue += ((parseFloat(data.stock) || 0) * getIdxRetailValue(data));
+            });
+            document.getElementById('totalInventoryItems').innerText = totalItems.toLocaleString();
+            document.getElementById('totalInventoryValue').innerText = totalValue.toLocaleString(undefined, {minimumFractionDigits: 2});
+
+            window._idxInvRenderGen = (window._idxInvRenderGen || 0) + 1;
+            const myGen = window._idxInvRenderGen;
+            const buildRow = (data) => {
+                const docId = data._id || data.id || '';
+                const stock = parseFloat(data.stock) || 0;
+                const costVal = getIdxCostValue(data);
+                const priceRetail = getIdxRetailValue(data);
+                let badgeHTML = '';
+                if (data.allowDiscount) badgeHTML += '<span class="bg-blue-900/50 text-blue-300 text-[10px] px-2 py-0.5 rounded border border-blue-700/50 mr-1">ลดได้</span>';
+                if (data.allowCommission) badgeHTML += '<span class="bg-green-900/50 text-green-300 text-[10px] px-2 py-0.5 rounded border border-green-700/50">คอมฯ</span>';
+                return `
+                    <tr class="border-b border-gray-700/50 hover:bg-gray-800/50 transition">
+                        <td class="px-6 py-4 font-mono text-blue-400">${data.sku || '-'}</td>
+                        <td class="px-6 py-4 font-medium text-white">${data.name || '-'}</td>
+                        <td class="px-6 py-4 text-gray-400 text-sm">${data.category || '-'}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="text-lg font-bold ${stock <= 5 ? 'text-red-400' : 'text-white'}">${stock}</span>
+                            <span class="text-xs text-gray-500 ml-1">${data.unit || '-'}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right text-gray-500">${costVal > 0 ? costVal.toLocaleString(undefined, {minimumFractionDigits: 2}) : '-'}</td>
+                        <td class="px-6 py-4 text-right font-bold text-green-400">${parseFloat(priceRetail).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">${badgeHTML}</td>
+                        <td class="px-6 py-4 text-center whitespace-nowrap no-print">
+                            <button onclick="editProduct('${docId}')" class="text-yellow-400 hover:text-yellow-300 bg-yellow-400/10 hover:bg-yellow-400/20 px-3 py-1 rounded transition text-sm mr-2">✏️ แก้ไข</button>
+                            <button onclick="deleteProduct('${docId}')" class="text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 px-3 py-1 rounded transition text-sm">🗑️ ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            };
+            const FIRST = 35, CHUNK = 70;
+            tableBody.innerHTML = items.slice(0, FIRST).map(buildRow).join('');
+            if (items.length > FIRST) {
+                let off = FIRST;
+                const step = () => {
+                    if (myGen !== window._idxInvRenderGen) return;
+                    const sl = items.slice(off, off + CHUNK);
+                    if (!sl.length) return;
+                    tableBody.insertAdjacentHTML('beforeend', sl.map(buildRow).join(''));
+                    off += CHUNK;
+                    if (off < items.length) requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+            }
+        }
+
         async function loadInventoryData() {
             const tableBody = document.getElementById('inventoryTableBody');
             if(!tableBody) return;
+            if (Array.isArray(window.cachedIndexInventory) && window.cachedIndexInventory.length > 0) {
+                renderIdxInventoryRows(window.cachedIndexInventory);
+                return;
+            }
             
             tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-gray-400"><div class="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>กำลังดึงข้อมูลคลังสินค้า...</td></tr>';
             
             try {
                 const snapshot = await db.collection('inventory').orderBy('sku').get();
-                
-                if (snapshot.empty) {
-                    tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-gray-500">ย้งไม่มีสินค้าในระบบคลัง</td></tr>';
-                    document.getElementById('totalInventoryItems').innerText = '0';
-                    document.getElementById('totalInventoryValue').innerText = '0.00';
-                    return;
-                }
-
-                tableBody.innerHTML = '';
-                let totalItems = 0;
-                let totalValue = 0;
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    
-                    // แปลงค่าให้เป็นตัวเลข
-                    const stock = parseFloat(data.stock) || 0;
-                    const priceRetail = parseFloat(data.priceRetail) || 0;
-                    
-                    totalItems += stock;
-                    totalValue += (stock * priceRetail);
-
-                    // สร้าง Badge สถานะ
-                    let badgeHTML = '';
-                    if (data.allowDiscount) badgeHTML += '<span class="bg-blue-900/50 text-blue-300 text-[10px] px-2 py-0.5 rounded border border-blue-700/50 mr-1">ลดได้</span>';
-                    if (data.allowCommission) badgeHTML += '<span class="bg-green-900/50 text-green-300 text-[10px] px-2 py-0.5 rounded border border-green-700/50">คอมฯ</span>';
-
-                    const row = `
-                        <tr class="border-b border-gray-700/50 hover:bg-gray-800/50 transition">
-                            <td class="px-6 py-4 font-mono text-blue-400">${data.sku || '-'}</td>
-                            <td class="px-6 py-4 font-medium text-white">${data.name || '-'}</td>
-                            <td class="px-6 py-4 text-gray-400 text-sm">${data.category || '-'}</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="text-lg font-bold ${stock <= 5 ? 'text-red-400' : 'text-white'}">${stock}</span>
-                                <span class="text-xs text-gray-500 ml-1">${data.unit || '-'}</span>
-                            </td>
-                            <td class="px-6 py-4 text-right text-gray-500">${data.cost ? parseFloat(data.cost).toLocaleString(undefined, {minimumFractionDigits: 2}) : '-'}</td>
-                            <td class="px-6 py-4 text-right font-bold text-green-400">${parseFloat(priceRetail).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                            <td class="px-6 py-4 text-center whitespace-nowrap">${badgeHTML}</td>
-                            <td class="px-6 py-4 text-center whitespace-nowrap no-print">
-                                <button onclick="editProduct('${doc.id}')" class="text-yellow-400 hover:text-yellow-300 bg-yellow-400/10 hover:bg-yellow-400/20 px-3 py-1 rounded transition text-sm mr-2">✏️ แก้ไข</button>
-                                <button onclick="deleteProduct('${doc.id}')" class="text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 px-3 py-1 rounded transition text-sm">🗑️ ลบ</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.insertAdjacentHTML('beforeend', row);
-                });
-
-                // อัปเดต Summary Cards
-                document.getElementById('totalInventoryItems').innerText = totalItems.toLocaleString();
-                document.getElementById('totalInventoryValue').innerText = totalValue.toLocaleString(undefined, {minimumFractionDigits: 2});
-
+                const list = [];
+                snapshot.forEach(doc => list.push({ _id: doc.id, ...doc.data() }));
+                window.cachedIndexInventory = list;
+                FinlightIdxIDB.set('inv', list.map(x => ({ ...x, createdAt: null, updatedAt: null })));
+                renderIdxInventoryRows(list);
             } catch (error) {
                 console.error("Error loading inventory: ", error);
                 tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-red-500">❌ เกิดข้อผิดพลาด: ${error.message}</td></tr>`;
@@ -6042,6 +6787,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 name: name,
                 stock: Number(document.getElementById('invStock').value) || 0,
                 unit: document.getElementById('invUnit').value,
+                multiUnits: typeof collectIdxMultiUnits === 'function' ? collectIdxMultiUnits() : [],
                 cost: Number(document.getElementById('invCost').value) || 0,
                 priceRetail: Number(document.getElementById('invPriceRetail').value) || 0,
                 priceWholesale1: Number(document.getElementById('invPriceWholesale1').value) || 0,
@@ -6057,11 +6803,18 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     await db.collection('inventory').doc(id).update(productData);
                     alert('✅ อัปเดตข้อมูลสินค้าเรียบร้อยแล้ว');
                 } else {
-                    // กรณีเพิ่มใหม่ (เช็ค SKU ซ้ำก่อน)
-                    const checkSku = await db.collection('inventory').where('sku', '==', sku).get();
-                    if (!checkSku.empty) {
+                    // กรณีเพิ่มใหม่ (เช็ค SKU ซ้ำจากแคชก่อนแล้วค่อยตรวจ Firestore)
+                    const dupLocal = (window.cachedIndexInventory || []).some(p => String(p.sku || '').trim().toLowerCase() === sku.toLowerCase());
+                    if (dupLocal) {
                         alert('❌ รหัส SKU นี้มีในระบบแล้ว กรุณาใช้รหัสอื่น');
-                        return; // หยุดการทำงานถ้า SKU ซ้ำ
+                        return;
+                    }
+                    if (!window.cachedIndexInventory || window.cachedIndexInventory.length === 0) {
+                        const checkSku = await db.collection('inventory').where('sku', '==', sku).get();
+                        if (!checkSku.empty) {
+                            alert('❌ รหัส SKU นี้มีในระบบแล้ว กรุณาใช้รหัสอื่น');
+                            return; // หยุดการทำงานถ้า SKU ซ้ำ
+                        }
                     }
                     
                     productData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
@@ -6070,7 +6823,6 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 }
 
                 closeInventoryModal(true);
-                loadInventoryData(); // รีเฟรชตารางใหม่
 
             } catch (error) {
                 console.error("Error saving product: ", error);
@@ -6084,14 +6836,15 @@ function printMaintenanceA4(data, items, existingWindow = null) {
 
         async function editProduct(docId) {
             try {
-                // ดึงข้อมูลสินค้าจาก Firestore
-                const doc = await db.collection('inventory').doc(docId).get();
-                if (!doc.exists) {
-                    alert('❌ ไม่พบข้อมูลสินค้านี้');
-                    return;
+                let data = (window.cachedIndexInventory || []).find(p => (p._id || p.id) === docId);
+                if (!data) {
+                    const doc = await db.collection('inventory').doc(docId).get();
+                    if (!doc.exists) {
+                        alert('❌ ไม่พบข้อมูลสินค้านี้');
+                        return;
+                    }
+                    data = doc.data();
                 }
-                
-                const data = doc.data();
 
                 // เติมข้อมูลลงในฟอร์ม
                 document.getElementById('invProductId').value = docId;
@@ -6100,8 +6853,9 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 document.getElementById('invName').value = data.name || '';
                 document.getElementById('invStock').value = data.stock || 0;
                 document.getElementById('invUnit').value = data.unit || 'ตัว';
-                document.getElementById('invCost').value = data.cost || '';
-                document.getElementById('invPriceRetail').value = data.priceRetail || '';
+                if (typeof resetIdxMultiUnitsUI === 'function') resetIdxMultiUnitsUI(data.unit || 'ตัว', data.multiUnits || []);
+                document.getElementById('invCost').value = getIdxCostValue(data) || '';
+                document.getElementById('invPriceRetail').value = getIdxRetailValue(data) || '';
                 document.getElementById('invPriceWholesale1').value = data.priceWholesale1 || '';
                 document.getElementById('invPriceWholesale2').value = data.priceWholesale2 || '';
                 document.getElementById('invAllowDiscount').checked = data.allowDiscount !== false; // ค่าเริ่มต้นคือ true
@@ -6154,8 +6908,8 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     const category = `"${data.category || ''}"`;
                     const stock = data.stock || 0;
                     const unit = `"${data.unit || ''}"`;
-                    const cost = data.cost || 0;
-                    const retail = data.priceRetail || 0;
+                    const cost = getIdxCostValue(data);
+                    const retail = getIdxRetailValue(data);
                     const ws1 = data.priceWholesale1 || 0;
                     const ws2 = data.priceWholesale2 || 0;
                     const allowDiscount = data.allowDiscount ? "ใช่" : "ไม่ใช่";
@@ -6217,7 +6971,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </head>
                 <body>
                     <h1>รายงานฐานข้อมูลคลังสินค้า (Inventory Report)</h1>
-                    <div class="subtitle">ระบบ ICE FINLIGHT - ข้อมูล ณ วันที่ ${date}</div>
+                    <div class="subtitle">ระบบ ICE Finlight & ICE Prosound - ข้อมูล ณ วันที่ ${date}</div>
                     
                     <div class="summary">
                         <span>📦 ยอดรวมสินค้าคงเหลือ: ${totalItems} ชิ้น</span>
@@ -6227,7 +6981,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     ${tableHTML}
                     
                     <div class="footer">
-                        ออกรายงานโดยระบบ ICE FINLIGHT
+                        ออกรายงานโดยระบบ ICE Finlight & ICE Prosound
                     </div>
                 </body>
                 </html>
@@ -6235,7 +6989,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
 
             const printWindow = null;
 
-            renderResilientPrintDocument(printContent, (typeof docTitle !== "undefined" ? docTitle : "รายงานข้อมูลระบบ ICE FINLIGHT"), printWindow);
+            renderResilientPrintDocument(printContent, (typeof docTitle !== "undefined" ? docTitle : "รายงานข้อมูลระบบ ICE Finlight & ICE Prosound"), printWindow);
         }
 
         function filterInventory() {
@@ -6264,6 +7018,88 @@ function printMaintenanceA4(data, items, existingWindow = null) {
             }
         }
 
+        // 🔎 Anchored Express Comparison Panel directly beneath #invSearchInput (index.html)
+        function openIdxTableExpressPanel() {
+            const panel = document.getElementById('idxTableExpressPanel');
+            if (!panel) return;
+            panel.classList.remove('hidden');
+            renderIdxTableExpressPanel();
+        }
+        function closeIdxTableExpressPanel() {
+            const panel = document.getElementById('idxTableExpressPanel');
+            if (panel) panel.classList.add('hidden');
+        }
+        function toggleIdxTableExpressPanel() {
+            const panel = document.getElementById('idxTableExpressPanel');
+            if (!panel) return;
+            if (panel.classList.contains('hidden')) openIdxTableExpressPanel();
+            else closeIdxTableExpressPanel();
+        }
+        function handleIdxSearchFocus() {
+            const q = (document.getElementById('invSearchInput')?.value || '').trim();
+            if (q.length > 0) openIdxTableExpressPanel();
+        }
+        function handleIdxSearchInput() {
+            const q = (document.getElementById('invSearchInput')?.value || '').trim();
+            if (q.length > 0) openIdxTableExpressPanel();
+            else renderIdxTableExpressPanel();
+        }
+        function handleIdxSearchKeydown(ev) {
+            if (ev.key === 'Escape') closeIdxTableExpressPanel();
+        }
+        function renderIdxTableExpressPanel() {
+            const tbody = document.getElementById('idxTableExpressBody');
+            const badge = document.getElementById('idxTableExpressBadge');
+            if (!tbody) return;
+            const q = (document.getElementById('invSearchInput')?.value || '').trim().toLowerCase();
+            const catQ = (document.getElementById('invCategorySearchInput')?.value || '').trim().toLowerCase();
+            const list = Array.isArray(window.cachedIndexInventory) ? window.cachedIndexInventory : [];
+            const filtered = list.filter(it => {
+                const sku = (it.sku || '').toLowerCase();
+                const name = (it.name || '').toLowerCase();
+                const cat = (it.category || '').toLowerCase();
+                const okQ = !q || sku.includes(q) || name.includes(q) || cat.includes(q);
+                const okCat = !catQ || cat.includes(catQ);
+                return okQ && okCat;
+            });
+            if (badge) badge.textContent = `${filtered.length.toLocaleString()} รายการ`;
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-slate-400">ไม่พบสินค้าที่ตรงกับคำค้นหา</td></tr>';
+                return;
+            }
+            tbody.innerHTML = filtered.slice(0, 80).map(it => {
+                const stk = parseFloat(it.stock) || 0;
+                const retVal = (typeof getIdxRetailValue === 'function') ? getIdxRetailValue(it) : (parseFloat(it.priceRetail) || 0);
+                const thumb = it.thumbUrl || it.imageUrl || (Array.isArray(it.images) && it.images[0]) || '';
+                const imgHtml = thumb
+                    ? `<img src="${escapeHtml(thumb)}" alt="" loading="lazy" class="w-8 h-8 rounded object-cover border border-slate-700 bg-slate-900">`
+                    : `<span class="inline-flex w-8 h-8 rounded bg-slate-800 items-center justify-center text-xs text-slate-500">📦</span>`;
+                const stkCls = stk > 0 ? 'text-emerald-300 font-bold' : 'text-rose-400 font-bold';
+                const stkLabel = stk > 0 ? `${stk.toLocaleString()} ${escapeHtml(it.unit || 'ชิ้น')}` : '0 (หมด)';
+                const loc = escapeHtml(it.location || it.binLocation || '-');
+                const docId = escapeHtml(it._id || it.id || '');
+                return `<tr class="hover:bg-slate-800/80 text-gray-200 transition">
+                    <td class="px-2 py-1.5 border-r border-slate-800">${imgHtml}</td>
+                    <td class="px-2.5 py-1.5 border-r border-slate-800 font-mono text-cyan-300 whitespace-nowrap">${escapeHtml(it.sku || '-')}</td>
+                    <td class="px-3 py-1.5 border-r border-slate-800 font-medium text-white">${escapeHtml(it.name || '-')}</td>
+                    <td class="px-2.5 py-1.5 border-r border-slate-800 text-slate-300 whitespace-nowrap">${escapeHtml(it.category || '-')}</td>
+                    <td class="px-2.5 py-1.5 border-r border-slate-800 text-right font-mono ${stkCls} whitespace-nowrap">${stkLabel}</td>
+                    <td class="px-2.5 py-1.5 border-r border-slate-800 text-right font-mono text-emerald-300">${retVal > 0 ? retVal.toLocaleString(undefined,{minimumFractionDigits:2}) : '-'}</td>
+                    <td class="px-2.5 py-1.5 border-r border-slate-800 text-amber-300 whitespace-nowrap">${loc}</td>
+                    <td class="px-2.5 py-1.5 text-center whitespace-nowrap">
+                        <button type="button" onclick="closeIdxTableExpressPanel(); editProduct('${docId}');" class="px-2 py-0.5 bg-amber-500/25 hover:bg-amber-500 text-amber-200 hover:text-white rounded text-[11px]" title="แก้ไข">✏️</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+        if (typeof document !== 'undefined') document.addEventListener('click', function(ev) {
+            const wrap = document.getElementById('idxSearchRowWrap');
+            const panel = document.getElementById('idxTableExpressPanel');
+            if (wrap && panel && !panel.classList.contains('hidden') && !wrap.contains(ev.target)) {
+                closeIdxTableExpressPanel();
+            }
+        });
+
         // ========================================================
         // 🌟 DYNAMIC UNITS SYNC CONTROLLER (FIREBASE 'units')
         // ========================================================
@@ -6281,7 +7117,19 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 if (snapshot.empty) {
                     cachedUnits = defaultUnits.map((uName, idx) => ({ name: uName, order: idx + 1 }));
                 } else {
-                    cachedUnits = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+                    const rawUnits = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+                    // [LILIN DEDUPLICATION] : กรองหน่วยนับที่ซ้ำซ้อนออก ป้องกันแสดงซ้ำ
+                    const seenUnits = new Set();
+                    cachedUnits = [];
+                    rawUnits.forEach(u => {
+                        const uName = (u.name || '').trim();
+                        if (!uName || uName.includes('\ufffd')) return;
+                        const key = uName.toLowerCase();
+                        if (!seenUnits.has(key)) {
+                            seenUnits.add(key);
+                            cachedUnits.push(u);
+                        }
+                    });
                     cachedUnits.sort((a, b) => {
                         if (typeof a.order === 'number' && typeof b.order === 'number') {
                             return a.order - b.order;
@@ -6312,6 +7160,11 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 invUnitEl.innerHTML = optionsHtml;
                 invUnitEl.value = currentVal;
             }
+            const dl = document.getElementById('idxAllUnitsDatalist');
+            if (dl) {
+                dl.innerHTML = unitList.map(u => `<option value="${escapeUnitText(u)}"></option>`).join('');
+            }
+            if (typeof refreshIdxMultiUnitBaseLabel === 'function') refreshIdxMultiUnitBaseLabel();
         }
 
         async function quickAddUnitPrompt() {
@@ -6921,6 +7774,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         // 🔄 REAL-TIME CATEGORY SYNC CONTROLLER (Sync กับ Firebase Firestore)
         // ========================================================
         const defaultCategoryIcons = {
+            'จอ LED และอุปกรณ์ประกอบ': '🖥️',
             'รายการโคมไฟ': '💡',
             'ไฟเลเซอร์ + CO2': '💨',
             'บอร์ดคอนโทรลไฟ+บูทเตอร์': '🎛️',
@@ -6936,7 +7790,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
             'ชุดไมโครโฟน+เครื่องควบคุม+ขาไมค์': '🎤',
             'รายการ Truss': '⛩️',
             'รายการรอกไฟฟ้า': '⛓️',
-            'รายการนั่งร้านลิ่มล็อค': '🪜',
+            'รายการนั่งร้านลิ่มล็อค': '🏗️',
             'รายการเวที': '🎭',
             'รายการเมการูฟ': '⛺',
             'เอฟเฟกต์ (พัดลม/สโมค/ดรายไอซ์)': '💨',
@@ -7007,34 +7861,228 @@ function printMaintenanceA4(data, items, existingWindow = null) {
             });
         }
 
+        let _indexRealtimeUnsubs = [];
+        let _indexRealtimeStarted = false;
+        let _indexReqsSynced = false;
+        let _idxInvRefreshTimer = null;
+
+        async function hydrateIndexFromFastIDB() {
+            try {
+                const [idbInv, idbUnits, idbReqs] = await Promise.all([
+                    FinlightIdxIDB.get('inv'),
+                    FinlightIdxIDB.get('units'),
+                    FinlightIdxIDB.get('reqs')
+                ]);
+                if (Array.isArray(idbInv) && idbInv.length > 0 && (!window.cachedIndexInventory || window.cachedIndexInventory.length === 0)) {
+                    window.cachedIndexInventory = idbInv;
+                    const invSec = document.getElementById('inventorySection');
+                    if (invSec && !invSec.classList.contains('hidden')) renderIdxInventoryRows(idbInv);
+                    if (typeof updateCartUI === 'function') updateCartUI();
+                }
+                if (Array.isArray(idbUnits) && idbUnits.length > 0 && (!cachedUnits || cachedUnits.length === 0)) {
+                    cachedUnits = idbUnits;
+                    if (typeof syncUnitSelectDropdowns === 'function') syncUnitSelectDropdowns();
+                }
+                if (Array.isArray(idbReqs) && (!_indexReqsSynced)) {
+                    cachedRequisitionsForReport = idbReqs;
+                    if (typeof filterReportData === 'function') filterReportData();
+                }
+            } catch (e) {}
+        }
+
+        async function fastBootstrapIndexFromRest() {
+            try {
+                const [invRes, unitRes, reqRes] = await Promise.allSettled([
+                    fastFetchIdxRest('inventory', 300),
+                    fastFetchIdxRest('units', 300),
+                    fastFetchIdxRest('requisitions', 300)
+                ]);
+                if (unitRes.status === 'fulfilled' && unitRes.value.length > 0 && (!cachedUnits || cachedUnits.length === 0)) {
+                    const seenUnits = new Set();
+                    const dedupUnits = [];
+                    unitRes.value.forEach(u => {
+                        const uName = (u.name || '').trim();
+                        if (!uName || uName.includes('\ufffd')) return;
+                        const key = uName.toLowerCase();
+                        if (!seenUnits.has(key)) { seenUnits.add(key); dedupUnits.push(u); }
+                    });
+                    dedupUnits.sort((a, b) => (typeof a.order === 'number' && typeof b.order === 'number') ? (a.order - b.order) : (a.name || '').localeCompare(b.name || ''));
+                    cachedUnits = dedupUnits;
+                    FinlightIdxIDB.set('units', dedupUnits.map(x => ({ ...x, createdAt: null, updatedAt: null })));
+                    if (typeof syncUnitSelectDropdowns === 'function') syncUnitSelectDropdowns();
+                }
+                if (reqRes.status === 'fulfilled' && !_indexReqsSynced) {
+                    const nextReqs = reqRes.value.map(data => {
+                        let dateObj = null;
+                        if (data.createdAt && data.createdAt.toDate) dateObj = data.createdAt.toDate();
+                        else if (data.createdAt) dateObj = new Date(data.createdAt);
+                        return { id: data._id, ...data, _dateObj: dateObj };
+                    });
+                    nextReqs.sort((a, b) => (b._dateObj ? b._dateObj.getTime() : 0) - (a._dateObj ? a._dateObj.getTime() : 0));
+                    cachedRequisitionsForReport = nextReqs;
+                    _indexReqsSynced = true;
+                    if (typeof filterReportData === 'function') filterReportData();
+                    if (nextReqs.length === 0) {
+                        const tableBody = document.getElementById('reportTableBody');
+                        if (tableBody) tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-gray-500">ยังไม่มีข้อมูลการเบิกของ</td></tr>';
+                    }
+                }
+                if (invRes.status === 'fulfilled' && invRes.value.length > 0 && (!window.cachedIndexInventory || window.cachedIndexInventory.length === 0)) {
+                    const nextInv = invRes.value;
+                    nextInv.sort((a, b) => (a.sku || '').localeCompare(b.sku || ''));
+                    window.cachedIndexInventory = nextInv;
+                    FinlightIdxIDB.set('inv', nextInv.map(x => ({ ...x, createdAt: null, updatedAt: null })));
+                    const invSec = document.getElementById('inventorySection');
+                    if (invSec && !invSec.classList.contains('hidden')) renderIdxInventoryRows(window.cachedIndexInventory);
+                    if (typeof updateCartUI === 'function') updateCartUI();
+                }
+            } catch (e) {
+                console.warn('fastBootstrapIndexFromRest warn:', e);
+            }
+        }
+
+        function initIndexRealtimeSync() {
+            if (typeof db === 'undefined') return;
+            if (_indexRealtimeStarted && _indexRealtimeUnsubs.length > 0) return;
+            _indexRealtimeStarted = true;
+            hydrateIndexFromFastIDB();
+            fastBootstrapIndexFromRest();
+
+            try {
+                // 1. Units Real-time Sync (Deduplicated + IDB Saved)
+                _indexRealtimeUnsubs.push(db.collection('units').onSnapshot(snapshot => {
+                    if (snapshot.empty) {
+                        cachedUnits = defaultUnits.map((uName, idx) => ({ name: uName, order: idx + 1 }));
+                    } else {
+                        const rawUnits = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+                        const seenUnits = new Set();
+                        cachedUnits = [];
+                        rawUnits.forEach(u => {
+                            const uName = (u.name || '').trim();
+                            if (!uName || uName.includes('\ufffd')) return;
+                            const key = uName.toLowerCase();
+                            if (!seenUnits.has(key)) {
+                                seenUnits.add(key);
+                                cachedUnits.push(u);
+                            }
+                        });
+                        cachedUnits.sort((a, b) => (typeof a.order === 'number' && typeof b.order === 'number') ? (a.order - b.order) : (a.name || '').localeCompare(b.name || ''));
+                    }
+                    FinlightIdxIDB.set('units', cachedUnits.map(x => ({ ...x, createdAt: null, updatedAt: null })));
+                    if (typeof syncUnitSelectDropdowns === 'function') syncUnitSelectDropdowns();
+                }, err => console.warn('Index realtime units warn:', err)));
+
+                // 2. Requisitions Real-time Sync -> Reports Table & Badges
+                _indexRealtimeUnsubs.push(db.collection('requisitions').onSnapshot(snapshot => {
+                    const nextReqs = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        let dateObj = null;
+                        if (data.createdAt && data.createdAt.toDate) dateObj = data.createdAt.toDate();
+                        else if (data.createdAt) dateObj = new Date(data.createdAt);
+                        nextReqs.push({ id: doc.id, ...data, _dateObj: dateObj });
+                    });
+                    nextReqs.sort((a, b) => (b._dateObj ? b._dateObj.getTime() : 0) - (a._dateObj ? a._dateObj.getTime() : 0));
+                    cachedRequisitionsForReport = nextReqs;
+                    _indexReqsSynced = true;
+                    FinlightIdxIDB.set('reqs', nextReqs.map(x => ({ ...x, createdAt: null, updatedAt: null })));
+                    if (typeof filterReportData === 'function') {
+                        filterReportData();
+                    }
+                    if (nextReqs.length === 0) {
+                        const tableBody = document.getElementById('reportTableBody');
+                        if (tableBody) tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-gray-500">ยังไม่มีข้อมูลการเบิกของ</td></tr>';
+                    }
+                }, err => console.warn('Index realtime requisitions warn:', err)));
+
+                // 3. Inventory Real-time Sync -> Memory Index (0ms Category Modal) + IDB Saved
+                _indexRealtimeUnsubs.push(db.collection('inventory').onSnapshot(snapshot => {
+                    const nextInv = [];
+                    snapshot.forEach(doc => nextInv.push({ _id: doc.id, ...doc.data() }));
+                    nextInv.sort((a, b) => (a.sku || '').localeCompare(b.sku || ''));
+                    window.cachedIndexInventory = nextInv;
+                    FinlightIdxIDB.set('inv', nextInv.map(x => ({ ...x, createdAt: null, updatedAt: null })));
+
+                    const invSec = document.getElementById('inventorySection');
+                    if (invSec && !invSec.classList.contains('hidden')) {
+                        clearTimeout(_idxInvRefreshTimer);
+                        _idxInvRefreshTimer = setTimeout(() => renderIdxInventoryRows(window.cachedIndexInventory), 80);
+                    }
+                    if (typeof updateCartUI === 'function') updateCartUI();
+                    if (typeof renderIdxTableExpressPanel === 'function' && !document.getElementById('idxTableExpressPanel')?.classList.contains('hidden')) renderIdxTableExpressPanel();
+                }, err => console.warn('Index realtime inventory warn:', err)));
+
+                // 4. Staff Real-time Sync -> Staff section when active
+                _indexRealtimeUnsubs.push(db.collection('staff').onSnapshot(() => {
+                    const staffSec = document.getElementById('staffSection');
+                    if (staffSec && !staffSec.classList.contains('hidden') && typeof loadStaffData === 'function') {
+                        loadStaffData();
+                    }
+                }, err => console.warn('Index realtime staff warn:', err)));
+            } catch (err) {
+                console.warn('initIndexRealtimeSync warn:', err);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(initRealtimeCategorySync, 200);
+            setTimeout(() => {
+                initRealtimeCategorySync();
+                initIndexRealtimeSync();
+            }, 200);
         });
 
 
         // ========================================================
-        // [LILIN'S UNIVERSAL RESILIENT PRINT STUDIO ENGINE]
+        // [LILIN'S UNIVERSAL RESILIENT PRINT STUDIO ENGINE + UNIFIED BILL STANDARD]
         // ========================================================
-        function renderResilientPrintDocument(htmlContent, docTitle = 'เอกสารระบบ ICE FINLIGHT', targetWindow = null) {
+        const FINLIGHT_MASTER_BILL_STD_CSS = `
+            @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap');
+            #resilientPrintContent, #resilientPrintContent .container, #resilientPrintContent .header-wrapper, #resilientPrintContent .info-box, #resilientPrintContent .signatures, #resilientPrintContent .sig-section, #resilientPrintContent .sig-box, #resilientPrintContent .sign-box, #resilientPrintContent table, #resilientPrintContent th, #resilientPrintContent td { font-family: 'Sarabun', sans-serif !important; box-sizing: border-box; }
+            #resilientPrintContent .header-wrapper, #resilientPrintContent .header { padding-bottom: 12px !important; margin-bottom: 14px !important; }
+            #resilientPrintContent .company-name, #resilientPrintContent .header .title { font-family: 'Sarabun', sans-serif !important; font-size: 24px !important; font-weight: 800 !important; color: #0f172a !important; margin: 0 !important; line-height: 1.25 !important; letter-spacing: 0 !important; }
+            #resilientPrintContent .company-subtitle, #resilientPrintContent .header .subtitle { font-family: 'Sarabun', sans-serif !important; font-size: 12px !important; font-weight: 500 !important; color: #475569 !important; margin-top: 3px !important; }
+            #resilientPrintContent .doc-badge { font-family: 'Sarabun', sans-serif !important; font-size: 18px !important; font-weight: 700 !important; padding: 5px 16px !important; border-radius: 6px !important; line-height: 1.3 !important; }
+            #resilientPrintContent .doc-badge-en { font-family: 'Sarabun', sans-serif !important; font-size: 11px !important; font-weight: 600 !important; letter-spacing: 0.8px !important; margin-top: 4px !important; }
+            #resilientPrintContent .info-box { border: 1px solid #cbd5e1 !important; border-radius: 6px !important; background-color: #f8fafc !important; padding: 10px 14px !important; margin-bottom: 16px !important; }
+            #resilientPrintContent .info-grid { display: flex !important; justify-content: space-between !important; gap: 16px !important; font-size: 13px !important; line-height: 1.55 !important; }
+            #resilientPrintContent .info-col-left { width: 48% !important; text-align: left !important; }
+            #resilientPrintContent .info-col-right { width: 52% !important; text-align: left !important; }
+            #resilientPrintContent .info-row { display: flex !important; align-items: flex-start !important; margin-bottom: 3px !important; }
+            #resilientPrintContent .info-label { font-family: 'Sarabun', sans-serif !important; font-size: 13px !important; font-weight: 700 !important; width: 138px !important; min-width: 138px !important; flex-shrink: 0 !important; white-space: nowrap !important; color: #1e293b !important; }
+            #resilientPrintContent .info-val { font-family: 'Sarabun', sans-serif !important; font-size: 13px !important; font-weight: 500 !important; color: #0f172a !important; flex-grow: 1 !important; word-break: break-word !important; padding-left: 6px !important; }
+            #resilientPrintContent .signatures, #resilientPrintContent .sig-section { display: flex !important; grid-template-columns: none !important; justify-content: space-between !important; align-items: stretch !important; gap: 14px !important; margin-top: 22px !important; text-align: center !important; page-break-inside: avoid !important; width: 100% !important; }
+            #resilientPrintContent .sig-box, #resilientPrintContent .sign-box { flex: 1 1 0% !important; width: auto !important; min-width: 0 !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; padding: 12px 10px !important; background-color: #f8fafc !important; text-align: center !important; display: flex !important; flex-direction: column !important; justify-content: flex-end !important; }
+            #resilientPrintContent .sig-line, #resilientPrintContent .sign-line { border-bottom: 1px dashed #475569 !important; width: 82% !important; height: 40px !important; margin: 0 auto 8px auto !important; }
+            #resilientPrintContent .sig-name { font-family: 'Sarabun', sans-serif !important; font-size: 12.5px !important; font-weight: 700 !important; color: #0f172a !important; margin: 3px 0 !important; line-height: 1.35 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+            #resilientPrintContent .sig-title { font-family: 'Sarabun', sans-serif !important; font-size: 12.5px !important; font-weight: 700 !important; color: #1e293b !important; margin: 3px 0 !important; line-height: 1.35 !important; white-space: nowrap !important; }
+            #resilientPrintContent .sig-date { font-family: 'Sarabun', sans-serif !important; font-size: 11.5px !important; font-weight: 500 !important; color: #475569 !important; margin: 4px 0 0 0 !important; white-space: nowrap !important; }
+        `;
+
+        function renderResilientPrintDocument(htmlContent, docTitle = 'เอกสารระบบ ICE Finlight & ICE Prosound', targetWindow = null) {
             const modal = document.getElementById('resilientPrintModal');
             const container = document.getElementById('resilientPrintContent');
             const titleElem = document.getElementById('resilientPrintDocTitle');
+            const normalizedHtml = typeof htmlContent === 'string'
+                ? htmlContent.replace(/F[e]nlight/g, 'Finlight').replace(/f[e]nlight/g, 'finlight')
+                : htmlContent;
 
             if (modal && container) {
-                if (titleElem) titleElem.textContent = docTitle;
+                if (titleElem) titleElem.textContent = (docTitle || '').replace(/F[e]nlight/g, 'Finlight');
 
-                let bodyInner = htmlContent;
-                if (typeof htmlContent === 'string') {
+                let bodyInner = normalizedHtml;
+                if (typeof normalizedHtml === 'string') {
                     let extractedStyles = '';
                     const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
                     let match;
-                    while ((match = styleRegex.exec(htmlContent)) !== null) {
+                    while ((match = styleRegex.exec(normalizedHtml)) !== null) {
                         extractedStyles += match[0] + '\n';
                     }
 
-                    const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+                    const bodyMatch = normalizedHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
                     if (bodyMatch && bodyMatch[1]) {
-                        bodyInner = extractedStyles + bodyMatch[1];
+                        bodyInner = extractedStyles + `<style id="finlightUnifiedBillMasterStd">${FINLIGHT_MASTER_BILL_STD_CSS}</style>` + bodyMatch[1];
+                    } else {
+                        bodyInner = extractedStyles + `<style id="finlightUnifiedBillMasterStd">${FINLIGHT_MASTER_BILL_STD_CSS}</style>` + bodyInner;
                     }
 
                     // 🛡️ Scope all body selectors within any <style> tags so they apply strictly to the print studio container
@@ -7060,7 +8108,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 const win = targetWindow || window.open('', '_blank', 'width=950,height=1200');
                 if (win) {
                     win.document.open();
-                    win.document.write(htmlContent);
+                    win.document.write(normalizedHtml);
                     win.document.close();
                     win.focus();
                     setTimeout(() => { win.print(); }, 500);
@@ -7134,7 +8182,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 </div>
             </div>
 
-            <!-- 🏷️ Brand Title: ICE FINLIGHT -->
+            <!-- 🏷️ Brand Title: ICE Finlight & ICE Prosound -->
             <div class="flex items-center justify-center gap-2.5 mb-2">
                 <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden shrink-0 border border-blue-400/40 bg-black flex items-center justify-center shadow">
                     <img src="assets/ice-logo-new.jpg" alt="ICE" class="w-full h-full object-cover">

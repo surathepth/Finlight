@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ICE Finlight & ICE Prosound - ระบบเบิกอุปกรณ์มือถือ (Mobile Requisition)</title>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ICE Finlight & ICE Prosound">
+    <meta property="og:title" content="ICE Finlight &amp; ICE Prosound — ระบบเบิกอุปกรณ์ด่วนบนมือถือ">
+    <meta property="og:description" content="เปิดในแชต LINE ได้ทันที — ค้นหาอุปกรณ์ เช็กสต๊อก และส่งใบเบิกแบบเรียลไทม์">
+    <meta property="og:image" content="https://surathepth.github.io/Finlight/img/1000.PNG">
+    <meta property="og:url" content="https://surathepth.github.io/Finlight/mobile_requisition.html">
     
     <!-- Google Fonts: Sarabun & Allerta Stencil -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,8 +49,10 @@
             background-color: #070c1e;
             color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
+            user-select: text;
+            -webkit-user-select: text;
             touch-action: manipulation;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         /* Custom scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
@@ -1222,6 +1230,36 @@
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
         }
+    </script>
+    <!-- 💬 LINE In-App Browser Auto-Helper (แสดงเฉพาะตอนเปิดผ่านแอป LINE) -->
+    <div id="finlightLineHelperBanner" class="hidden fixed bottom-2 left-2 right-2 z-[9500] mx-auto max-w-md rounded-xl border border-emerald-400/60 bg-slate-900/95 px-3 py-2 shadow-2xl flex items-center justify-between gap-2 text-xs text-slate-100" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
+        <div class="flex items-center gap-2 min-w-0">
+            <span class="text-base shrink-0">💬</span>
+            <span class="truncate">เปิดใน <b>LINE</b> พร้อมเบิกทันที</span>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+            <a id="btnOpenExternalFromLine" href="?openExternalBrowser=1" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold whitespace-nowrap">🌐 เปิดเต็มจอ</a>
+            <button type="button" onclick="document.getElementById('finlightLineHelperBanner')?.classList.add('hidden')" class="px-1.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white" title="ซ่อนแถบนี้">✕</button>
+        </div>
+    </div>
+    <script>
+        (function initFinlightLineHelper() {
+            try {
+                const ua = navigator.userAgent || '';
+                const isLine = /Line\//i.test(ua) || /\bLine\b/i.test(ua) || /[?&]test_line=1/i.test(location.search);
+                if (!isLine) return;
+                document.documentElement.classList.add('in-line-browser');
+                const banner = document.getElementById('finlightLineHelperBanner');
+                const btn = document.getElementById('btnOpenExternalFromLine');
+                if (btn) {
+                    const u = new URL(location.href);
+                    u.searchParams.set('openExternalBrowser', '1');
+                    u.searchParams.delete('test_line');
+                    btn.href = u.toString();
+                }
+                if (banner) banner.classList.remove('hidden');
+            } catch (e) {}
+        })();
     </script>
 </body>
 </html>

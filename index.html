@@ -7019,6 +7019,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         }
 
         // 🔎 Anchored Express Comparison Panel directly beneath #invSearchInput (index.html)
+        const idxTableExpressState = { items: [], selectedIndex: 0 };
         function openIdxTableExpressPanel() {
             const panel = document.getElementById('idxTableExpressPanel');
             if (!panel) return;
@@ -7041,12 +7042,75 @@ function printMaintenanceA4(data, items, existingWindow = null) {
         }
         function handleIdxSearchInput() {
             const q = (document.getElementById('invSearchInput')?.value || '').trim();
+            idxTableExpressState.selectedIndex = 0;
             if (q.length > 0) openIdxTableExpressPanel();
             else renderIdxTableExpressPanel();
         }
-        function handleIdxSearchKeydown(ev) {
-            if (ev.key === 'Escape') closeIdxTableExpressPanel();
+        function selectIdxTableExpressRow(idx, scroll = false) {
+            const items = idxTableExpressState.items || [];
+            if (idx < 0 || idx >= items.length) return;
+            idxTableExpressState.selectedIndex = idx;
+            document.querySelectorAll('#idxTableExpressBody tr[data-idx-exp]').forEach(tr => {
+                const rIdx = parseInt(tr.getAttribute('data-idx-exp'), 10);
+                if (rIdx === idx) {
+                    tr.className = 'bg-blue-600/80 text-white font-semibold cursor-pointer transition';
+                    if (scroll) tr.scrollIntoView({ block: 'nearest' });
+                } else {
+                    tr.className = 'hover:bg-slate-800/80 text-gray-200 cursor-pointer transition';
+                }
+            });
         }
+        function activateSelectedIdxTableExpressItem() {
+            const items = idxTableExpressState.items || [];
+            const item = items[idxTableExpressState.selectedIndex];
+            const docId = item ? (item._id || item.id || '') : '';
+            if (!docId) return;
+            closeIdxTableExpressPanel();
+            if (typeof editProduct === 'function') editProduct(docId);
+        }
+        function handleIdxSearchKeydown(ev) {
+            const panel = document.getElementById('idxTableExpressPanel');
+            if (!panel || panel.classList.contains('hidden')) return;
+            const items = idxTableExpressState.items || [];
+            if (ev.key === 'Escape') {
+                ev.preventDefault();
+                closeIdxTableExpressPanel();
+            } else if (ev.key === 'ArrowDown' && items.length > 0) {
+                ev.preventDefault();
+                idxTableExpressState.selectedIndex = Math.min(items.length - 1, idxTableExpressState.selectedIndex + 1);
+                selectIdxTableExpressRow(idxTableExpressState.selectedIndex, true);
+            } else if (ev.key === 'ArrowUp' && items.length > 0) {
+                ev.preventDefault();
+                idxTableExpressState.selectedIndex = Math.max(0, idxTableExpressState.selectedIndex - 1);
+                selectIdxTableExpressRow(idxTableExpressState.selectedIndex, true);
+            } else if (ev.key === 'Enter' && items.length > 0) {
+                ev.preventDefault();
+                activateSelectedIdxTableExpressItem();
+            }
+        }
+        if (typeof document !== 'undefined') document.addEventListener('keydown', function(ev) {
+            if (ev.defaultPrevented) return;
+            const panel = document.getElementById('idxTableExpressPanel');
+            if (!panel || panel.classList.contains('hidden')) return;
+            const activeEl = document.activeElement;
+            if (activeEl && (activeEl.id === 'invSearchInput' || activeEl.tagName === 'BUTTON' || activeEl.tagName === 'INPUT')) return;
+            const items = idxTableExpressState.items || [];
+            if (ev.key === 'Escape') {
+                ev.preventDefault();
+                closeIdxTableExpressPanel();
+            } else if (ev.key === 'ArrowDown' && items.length > 0) {
+                ev.preventDefault();
+                idxTableExpressState.selectedIndex = Math.min(items.length - 1, idxTableExpressState.selectedIndex + 1);
+                selectIdxTableExpressRow(idxTableExpressState.selectedIndex, true);
+            } else if (ev.key === 'ArrowUp' && items.length > 0) {
+                ev.preventDefault();
+                idxTableExpressState.selectedIndex = Math.max(0, idxTableExpressState.selectedIndex - 1);
+                selectIdxTableExpressRow(idxTableExpressState.selectedIndex, true);
+            } else if (ev.key === 'Enter' && items.length > 0) {
+                ev.preventDefault();
+                activateSelectedIdxTableExpressItem();
+            }
+        });
         function renderIdxTableExpressPanel() {
             const tbody = document.getElementById('idxTableExpressBody');
             const badge = document.getElementById('idxTableExpressBadge');
@@ -7064,10 +7128,15 @@ function printMaintenanceA4(data, items, existingWindow = null) {
             });
             if (badge) badge.textContent = `${filtered.length.toLocaleString()} รายการ`;
             if (filtered.length === 0) {
+                idxTableExpressState.items = [];
+                idxTableExpressState.selectedIndex = 0;
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-slate-400">ไม่พบสินค้าที่ตรงกับคำค้นหา</td></tr>';
                 return;
             }
-            tbody.innerHTML = filtered.slice(0, 80).map(it => {
+            const slice = filtered.slice(0, 80);
+            idxTableExpressState.items = slice;
+            if (idxTableExpressState.selectedIndex >= slice.length) idxTableExpressState.selectedIndex = 0;
+            tbody.innerHTML = slice.map((it, idx) => {
                 const stk = parseFloat(it.stock) || 0;
                 const retVal = (typeof getIdxRetailValue === 'function') ? getIdxRetailValue(it) : (parseFloat(it.priceRetail) || 0);
                 const thumb = it.thumbUrl || it.imageUrl || (Array.isArray(it.images) && it.images[0]) || '';
@@ -7078,7 +7147,9 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                 const stkLabel = stk > 0 ? `${stk.toLocaleString()} ${escapeHtml(it.unit || 'ชิ้น')}` : '0 (หมด)';
                 const loc = escapeHtml(it.location || it.binLocation || '-');
                 const docId = escapeHtml(it._id || it.id || '');
-                return `<tr class="hover:bg-slate-800/80 text-gray-200 transition">
+                const isSel = idx === idxTableExpressState.selectedIndex;
+                const rowCls = isSel ? 'bg-blue-600/80 text-white font-semibold cursor-pointer transition' : 'hover:bg-slate-800/80 text-gray-200 cursor-pointer transition';
+                return `<tr data-idx-exp="${idx}" onclick="selectIdxTableExpressRow(${idx})" ondblclick="selectIdxTableExpressRow(${idx}); activateSelectedIdxTableExpressItem();" class="${rowCls}">
                     <td class="px-2 py-1.5 border-r border-slate-800">${imgHtml}</td>
                     <td class="px-2.5 py-1.5 border-r border-slate-800 font-mono text-cyan-300 whitespace-nowrap">${escapeHtml(it.sku || '-')}</td>
                     <td class="px-3 py-1.5 border-r border-slate-800 font-medium text-white">${escapeHtml(it.name || '-')}</td>
@@ -7087,7 +7158,7 @@ function printMaintenanceA4(data, items, existingWindow = null) {
                     <td class="px-2.5 py-1.5 border-r border-slate-800 text-right font-mono text-emerald-300">${retVal > 0 ? retVal.toLocaleString(undefined,{minimumFractionDigits:2}) : '-'}</td>
                     <td class="px-2.5 py-1.5 border-r border-slate-800 text-amber-300 whitespace-nowrap">${loc}</td>
                     <td class="px-2.5 py-1.5 text-center whitespace-nowrap">
-                        <button type="button" onclick="closeIdxTableExpressPanel(); editProduct('${docId}');" class="px-2 py-0.5 bg-amber-500/25 hover:bg-amber-500 text-amber-200 hover:text-white rounded text-[11px]" title="แก้ไข">✏️</button>
+                        <button type="button" onclick="event.stopPropagation(); closeIdxTableExpressPanel(); editProduct('${docId}');" class="px-2 py-0.5 bg-amber-500/25 hover:bg-amber-500 text-amber-200 hover:text-white rounded text-[11px]" title="แก้ไข">✏️</button>
                     </td>
                 </tr>`;
             }).join('');
